@@ -1,12 +1,13 @@
 const FeedbackManager = {
     init() {
-        // Formspree endpoint — secured via Formspree Dashboard domain restriction.
-        // Go to formspree.io → Your Form → Settings → Allowed Domains
-        // and add only your domain. This stops anyone else from using this endpoint.
-        const FORM_ENDPOINT = (typeof GAME_SECRETS !== 'undefined' && GAME_SECRETS.formspreeEndpoint)
-            ? GAME_SECRETS.formspreeEndpoint
-            : 'https://formspree.io/f/xppqnwol';
-        const endpoint = FORM_ENDPOINT;
+        // Web3Forms access key — loaded from gitignored secrets.js if available,
+        // otherwise falls back to the hardcoded key so GitHub Pages deployment works.
+        // Web3Forms is designed for frontend use — key is tied to your email only.
+        const ACCESS_KEY = (typeof GAME_SECRETS !== 'undefined' && GAME_SECRETS.web3formsKey)
+            ? GAME_SECRETS.web3formsKey
+            : '6d3b06c1-833f-4cae-9ce5-9802383f23c0';
+
+        const WEB3FORMS_URL = 'https://api.web3forms.com/submit';
 
         const modal = document.getElementById('modal-feedback');
         const form = document.getElementById('feedback-form');
@@ -35,14 +36,23 @@ const FeedbackManager = {
             statusMsg.classList.add('hidden');
 
             try {
-                const res = await fetch(endpoint, {
+                // Build form data and inject Web3Forms access key
+                const formData = new FormData(form);
+                formData.append('access_key', ACCESS_KEY);
+                formData.append('subject', 'Bumper Crash — New Player Feedback 🏎️');
+                formData.append('from_name', 'Bumper Crash Game');
+
+                const res = await fetch(WEB3FORMS_URL, {
                     method: 'POST',
-                    body: new FormData(form),
+                    body: formData,
                     headers: { 'Accept': 'application/json' }
                 });
-                if (res.ok) {
+
+                const data = await res.json();
+
+                if (data.success) {
                     form.reset();
-                    statusMsg.textContent = 'Thank you! Your feedback was sent directly to the developer Gmail.';
+                    statusMsg.textContent = '✅ Thank you! Your feedback was sent directly to the developer Gmail.';
                     statusMsg.className = 'fb-status-msg success';
                 } else {
                     statusMsg.textContent = 'Could not submit right now. Please check your internet connection.';
