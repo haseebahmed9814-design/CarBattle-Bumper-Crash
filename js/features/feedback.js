@@ -1,12 +1,11 @@
 const FeedbackManager = {
-    // Endpoint is loaded from js/core/secrets.js (gitignored).
-    // If secrets.js is missing (e.g. fresh clone), the form
-    // gracefully shows a "not configured" message instead of crashing.
-    endpoint: (typeof GAME_SECRETS !== 'undefined' && GAME_SECRETS.formspreeEndpoint)
-        ? GAME_SECRETS.formspreeEndpoint
-        : null,
-
     init() {
+        // Read endpoint lazily here so secrets.js timing is never an issue.
+        // Reads from the gitignored js/core/secrets.js file.
+        const endpoint = (typeof GAME_SECRETS !== 'undefined' && GAME_SECRETS.formspreeEndpoint)
+            ? GAME_SECRETS.formspreeEndpoint
+            : null;
+
         const modal = document.getElementById('modal-feedback');
         const form = document.getElementById('feedback-form');
         const statusMsg = document.getElementById('fb-status-msg');
@@ -34,7 +33,7 @@ const FeedbackManager = {
             statusMsg.classList.add('hidden');
 
             try {
-                if (!this.endpoint) {
+                if (!endpoint) {
                     statusMsg.textContent = 'Feedback form not configured. See js/core/secrets.example.js to set up.';
                     statusMsg.className = 'fb-status-msg error';
                     statusMsg.classList.remove('hidden');
@@ -42,7 +41,7 @@ const FeedbackManager = {
                     submitBtn.textContent = 'SEND FEEDBACK TO DEVELOPER →';
                     return;
                 }
-                const res = await fetch(this.endpoint, {
+                const res = await fetch(endpoint, {
                     method: 'POST',
                     body: new FormData(form),
                     headers: { 'Accept': 'application/json' }
