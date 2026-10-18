@@ -1,10 +1,12 @@
 const FeedbackManager = {
     init() {
-        // Read endpoint lazily here so secrets.js timing is never an issue.
-        // Reads from the gitignored js/core/secrets.js file.
-        const endpoint = (typeof GAME_SECRETS !== 'undefined' && GAME_SECRETS.formspreeEndpoint)
+        // Formspree endpoint — secured via Formspree Dashboard domain restriction.
+        // Go to formspree.io → Your Form → Settings → Allowed Domains
+        // and add only your domain. This stops anyone else from using this endpoint.
+        const FORM_ENDPOINT = (typeof GAME_SECRETS !== 'undefined' && GAME_SECRETS.formspreeEndpoint)
             ? GAME_SECRETS.formspreeEndpoint
-            : null;
+            : 'https://formspree.io/f/xppqnwol';
+        const endpoint = FORM_ENDPOINT;
 
         const modal = document.getElementById('modal-feedback');
         const form = document.getElementById('feedback-form');
@@ -33,14 +35,6 @@ const FeedbackManager = {
             statusMsg.classList.add('hidden');
 
             try {
-                if (!endpoint) {
-                    statusMsg.textContent = 'Feedback form not configured. See js/core/secrets.example.js to set up.';
-                    statusMsg.className = 'fb-status-msg error';
-                    statusMsg.classList.remove('hidden');
-                    submitBtn.disabled = false;
-                    submitBtn.textContent = 'SEND FEEDBACK TO DEVELOPER →';
-                    return;
-                }
                 const res = await fetch(endpoint, {
                     method: 'POST',
                     body: new FormData(form),
