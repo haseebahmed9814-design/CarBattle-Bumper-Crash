@@ -1,4 +1,4 @@
-﻿const SquadWarMode = {
+const SquadWarMode = {
     spawn(cars, spawns) {
         const ruleTag = MatchConfig.timedMode ? `TIMED SIEGE (${MatchConfig.timeLimitMinutes}M)` : 'KNOCKOUT';
         document.getElementById('hud-mode-pill').textContent = `SQUAD WAR • ${ruleTag}`;
@@ -6,8 +6,12 @@
         const n1 = (MatchConfig.p1Name || 'PLAYER 1').trim().toUpperCase();
         const n2 = (MatchConfig.p2Name || 'PLAYER 2').trim().toUpperCase();
 
-        let sIdx = 0;
-        const p1Spawn = spawns[sIdx++];
+        const totalT1 = 1 + MatchConfig.p1TeamBots;
+        const totalT2 = 1 + MatchConfig.p2TeamBots;
+        const { team1Spawns, team2Spawns } = PhysicsEngine.generateTeamSpawnPositions(totalT1, totalT2, Game.arena);
+
+        // P1 Commander + P1 Bots on the Left Stadium Curve
+        const p1Spawn = team1Spawns[0];
         cars.push(new BattleCar({
             id: 1, label: n1, team: 'P1_SQUAD',
             isAI: false, playerSlot: 'p1', colorKey: MatchConfig.p1Color,
@@ -15,7 +19,7 @@
         }));
 
         for (let i = 0; i < MatchConfig.p1TeamBots; i++) {
-            const bSpawn = spawns[sIdx++];
+            const bSpawn = team1Spawns[i + 1];
             cars.push(new BattleCar({
                 id: 10 + i, label: `P1 BOT ${i + 1}`, team: 'P1_SQUAD',
                 isAI: true, colorKey: MatchConfig.p1Color,
@@ -23,7 +27,8 @@
             }));
         }
 
-        const p2Spawn = spawns[sIdx++];
+        // P2 Commander + P2 Bots on the Right Stadium Curve
+        const p2Spawn = team2Spawns[0];
         cars.push(new BattleCar({
             id: 2, label: n2, team: 'P2_SQUAD',
             isAI: false, playerSlot: 'p2', colorKey: MatchConfig.p2Color,
@@ -31,7 +36,7 @@
         }));
 
         for (let i = 0; i < MatchConfig.p2TeamBots; i++) {
-            const bSpawn = spawns[sIdx++];
+            const bSpawn = team2Spawns[i + 1];
             cars.push(new BattleCar({
                 id: 30 + i, label: `P2 BOT ${i + 1}`, team: 'P2_SQUAD',
                 isAI: true, colorKey: MatchConfig.p2Color,

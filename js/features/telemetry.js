@@ -1,4 +1,4 @@
-﻿const TelemetryTracker = {
+const TelemetryTracker = {
     storageKey: 'bumper_crash_telemetry_v26',
 
     getStats() {
@@ -12,7 +12,16 @@
         } catch (e) {}
         return {
             totalPlays: 0,
-            modes: { single: 0, '1v1': 0, coop_timed: 0, coop_elim: 0, team_vs_timed: 0, team_vs_elim: 0 },
+            modes: {
+                single: 0,
+                single_team_timed: 0,
+                single_team_elim: 0,
+                '1v1': 0,
+                coop_timed: 0,
+                coop_elim: 0,
+                team_vs_timed: 0,
+                team_vs_elim: 0
+            },
             players: {}
         };
     },
@@ -22,8 +31,13 @@
         stats.totalPlays = (stats.totalPlays || 0) + 1;
 
         let modeKey = MatchConfig.mode;
-        if (MatchConfig.mode === 'coop') modeKey = MatchConfig.timedMode ? 'coop_timed' : 'coop_elim';
-        else if (MatchConfig.mode === 'team_vs') modeKey = MatchConfig.timedMode ? 'team_vs_timed' : 'team_vs_elim';
+        if (MatchConfig.mode === 'single' && MatchConfig.spSubMode === 'team') {
+            modeKey = MatchConfig.timedMode ? 'single_team_timed' : 'single_team_elim';
+        } else if (MatchConfig.mode === 'coop') {
+            modeKey = MatchConfig.timedMode ? 'coop_timed' : 'coop_elim';
+        } else if (MatchConfig.mode === 'team_vs') {
+            modeKey = MatchConfig.timedMode ? 'team_vs_timed' : 'team_vs_elim';
+        }
 
         stats.modes[modeKey] = (stats.modes[modeKey] || 0) + 1;
         try { localStorage.setItem(this.storageKey, JSON.stringify(stats)); } catch (e) {}
@@ -38,12 +52,12 @@
         }
     },
 
-    // Saves individual human player's Career Matches, Wins, Kills & Damage Dealt
     recordPlayerMatchStats(cars, outcome) {
         const stats = this.getStats();
         if (!stats.players) stats.players = {};
 
         const titleUpper = (outcome && outcome.title ? outcome.title : '').toUpperCase();
+        const badgeUpper = (outcome && outcome.badge ? outcome.badge : '').toUpperCase();
 
         cars.filter(c => !c.isAI).forEach(humanCar => {
             const name = (humanCar.label || 'PLAYER').toUpperCase();
@@ -55,13 +69,13 @@
             p.kills += (humanCar.kills || 0);
             p.damage += (humanCar.damageDealt || 0);
 
-            // Check if this player won
-            const wonSolo = (MatchConfig.mode === 'single' && !humanCar.dead && titleUpper.includes('WINS'));
+            const wonSoloFFA = (MatchConfig.mode === 'single' && MatchConfig.spSubMode !== 'team' && !humanCar.dead && titleUpper.includes('WINS'));
+            const wonSoloTeam = (MatchConfig.mode === 'single' && MatchConfig.spSubMode === 'team' && badgeUpper.includes('VICTORY'));
             const wonDuel = (MatchConfig.mode === '1v1' && !humanCar.dead && titleUpper.includes(name));
             const wonCoop = (MatchConfig.mode === 'coop' && titleUpper.includes('VICTORY'));
             const wonSquad = (MatchConfig.mode === 'team_vs' && titleUpper.includes(name));
 
-            if (wonSolo || wonDuel || wonCoop || wonSquad) {
+            if (wonSoloFFA || wonSoloTeam || wonDuel || wonCoop || wonSquad) {
                 p.wins += 1;
             }
         });
@@ -71,7 +85,7 @@
 
     getSummaryString() {
         const s = this.getStats();
-        return `Version: ${GAME_VERSION} | Total Plays: ${s.totalPlays} | Single: ${s.modes.single || 0} | 1v1: ${s.modes['1v1'] || 0} | Co-op Timed: ${s.modes.coop_timed || 0} | Squad Timed: ${s.modes.team_vs_timed || 0}`;
+        return `Version: ${GAME_VERSION} | Total Plays: ${s.totalPlays} | Solo FFA: ${s.modes.single || 0} | Solo Team: ${(s.modes.single_team_timed || 0) + (s.modes.single_team_elim || 0)} | 1v1: ${s.modes['1v1'] || 0}`;
     },
 
     renderAnalyticsDashboard() {
@@ -79,19 +93,21 @@
         const total = s.totalPlays || 0;
 
         const modeMeta = [
-            { key: 'single',        label: 'Single Player (vs AI)',         color: '#00a8ff', count: s.modes.single || 0 },
-            { key: '1v1',           label: 'Two Players: 1v1 Solo Duel',    color: '#ffb703', count: s.modes['1v1'] || 0 },
-            { key: 'coop_timed',    label: 'Co-op Alliance (Timed Siege)',  color: '#00e676', count: s.modes.coop_timed || 0 },
-            { key: 'coop_elim',     label: 'Co-op Alliance (Knockout)',     color: '#10b981', count: s.modes.coop_elim || 0 },
-            { key: 'team_vs_timed', label: 'P1 vs P2 Squad (Timed Siege)',  color: '#ff1e42', count: s.modes.team_vs_timed || 0 },
-            { key: 'team_vs_elim',  label: 'P1 vs P2 Squad (Knockout)',     color: '#b5179e', count: s.modes.team_vs_elim || 0 }
+            { key: 'single',            label: 'Single Player: Solo Free-For-All',   color: '#00a8ff', count: s.modes.single || 0 },
+            { key: 'single_team_timed', label: 'Single Player: Team (Timed Siege)',  color: '#38bdf8', count: s.modes.single_team_timed || 0 },
+            { key: 'single_team_elim',  label: 'Single Player: Team (Knockout)',     color: '#0284c7', count: s.modes.single_team_elim || 0 },
+            { key: '1v1',               label: 'Two Players: 1v1 Solo Duel',         color: '#ffb703', count: s.modes['1v1'] || 0 },
+            { key: 'coop_timed',        label: 'Co-op Alliance (Timed Siege)',       color: '#00e676', count: s.modes.coop_timed || 0 },
+            { key: 'coop_elim',         label: 'Co-op Alliance (Knockout)',          color: '#10b981', count: s.modes.coop_elim || 0 },
+            { key: 'team_vs_timed',     label: 'P1 vs P2 Squad (Timed Siege)',       color: '#ff1e42', count: s.modes.team_vs_timed || 0 },
+            { key: 'team_vs_elim',      label: 'P1 vs P2 Squad (Knockout)',          color: '#b5179e', count: s.modes.team_vs_elim || 0 }
         ];
 
         let topMode = 'None Yet', maxCount = 0;
         modeMeta.forEach(m => { if (m.count > maxCount) { maxCount = m.count; topMode = m.label; } });
 
-        const spCount = s.modes.single || 0;
-        const mpCount = total - spCount;
+        const spCount = (s.modes.single || 0) + (s.modes.single_team_timed || 0) + (s.modes.single_team_elim || 0);
+        const mpCount = Math.max(0, total - spCount);
 
         const totalEl = document.getElementById('an-total-plays');
         const topEl = document.getElementById('an-top-mode');

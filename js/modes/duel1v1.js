@@ -1,19 +1,24 @@
-﻿const Duel1v1Mode = {
+const Duel1v1Mode = {
     spawn(cars, spawns) {
         document.getElementById('hud-mode-pill').textContent = '1V1 SOLO DUEL';
         const n1 = (MatchConfig.p1Name || 'PLAYER 1').trim().toUpperCase();
         const n2 = (MatchConfig.p2Name || 'PLAYER 2').trim().toUpperCase();
 
+        // Ensure P1 is always on the Left spawn and P2 is always on the Right spawn
+        const sortedByX = [...spawns].sort((a, b) => a.x - b.x);
+        const leftSpawn = sortedByX[0];
+        const rightSpawn = sortedByX[sortedByX.length - 1];
+
         cars.push(new BattleCar({
             id: 1, label: n1, team: 'P1',
             isAI: false, playerSlot: 'p1', colorKey: MatchConfig.p1Color,
-            x: spawns[0].x, y: spawns[0].y, angle: spawns[0].angle
+            x: leftSpawn.x, y: leftSpawn.y, angle: leftSpawn.angle
         }));
 
         cars.push(new BattleCar({
             id: 2, label: n2, team: 'P2',
             isAI: false, playerSlot: 'p2', colorKey: MatchConfig.p2Color,
-            x: spawns[1].x, y: spawns[1].y, angle: spawns[1].angle
+            x: rightSpawn.x, y: rightSpawn.y, angle: rightSpawn.angle
         }));
     },
 

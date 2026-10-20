@@ -8,12 +8,12 @@
 
 <br/>
 
-[![Version](https://img.shields.io/badge/Version-v2.7.0-orange?style=for-the-badge)](https://github.com)
+[![Version](https://img.shields.io/badge/Version-v3.1.0-orange?style=for-the-badge)](https://github.com)
 [![Language](https://img.shields.io/badge/Built%20With-Vanilla%20JS%20%2B%20HTML5%20Canvas-blue?style=for-the-badge)](https://github.com)
 [![License](https://img.shields.io/badge/License-MIT-green?style=for-the-badge)](LICENSE)
 [![Status](https://img.shields.io/badge/Status-Active%20Development-brightgreen?style=for-the-badge)](https://github.com)
 
-> **High-Impact Demolition Derby & Tactical Arena Combat** — a fully browser-based 2D top-down car battle game with tactical AI, real-time physics, multi-mode multiplayer, and procedurally generated combat effects. No dependencies. No frameworks. Pure HTML5 Canvas + Vanilla JavaScript.
+> **High-Impact Demolition Derby & Tactical Arena Combat** — a fully browser-based 2D top-down car battle game with tactical AI, real-time physics, multi-mode multiplayer, procedurally generated combat effects, and a live Power-Up Supply Drop system. No dependencies. No frameworks. Pure HTML5 Canvas + Vanilla JavaScript.
 
 </div>
 
@@ -25,6 +25,7 @@
 - [✨ Features](#-features)
 - [📸 Screenshots](#-screenshots)
 - [🕹️ Game Modes](#️-game-modes)
+- [⚡ Power-Up Supply Drop System](#-power-up-supply-drop-system)
 - [🎯 Controls](#-controls)
 - [⚙️ Settings & Customisation](#️-settings--customisation)
 - [🧠 AI System](#-ai-system)
@@ -42,7 +43,9 @@
 
 **Bumper Crash** is a browser-based **2D top-down demolition derby** game built entirely from scratch with **Vanilla JavaScript and HTML5 Canvas** — no game engine, no external libraries, no build tools required.
 
-Players choose from multiple game modes: Solo against AI, head-to-head 1v1 duels, cooperative team battles, or full squad vs squad wars. Each car features a detailed damage model, real-time physics, and tactical AI opponents that flank, drift, and ram with intent.
+Players choose from multiple game modes: Solo Free-For-All (King of the Ring) against AI, Solo Team Battle (Stadium Squad Siege), head-to-head 1v1 duels, cooperative team battles, or full squad vs squad wars. Each car features a detailed damage model, real-time physics, and tactical AI opponents that flank, drift, and ram with intent.
+
+Starting at v3.1.0, every arena features a live **Power-Up Supply Drop System** — glowing 3D orbs drop from above every 30 seconds carrying Repair Kits, Mega Medkits, Inferno Fire RAM, Titan Armor Shield, or Turbo Speed Boost abilities.
 
 The game runs entirely in the browser at 60 FPS and requires no installation.
 
@@ -58,21 +61,36 @@ The game runs entirely in the browser at 60 FPS and requires no installation.
   - Rear spoiler & bumper break off
   - Left/right fenders crumple
   - Hood pops open at critical HP
-- **Dual exhaust nitro flames** — animated, color-matched to each car's paint scheme
+- **Dual exhaust nitro flames** — animated, color-matched to each car's paint scheme (amplified during power-ups)
 - **Health bars** — color-coded from green → amber → red with 25% segment tick marks
-- **Floating damage text** — "WRECKED!", "1.2x SIDE SMASH!" and more appear in-game
-- **Shockwave explosions** on car destruction
+- **Power-up duration bar** — appears below HP bar while a timed ability is active
+- **Floating damage text** — "WRECKED!", "1.2x SIDE SMASH!", "🔥 1.8x INFERNO FIRE HIT!", "🛡️ SHIELD BLOCKED!" and more
+- **Shockwave explosions** on car destruction and on supply drop landing
+
+### ⚡ Power-Up Supply Drop System *(New in v3.1.0)*
+- **Every 30 seconds** a 3D glowing orb drops from above into the arena (max 3 active at once)
+- **5 distinct power-ups** with fully unique 3D rendered logos:
+  - 🟢 **Repair Kit** — Instant +65 HP heal + partial dent reduction
+  - 🔵 **Mega Medkit** — Full HP restore + all parts repaired + dents cleared
+  - 🔥 **Inferno Fire RAM (12s)** — 1.8× damage on hits + 1-second fire singe on victims + orange flame aura + boosted exhaust
+  - 🛡️ **Titan Armor Shield (10s)** — Blocks 70% of incoming damage + purple shield aura
+  - ⚡ **Turbo Speed Boost (10s)** — 1.45× acceleration + 1.28× top speed + yellow spinning dash aura
+- Orbs animate with rotating orbital rings, 3D radial gradient spheres, and a specular glass highlight
+- **Kill Announcer banner** alerts all players when a supply drop lands
+- Power-up orbs appear on the **minimap** as pulsing colored dots
+- Supply drops spawn on **both maps** (Football Ground and Park Ground)
 
 ### 🎨 Visual Effects
 - Persistent **tire tracks** (up to 650 in high-detail mode)
 - **Spark particle system** on collisions
-- **Smoke plumes** — dark or fiery depending on speed
+- **Smoke plumes** — dark or fiery depending on speed and active power-up
 - **Flying detached parts** with angular velocity and friction
-- **Expanding shockwave rings** on destruction
-- **Floating text** for kill events and announcements
+- **Expanding shockwave rings** on destruction and supply drop impact
+- **Floating text** for kill events, power-up pickups, and announcements
 - **Screen shake** scaled to impact force
 - **Headlight beam gradients** — per car
 - **Slow-motion kill replay** via KillAnnouncer system
+- **Power-up visual aura** — flame halo (Inferno), shield bubble (Titan), spinning dashes (Turbo)
 
 ### 🎵 Audio (Procedural Web Audio API)
 - **No audio files required** — all sounds synthesized at runtime using the Web Audio API
@@ -80,16 +98,19 @@ The game runs entirely in the browser at 60 FPS and requires no installation.
 - Crash impact sounds
 - UI click feedback
 - Explosion sounds
+- **Power-up pickup sounds** — distinct tones for heal vs timed ability pickups
 
 ### 🎛️ UI & Menus
-- 10 distinct menu screens with smooth transitions
+- 10+ distinct menu screens with smooth transitions
 - **Live car preview canvas** — renders your car in real-time as you pick colors
+- **Live arena map preview canvas** — shows selected arena layout on the setup screen
 - **Vehicle stat bars** — Top Speed, Drift & Grip, Chassis Armor
 - **Player keybind remapper** — remap all controls from the Controls screen
 - Match results modal with full per-driver stats
-- Integrated **Player Feedback Form** (Formspree backend)
+- Integrated **Player Feedback Form** (Web3Forms backend)
 - Pause menu with Resume / Restart / Main Menu
 - **Spectator Mode** — if your car is wrecked, keep watching remaining bots fight it out
+- **Stadium Squad Siege** setup screen with ally/enemy bot count pickers, match rule selector, and time limit pills
 
 ### 📡 Analytics
 - Session telemetry tracked locally in `localStorage`
@@ -102,50 +123,63 @@ The game runs entirely in the browser at 60 FPS and requires no installation.
 ## 📸 Screenshots
 
 ### 🏠 Main Menu
-<img src="screenshots/Screenshot 2026-10-18 222812.png" alt="Main Menu — Bumper Crash v2.7.0" width="100%"/>
+<img src="screenshots/Screenshot 2026-10-18 222812.png" alt="Main Menu — Bumper Crash v3.1.0" width="100%"/>
 
-> The main menu features animated background AI cars driving and crashing on the Park Ground arena while you browse. Buttons lead to Single Player, Two Players (with 3 sub-modes), a Coming Soon Multiplayer mode, Controls, Settings, Game Stats, Credits, and a Feedback form.
+> The main menu features animated background AI cars driving and crashing on the Park Ground arena while you browse. Buttons lead to Single Player (King of the Ring & Stadium Squad Siege), Two Players (with 3 sub-modes), a Coming Soon Multiplayer mode, Controls, Settings, Game Stats, Credits, and a Feedback form.
 
 ---
 
 ### ⚙️ Single Player Configuration
 <img src="screenshots/Screenshot 2026-10-18 222825.png" alt="Single Player Config — Driver Name, Color Picker, AI Difficulty, Arena Map" width="100%"/>
 
-> Configure your Driver Name, pick from 5 vehicle colors (Electric Blue, Hyper Red, Emerald Green, Cyber Gold, Plasma Purple), set the number of AI opponents (1–8), choose AI Difficulty (Easy / Normal / Hard), and select the Arena Map. A live car preview canvas renders your vehicle with headlights and nitro flames.
+> Configure your Driver Name, pick from 5 vehicle colors (Electric Blue, Hyper Red, Emerald Green, Cyber Gold, Plasma Purple), set the number of AI opponents (1–8), choose AI Difficulty (Easy / Normal / Hard), and select the Arena Map. A live car preview canvas and live arena map preview render in real-time.
 
 ---
 
 ### ⚔️ Gameplay — Football Ground (5 AI Opponents)
 <img src="screenshots/Screenshot 2026-10-18 222949.png" alt="Gameplay — Single Player Normal, Football Ground, 5 Bots" width="100%"/>
 
-> Active gameplay on the **Football Ground** arena. The player (blue, "PLAYER 1 — 91 HP") battles 5 AI bots simultaneously. The HUD shows mode, player HP, opponent count, camera mode toggle, and pause button. AI cars have tactical rings indicating their team. Tire tracks, headlight beams, and directional hit text ("1.2x SIDE SMASH!") are visible. The minimap in the bottom-right shows all active cars as colored dots.
+> Active gameplay on the **Football Ground** arena. The player (blue, "PLAYER 1 — 91 HP") battles 5 AI bots simultaneously. The HUD shows mode, player HP, opponent count, camera mode toggle, and pause button. AI cars have tactical rings indicating their team. Tire tracks, headlight beams, and directional hit text are visible. The minimap in the bottom-right shows all active cars and power-up drop positions as colored dots.
 
 ---
 
 ### 💥 Gameplay — Detached Parts & Critical Damage
 <img src="screenshots/Screenshot 2026-10-18 223010.png" alt="Gameplay — Critical Damage, Detached Parts Flying, Tire Tracks" width="100%"/>
 
-> Mid-match chaos: The player is at **44 HP** (amber health bar), surrounded by 4 remaining bots. Detached car parts (bumpers, fenders, spoilers) are visibly flying across the arena. Tire track trails from previous maneuvers crisscross the pitch. The minimap shows positions of all surviving cars.
+> Mid-match chaos: The player is at **44 HP** (amber health bar), surrounded by 4 remaining bots. Detached car parts (bumpers, fenders, spoilers) are visibly flying across the arena. Tire track trails from previous maneuvers crisscross the pitch.
 
 ---
 
 ### 🏁 Squad War — Countdown & Full Stadium View
 <img src="screenshots/Screenshot 2026-10-18 223942.png" alt="Squad War — Timed Siege, 3-Minute Match, 2 Teams of 3, Countdown" width="100%"/>
 
-> **Squad War (Timed Siege)** mode at the countdown stage — "1, START YOUR ENGINES!". Two squads of 3 spawn on opposite ends of the Football Ground. The HUD shows "Player 1 Squad: 3 | Player 2 Squad: 3" with a 3:00 minute timer. The camera is in **Full Stadium view**, revealing the entire arena. The minimap shows team color separation across both flanks.
+> **Squad War (Timed Siege)** mode at the countdown stage — "1, START YOUR ENGINES!". Two squads of 3 spawn on opposite ends of the Football Ground. The HUD shows "Player 1 Squad: 3 | Player 2 Squad: 3" with a 3:00 minute timer. The camera is in **Full Stadium view**, revealing the entire arena.
 
 ---
 
 ## 🕹️ Game Modes
 
-### 1. 🧍 Single Player — Solo Free-For-All
-Battle 1 to 8 AI opponents in a knockout derby. Last car surviving wins. Supports Easy / Normal / Hard AI difficulty and 2 arena maps.
+### 1. 🧍 Single Player — King of the Ring *(Classic FFA)*
+Battle 1 to 8 AI opponents in a full-circle knockout derby. Supports Easy / Normal / Hard AI difficulty and 2 arena maps. Cars spawn evenly around the stadium ring with Player 1 always on the left side.
 
-**Win condition:** Destroy every AI opponent.
+**Win condition:** Destroy every AI opponent. Last car surviving wins.
 
 ---
 
-### 2. 👥 Two Players (Local Split-Keyboard)
+### 2. 🏟️ Single Player — Stadium Squad Siege *(New in v3.1.0)*
+Lead your allied squad against an AI enemy squad. Player 1 commands the Left Stadium Arc team. Configure:
+- 0–4 allied AI bots on your team
+- 1–6 enemy AI bots
+- Match Rule: Timed Siege (1–5 min) or Knockout
+- AI Difficulty: Easy / Normal / Hard
+
+**HUD shows:** Your HP, Your Squad Alive, Enemy Squad Alive, and timer (Timed Siege).
+**Win condition (Knockout):** Wipe out the entire enemy squad.
+**Win condition (Timed Siege):** Destroy the most enemy squad cars before time expires.
+
+---
+
+### 3. 👥 Two Players (Local Split-Keyboard)
 
 #### ⚔️ 1v1 Duel
 Pure head-to-head: Player 1 vs Player 2. No AI. Each player picks their name and car color. The player who destroys the other wins.
@@ -169,8 +203,27 @@ Player 1 commands Squad 1. Player 2 commands Squad 2. Each squad has 1–5 AI bo
 
 ---
 
-### 3. 🌐 Online Multiplayer *(Coming Soon)*
+### 4. 🌐 Online Multiplayer *(Coming Soon)*
 Real-time online rooms, friend invite codes, and global demolition derby leaderboards — currently in development.
+
+---
+
+## ⚡ Power-Up Supply Drop System
+
+Every **30 seconds** during a match, a glowing 3D orb drops from the sky into a safe spot in the arena. Up to **3 orbs** can be active simultaneously. Picking up an orb applies its effect instantly.
+
+| Power-Up | Type | Effect |
+|---|---|---|
+| 🟢 **Repair Kit (+65 HP)** | Instant Heal | Restores 65 HP + partially reduces dents |
+| 🔵 **Mega Medkit (100% HP)** | Instant Heal | Full HP + all parts repaired + dents cleared |
+| 🔥 **Inferno Fire RAM (12s)** | Timed Ability | 1.8× hit damage + 1s fire singe on victims |
+| 🛡️ **Titan Armor Shield (10s)** | Timed Ability | Blocks 70% of incoming damage |
+| ⚡ **Turbo Speed Boost (10s)** | Timed Ability | 1.45× acceleration + 1.28× top speed |
+
+- The **Kill Announcer** banner alerts all players when a supply drop lands with the drop's name.
+- Active power-up orbs appear on the **minimap** as pulsing colored dots for quick navigation.
+- A **duration bar** appears under your HP bar while a timed ability is active, depleting in real-time.
+- Both arenas support supply drops — Football Ground for open-field pickup battles, Park Ground for obstacle-weaving chases.
 
 ---
 
@@ -238,6 +291,8 @@ AI evaluates every opponent and scores by:
 - Hard mode human priority (specifically hunts human players)
 - Crowd avoidance (distributes targeting across the field)
 
+> 🔥 AI cars can also pick up power-up supply drops, making Hard mode bots significantly more dangerous mid-match!
+
 ---
 
 ## 🗺️ Arena Maps
@@ -247,17 +302,19 @@ A large open arena styled as a football stadium with:
 - Alternating green pitch stripes
 - White pitch markings — boundary, halfway line, center circle, penalty boxes, goal boxes
 - Outer dirt track border with amber safety wall
-- **No obstacles** — full open-field combat
+- **No static obstacles** — full open-field combat
+- **Power-Up Supply Drops** every 30 seconds
 - Arena size: **3400 × 2100 units**
 
 ### 🌳 Park Ground (Trees & Benches)
 A realistic park setting with:
 - Natural lawn color variation
 - Sandy cross-shaped walkways and circular center plaza
-- **Trees** — solid collision obstacles that stop and damage cars
-- **Benches** — smaller solid obstacles
+- **14 Trees** — solid collision obstacles that stop and damage cars
+- **10 Benches** — smaller solid obstacles across inner plaza and outer lanes
 - Both are visible on the minimap as colored dots (green = trees, amber = benches)
 - Obstacles slow and damage cars without killing them
+- **Power-Up Supply Drops** every 30 seconds
 - Arena size: **3400 × 2100 units**
 
 ---
@@ -267,10 +324,10 @@ A realistic park setting with:
 ```
 MyGame_CarBattle_V2/
 │
-├── index.html               # Main HTML — all 10 menu screens, HUD overlays, modals
+├── index.html               # Main HTML — all 10+ menu screens, HUD overlays, modals
 │
 ├── css/
-│   └── style.css            # All styles — dark theme, animations, responsive layout (17 KB)
+│   └── style.css            # All styles — dark theme, animations, responsive layout
 │
 ├── js/
 │   ├── main.js              # Game loop, world state, rendering pipeline, canvas draw
@@ -280,31 +337,35 @@ MyGame_CarBattle_V2/
 │   │   │                    #   AI difficulty profiles, arena presets, match config
 │   │   ├── audio.js         # Procedural Web Audio API sound engine
 │   │   ├── input.js         # Keyboard input manager + keybind remapper
-│   │   └── camera.js        # Follow-zoom & full-stadium camera controllers
+│   │   ├── camera.js        # Follow-zoom & full-stadium camera controllers
+│   │   ├── secrets.js       # API keys — gitignored, copy from secrets.example.js
+│   │   └── secrets.example.js  # Template for secrets.js
 │   │
 │   ├── entities/
 │   │   ├── car.js           # BattleCar class — drawing, physics properties, damage model,
-│   │   │                    #   deformation, detached parts, health bar rendering
+│   │   │                    #   deformation, detached parts, health bar, power-up auras
 │   │   ├── physics.js       # PhysicsEngine — movement, wall bounce, car-car collision,
-│   │   │                    #   spawn generation, teammate detection
+│   │   │                    #   spawn generation, team arc spawns, power-up physics effects
 │   │   └── ai.js            # TacticalAIBrain — FSM, target scoring, flanking, drift turns
 │   │
 │   ├── modes/
-│   │   ├── singlePlayer.js  # Single Player mode — spawn logic & win condition
+│   │   ├── singlePlayer.js  # King of the Ring (FFA) & Stadium Squad Siege — spawn & win logic
 │   │   ├── duel1v1.js       # 1v1 Duel mode — spawn logic & win condition
 │   │   ├── coopTeam.js      # Co-op Team mode — allied/enemy spawn & win condition
 │   │   ├── squadWar.js      # Squad War mode — P1 team vs P2 team spawn & scoring
 │   │   └── timedSiege.js    # Timed Siege overlay logic — countdown timer HUD
 │   │
 │   ├── features/
-│   │   ├── hazards.js       # ArenaHazards — tree/bench generation, collision, minimap draw
+│   │   ├── hazards.js       # ArenaHazards — tree/bench generation, collision, minimap draw,
+│   │   │                    #   Power-Up Supply Drop system, 5 orb types, 3D orb rendering
 │   │   ├── announcer.js     # KillAnnouncer — floating kill banners, slow-motion replay
 │   │   ├── telemetry.js     # TelemetryTracker — localStorage stats, match records
-│   │   └── feedback.js      # Player feedback form — Formspree integration
+│   │   └── feedback.js      # Player feedback form — Web3Forms integration
 │   │
 │   └── ui/
 │       └── uiManager.js     # UIManager — screen routing, HUD updates, match results,
-│                            #   color pickers, keybind UI, settings sync, analytics view
+│                            #   color pickers, keybind UI, settings sync, analytics view,
+│                            #   Stadium Squad Siege config, live arena map preview
 │
 └── screenshots/
     ├── Screenshot 2026-10-18 222812.png   # Main Menu
@@ -325,10 +386,10 @@ MyGame_CarBattle_V2/
 
 ```bash
 # Clone the repository
-git clone https://github.com/YOUR_USERNAME/MyGame_CarBattle_V2.git
+git clone https://github.com/haseebahmed9814-design/CarBattle-Bumper-Crash.git
 
 # Open the game
-cd MyGame_CarBattle_V2
+cd CarBattle-Bumper-Crash
 start index.html      # Windows
 open index.html       # macOS
 xdg-open index.html   # Linux
@@ -351,7 +412,7 @@ npx http-server . -p 8080
 
 Then visit: `http://localhost:8080`
 
-> ⚠️ **Note:** GoatCounter analytics and Formspree feedback require an internet connection. The game itself is fully playable offline.
+> ⚠️ **Note:** Web3Forms feedback form requires an internet connection. Power-up supply drops and all game features are fully playable offline.
 
 ---
 
@@ -361,32 +422,42 @@ Then visit: `http://localhost:8080`
 Each frame in `Game.loop()` executes in order:
 1. Compute `dt` (delta time, capped at 2.2× to prevent tunneling)
 2. Tick AI brains for all cars
-3. Apply physics — movement, friction, wall bounce
-4. Resolve car–car collisions
-5. Update arena hazards (tree/bench collisions)
+3. Apply physics — movement, friction, wall bounce; tick active power-up timers & burn effects
+4. Resolve car–car collisions (with power-up damage multipliers applied)
+5. Update arena hazards — tree/bench collisions + supply drop spawner tick + orb pickup detection
 6. Check mode win condition
 7. **Draw arena ground** (pitch stripes, lines, or park walkways)
-8. **Draw ground hazard elements** (tree bases, bench pads)
+8. **Draw ground hazard elements** (tree bases, bench pads, power-up orbs)
 9. **Draw world effects** (tire tracks, detached parts, shockwaves, particles, floating texts)
-10. **Draw all cars** (shadow, wheels, body, damage dents, headlights, exhaust flames, health bar, name tag)
+10. **Draw all cars** (shadow, wheels, body, damage dents, headlights, exhaust flames, power-up aura, health bar, power-up duration bar, name tag)
 11. **Draw tree canopies** (on top of cars for depth layering)
 12. Draw kill announcer overlay
-13. Draw minimap
+13. Draw minimap (cars + trees + benches + power-up orbs)
 
 ### Physics Engine (`js/entities/physics.js`)
 - **Arcade top-down driving** — velocity decomposed into forward/lateral components
 - **Grip model** — normal traction vs handbrake slip controlled by `normalGrip` / `handbrakeGrip`
+- **Power-up speed modifiers** — Hyper Nitro: 1.45× accel / 1.28× top speed; Inferno RAM: 1.15× accel / 1.08× speed
+- **Burn damage ticking** — 1-second fire singe on Inferno RAM victims (~6 HP total, never lethal alone)
 - **Deceleration** — drag applied per frame, with separate braking deceleration
 - **Wall bounce** — elastic wall reflection with position correction and impulse
 - **Car–car collision** — circle-vs-circle detection with impulse resolution scaled by mass ratio and relative velocity
+- **Power-up collision multipliers** — Inferno RAM: 1.8× damage; Titan Shield: 0.30× incoming damage
 - **Directional hit zone detection** — dot product of collision normal vs car forward vector assigns FRONT/REAR/LEFT/RIGHT damage zones
-- **Spawn position generator** — guarantees no cars spawn within radius of each other or wall bounds
+- **Spawn position generator** — ring-based spawning with Player 1 always anchored on the left; adaptive arc for team modes
 
 ### Camera System (`js/core/camera.js`)
 | Mode | Behavior |
 |---|---|
 | **Follow Zoom** (`moving_wide`) | Smoothly follows the player car with lerp; zoom scales with speed |
 | **Full Stadium** (`fixed_full`) | Static top-down overview of the entire arena |
+
+### Team Spawn Arc System (`js/entities/physics.js`)
+The new `generateTeamSpawnPositions()` function distributes teams along opposing stadium arcs:
+- **Team 1** spawns along the **Left Arc** (180° / π radians)
+- **Team 2** spawns along the **Right Arc** (0° radians)
+- Angular spread widens automatically as team size grows (max ~155° arc)
+- Human commander always spawns at the **center slot** of their team's arc
 
 ---
 
@@ -408,7 +479,8 @@ View all stats in-game via **GAME STATS** from the main menu.
 
 | Status | Feature |
 |---|---|
-| ✅ Done | Single Player vs AI (1–8 bots) |
+| ✅ Done | Single Player — King of the Ring vs AI (1–8 bots) |
+| ✅ Done | Single Player — Stadium Squad Siege (Solo Team Battle) |
 | ✅ Done | 1v1 Duel (local split-keyboard) |
 | ✅ Done | Co-op Team (P1+P2 vs AI) |
 | ✅ Done | Squad War (P1 Team vs P2 Team) |
@@ -417,17 +489,22 @@ View all stats in-game via **GAME STATS** from the main menu.
 | ✅ Done | Procedural Web Audio (no audio files) |
 | ✅ Done | Directional damage model & deformation |
 | ✅ Done | Detached car parts physics |
-| ✅ Done | Park Ground arena with trees & benches |
-| ✅ Done | Minimap with hazard icons |
+| ✅ Done | Park Ground arena with 14 trees & 10 benches |
+| ✅ Done | Minimap with hazard & power-up icons |
 | ✅ Done | Kill Announcer + slow-motion replay |
 | ✅ Done | Player keybind remapper |
 | ✅ Done | LocalStorage analytics & career stats |
-| ✅ Done | Player feedback form (Formspree) |
+| ✅ Done | Player feedback form (Web3Forms) |
 | ✅ Done | Spectator mode |
+| ✅ Done | **Power-Up Supply Drop System (5 orb types, every 30s)** |
+| ✅ Done | **Inferno Fire RAM — 1.8× damage + fire singe** |
+| ✅ Done | **Titan Armor Shield — 70% damage block** |
+| ✅ Done | **Turbo Speed Boost — 1.45× accel + 1.28× top speed** |
+| ✅ Done | **Live arena map preview canvas on setup screens** |
+| ✅ Done | **Adaptive team arc spawn system** |
 | 🔄 In Progress | Online multiplayer — rooms & matchmaking |
 | 📋 Planned | Ranked global leaderboard |
 | 📋 Planned | Additional arena maps |
-| 📋 Planned | Power-ups & hazard items |
 | 📋 Planned | Mobile touch controls |
 
 ---
@@ -446,6 +523,9 @@ There is currently one vehicle archetype: **APEX GT** — a balanced, well-round
 | Normal Grip | 0.90 |
 | Handbrake Grip | 0.955 |
 | Rear Damage Penalty | 1.55× |
+
+> ⚡ With **Turbo Speed Boost** active: Top Speed → ~15.1 u/f, Acceleration → ~0.65
+> 🔥 With **Inferno Fire RAM** active: Hit damage → 1.8×, Exhaust flames turn orange
 
 ### Car Color Palettes
 | Name | Main Color |
@@ -473,6 +553,7 @@ There is currently one vehicle archetype: **APEX GT** — a balanced, well-round
 | 🧠 Tactical Combat AI System | FSM-based AI with flanking, drift, evasion |
 | 🎨 UI/UX Architecture | 10-screen menu system, HUD, results, analytics |
 | 🎵 Procedural Web Audio | All sounds synthesized — zero audio files |
+| ⚡ Power-Up Supply Drop System | 5-type orb system, 3D rendering, pickup physics |
 
 </div>
 
@@ -486,7 +567,7 @@ This project is licensed under the **MIT License** — see the [LICENSE](LICENSE
 
 <div align="center">
 
-**Bumper Crash v2.7.0** · Developed by **Muhammad Haseeb Ahmed**
+**Bumper Crash v3.1.0** · Developed by **Muhammad Haseeb Ahmed**
 
 *"The last car driving wins."*
 

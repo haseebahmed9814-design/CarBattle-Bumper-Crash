@@ -1,8 +1,7 @@
 const FeedbackManager = {
+    selectedStars: 0,
+
     init() {
-        // Web3Forms access key — loaded from gitignored secrets.js if available,
-        // otherwise falls back to the hardcoded key so GitHub Pages deployment works.
-        // Web3Forms is designed for frontend use — key is tied to your email only.
         const ACCESS_KEY = (typeof GAME_SECRETS !== 'undefined' && GAME_SECRETS.web3formsKey)
             ? GAME_SECRETS.web3formsKey
             : '6d3b06c1-833f-4cae-9ce5-9802383f23c0';
@@ -13,7 +12,35 @@ const FeedbackManager = {
         const form = document.getElementById('feedback-form');
         const statusMsg = document.getElementById('fb-status-msg');
         const submitBtn = document.getElementById('btn-submit-feedback');
+        const ratingInput = document.getElementById('fb-rating');
+        const ratingText = document.getElementById('fb-star-status');
+        const starBtns = document.querySelectorAll('#fb-star-widget .fb-star-btn');
         if (!modal || !form) return;
+
+        const updateStarUI = (stars) => {
+            this.selectedStars = stars;
+            starBtns.forEach(btn => {
+                const val = parseInt(btn.dataset.star, 10);
+                btn.classList.toggle('active', val <= stars);
+            });
+            if (stars > 0) {
+                ratingInput.value = `${stars} ${stars === 1 ? 'Star' : 'Stars'} (${stars}/5)`;
+                if (ratingText) ratingText.textContent = `${stars}/5 Stars Selected (Click same star to clear)`;
+            } else {
+                ratingInput.value = 'No star given';
+                if (ratingText) ratingText.textContent = 'No star given (Optional)';
+            }
+        };
+
+        starBtns.forEach(btn => {
+            btn.addEventListener('click', () => {
+                SoundEngine.playUIClick();
+                const clickedVal = parseInt(btn.dataset.star, 10);
+                // Clicking the already-selected star clears it back to 0 ("No star given")
+                if (this.selectedStars === clickedVal) updateStarUI(0);
+                else updateStarUI(clickedVal);
+            });
+        });
 
         const openModal = () => {
             SoundEngine.playUIClick();
@@ -36,10 +63,9 @@ const FeedbackManager = {
             statusMsg.classList.add('hidden');
 
             try {
-                // Build form data and inject Web3Forms access key
                 const formData = new FormData(form);
                 formData.append('access_key', ACCESS_KEY);
-                formData.append('subject', 'Bumper Crash — New Player Feedback 🏎️');
+                formData.append('subject', 'Bumper Crash v3.1.0 — New Player Feedback 🏎️');
                 formData.append('from_name', 'Bumper Crash Game');
 
                 const res = await fetch(WEB3FORMS_URL, {
@@ -52,6 +78,7 @@ const FeedbackManager = {
 
                 if (data.success) {
                     form.reset();
+                    updateStarUI(0);
                     statusMsg.textContent = '✅ Thank you! Your feedback was sent directly to the developer Gmail.';
                     statusMsg.className = 'fb-status-msg success';
                 } else {

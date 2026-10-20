@@ -1,4 +1,4 @@
-﻿const Game = {
+const Game = {
     canvas: null,
     ctx: null,
     state: 'MENU_BG',
@@ -36,15 +36,13 @@
         InputManager.init();
         UIManager.init();
 
-        // Bind Map Selectors across all modes
+        // Bind Map Selectors & Live Map Preview Canvases across all setup screens
         document.querySelectorAll('.map-select-group').forEach(group => {
             group.querySelectorAll('.seg-btn').forEach(btn => {
                 btn.addEventListener('click', () => {
                     SoundEngine.playUIClick();
                     MatchConfig.arenaKey = btn.dataset.arena;
-                    document.querySelectorAll('.map-select-group .seg-btn').forEach(b => {
-                        b.classList.toggle('active', b.dataset.arena === MatchConfig.arenaKey);
-                    });
+                    UIManager.refreshAllMapPreviews();
                 });
             });
         });
@@ -128,7 +126,7 @@
         TimedSiegeMode.initTimer();
 
         let totalCombatants = 2;
-        if (MatchConfig.mode === 'single') totalCombatants = 1 + MatchConfig.enemyBotCount;
+        if (MatchConfig.mode === 'single') totalCombatants = MatchConfig.spSubMode === 'team' ? (1 + MatchConfig.spAllyBots + MatchConfig.spEnemyBots) : (1 + MatchConfig.enemyBotCount);
         if (MatchConfig.mode === 'coop') totalCombatants = 2 + MatchConfig.allyBotCount + MatchConfig.enemyBotCount;
         if (MatchConfig.mode === 'team_vs') totalCombatants = 2 + MatchConfig.p1TeamBots + MatchConfig.p2TeamBots;
 
@@ -370,30 +368,71 @@
         if (this.state === 'MENU_BG') return;
         const mapW = 185, mapH = Math.round(mapW * (this.arena.height / this.arena.width)), pad = 16;
         const x0 = this.canvas.width - mapW - pad, y0 = this.canvas.height - mapH - pad;
+        const scaleX = mapW / this.arena.width, scaleY = mapH / this.arena.height;
+
         ctx.save();
-        ctx.fillStyle = 'rgba(15, 23, 42, 0.80)'; ctx.strokeStyle = 'rgba(148, 163, 184, 0.45)'; ctx.lineWidth = 2;
-        ctx.beginPath(); ctx.roundRect(x0, y0, mapW, mapH, 8); ctx.fill(); ctx.stroke();
+        ctx.fillStyle = 'rgba(15, 23, 42, 0.84)';
+        ctx.strokeStyle = 'rgba(148, 163, 184, 0.45)';
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        ctx.roundRect(x0, y0, mapW, mapH, 8);
+        ctx.fill();
+        ctx.stroke();
 
-        // Draw Park Trees & Benches on Minimap
-        for (const t of ArenaHazards.trees) {
-            const tx = x0 + (t.x / this.arena.width) * mapW;
-            const ty = y0 + (t.y / this.arena.height) * mapH;
-            ctx.fillStyle = '#22c55e';
-            ctx.beginPath(); ctx.arc(tx, ty, 3, 0, Math.PI * 2); ctx.fill();
-        }
+        // 1. Draw Park Benches on GPS as small wooden rectangles
         for (const b of ArenaHazards.benches) {
-            const bx = x0 + (b.x / this.arena.width) * mapW;
-            const by = y0 + (b.y / this.arena.height) * mapH;
-            ctx.fillStyle = '#d97706';
-            ctx.fillRect(bx - 2, by - 2, 4, 4);
+            const bx = x0 + b.x * scaleX;
+            const by = y0 + b.y * scaleY;
+            const bw = Math.max(3, b.w * scaleX);
+            const bh = Math.max(2, b.h * scaleY);
+            ctx.fillStyle = '#a16207';
+            ctx.fillRect(bx - bw / 2, by - bh / 2, bw, bh);
         }
 
+        // 2. Draw Trees on GPS as distinct dark-forest canopies with brown trunk centers
+        for (const t of ArenaHazards.trees) {
+            const tx = x0 + t.x * scaleX;
+            const ty = y0 + t.y * scaleY;
+            ctx.fillStyle = '#14532d';
+            ctx.strokeStyle = '#854d0e';
+            ctx.lineWidth = 1.2;
+            ctx.beginPath();
+            ctx.arc(tx, ty, 3.2, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.stroke();
+
+            ctx.fillStyle = '#78350f';
+            ctx.beginPath();
+            ctx.arc(tx, ty, 1.2, 0, Math.PI * 2);
+            ctx.fill();
+        }
+
+        // 3. Draw Active 3D Power-Up Supply Drops on GPS as pulsing rings
+        if (ArenaHazards.powerups) {
+            for (const orb of ArenaHazards.powerups) {
+                const ox = x0 + orb.x * scaleX;
+                const oy = y0 + orb.y * scaleY;
+                ctx.fillStyle = orb.spec.coreColor;
+                ctx.strokeStyle = '#ffffff';
+                ctx.lineWidth = 1.5;
+                ctx.beginPath();
+                ctx.arc(ox, oy, 4.5, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.stroke();
+            }
+        }
+
+        // 4. Draw Active Cars on top with crisp outlines
         this.cars.forEach(c => {
             if (c.dead) return;
-            const rx = x0 + (c.x / this.arena.width) * mapW, ry = y0 + (c.y / this.arena.height) * mapH;
+            const rx = x0 + c.x * scaleX, ry = y0 + c.y * scaleY;
             ctx.fillStyle = c.mainColor;
-            ctx.beginPath(); ctx.arc(rx, ry, c.isAI ? 3.5 : 5.5, 0, Math.PI * 2); ctx.fill();
-            if (!c.isAI) { ctx.strokeStyle = '#ffffff'; ctx.lineWidth = 1.5; ctx.stroke(); }
+            ctx.beginPath();
+            ctx.arc(rx, ry, c.isAI ? 3.8 : 5.5, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.strokeStyle = c.isAI ? '#090d16' : '#ffffff';
+            ctx.lineWidth = c.isAI ? 1.2 : 1.8;
+            ctx.stroke();
         });
         ctx.restore();
     },

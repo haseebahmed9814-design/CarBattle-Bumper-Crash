@@ -1,4 +1,4 @@
-﻿const InputManager = {
+const InputManager = {
     defaultBindings: {
         p1: { up: 'KeyW', down: 'KeyS', left: 'KeyA', right: 'KeyD', drift: 'Space' },
         p2: { up: 'ArrowUp', down: 'ArrowDown', left: 'ArrowLeft', right: 'ArrowRight', drift: 'ShiftRight' }
@@ -35,7 +35,12 @@
                 return;
             }
             if (this.gameplayActive) {
-                if (['Space', 'ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'Enter'].includes(e.code)) e.preventDefault();
+                if ([
+                    'Space', 'ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight',
+                    'Enter', 'NumpadEnter', 'Numpad0', 'Insert', 'ControlRight', 'ShiftRight'
+                ].includes(e.code)) {
+                    e.preventDefault();
+                }
                 this.pressedCodes.add(e.code);
             }
         });
@@ -54,7 +59,9 @@
     },
     formatKeyName(code) {
         if (!code) return 'NONE';
-        if (code === 'ShiftRight') return 'R-SHIFT / ENTER / NUM0';
+        if (code === 'ShiftRight') return 'R-SHIFT / R-CTRL / NUMPAD 0';
+        if (code === 'Numpad0' || code === 'Insert') return 'NUMPAD 0';
+        if (code === 'ControlRight') return 'R-CTRL';
         return code.replace('Key', '').replace('Arrow', 'ARROW ').replace('ShiftLeft', 'L-SHIFT').replace('Space', 'SPACE').replace('Digit', '');
     },
     getPlayerInput(playerKey) {
@@ -66,8 +73,12 @@
         const right = this.pressedCodes.has(map.right);
         const drift = this.pressedCodes.has(map.drift) ||
             (playerKey === 'p2' && map.drift === 'ShiftRight' && (
-                this.pressedCodes.has('Enter') || this.pressedCodes.has('Numpad0') ||
-                this.pressedCodes.has('NumpadEnter') || this.pressedCodes.has('Slash')
+                this.pressedCodes.has('ControlRight') ||
+                this.pressedCodes.has('Numpad0') ||
+                this.pressedCodes.has('Insert') ||
+                this.pressedCodes.has('Digit0') ||
+                this.pressedCodes.has('Enter') ||
+                this.pressedCodes.has('NumpadEnter')
             ));
         return { up, down, steer: (left ? -1 : 0) + (right ? 1 : 0), drift };
     }

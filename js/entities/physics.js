@@ -1,4 +1,4 @@
-﻿const PhysicsEngine = {
+const PhysicsEngine = {
     areTeammates(c1, c2) {
         if (!c1 || !c2) return false;
         if (!c1.team || !c2.team || c1.team === 'FFA' || c2.team === 'FFA') return false;
@@ -17,6 +17,49 @@
             return;
         }
 
+        // Tick Active Timed Power-Up
+        if (car.activePowerup && car.powerupTimer > 0) {
+            car.powerupTimer -= dt;
+            if (car.activePowerup === 'inferno_ram' && Math.random() < 0.55) {
+                Game.spawnSmoke(
+                    car.x + (Math.random() - 0.5) * 32,
+                    car.y + (Math.random() - 0.5) * 32,
+                    true
+                );
+            }
+            if (car.powerupTimer <= 0) {
+                car.activePowerup = null;
+                car.powerupTimer = 0;
+                car.powerupMeta = null;
+            }
+        }
+
+        // Brief 1-Second Fire Singe (60 frames max, ~6 HP total so post-hit burn is never unfair)
+        if (car.burningTimer > 0) {
+            car.burningTimer -= dt;
+            if (Math.random() < 0.70) {
+                Game.spawnSmoke(
+                    car.x + (Math.random() - 0.5) * 26,
+                    car.y + (Math.random() - 0.5) * 26,
+                    true
+                );
+            }
+            const burnDmg = 0.10 * dt; // Only ~6 HP total over 1.0 second
+            car.hp = Math.max(0, car.hp - burnDmg);
+            if (car.burnAttacker && car.burnAttacker !== car) {
+                car.burnAttacker.damageDealt += burnDmg;
+            }
+            if (car.hp <= 0 && !car.dead) {
+                car.dead = true;
+                car.activePowerup = null;
+                car.burningTimer = 0;
+                if (car.burnAttacker && car.burnAttacker !== car) car.burnAttacker.kills++;
+                SoundEngine.playExplosion();
+                Game.triggerExplosion(car);
+                return;
+            }
+        }
+
         const spec = car.spec;
         const hpRatio = car.hp / car.maxHp;
         car.isBraking = !!(input.down || input.drift);
@@ -31,18 +74,19 @@
         let forwardVel = car.vx * fx + car.vy * fy;
         let lateralVel = car.vx * rx + car.vy * ry;
 
-        // Strictly cap throttle between 0.55 and 1.00 so no AI car ever exceeds constant maxSpeed!
         const throttle = Math.min(1.0, Math.max(0.55, (input.throttle !== undefined) ? input.throttle : 1.0));
+        const isHyper = car.activePowerup === 'hyper_nitro';
+        const accelMult = isHyper ? 1.45 : (car.activePowerup === 'inferno_ram' ? 1.15 : 1.0);
+        const topSpeedMult = isHyper ? 1.28 : (car.activePowerup === 'inferno_ram' ? 1.08 : 1.0);
 
-        if (input.up) forwardVel += spec.accel * throttle * dt;
+        if (input.up) forwardVel += spec.accel * accelMult * throttle * dt;
         if (input.down) {
             if (forwardVel > 0.6) forwardVel *= Math.pow(0.89, dt);
             else forwardVel -= spec.reverseAccel * dt;
         }
         if (input.drift) forwardVel *= Math.pow(0.985, dt);
 
-        // Strict Constant Speed Ceiling (spec.maxSpeed is never exceeded by any bot)
-        const maxAllowedSpeed = spec.maxSpeed * throttle;
+        const maxAllowedSpeed = spec.maxSpeed * throttle * topSpeedMult;
         if (forwardVel > maxAllowedSpeed) forwardVel = maxAllowedSpeed;
         if (forwardVel < -spec.maxReverse) forwardVel = -spec.maxReverse;
 
@@ -164,21 +208,43 @@
             victim.angVel += (sideDot < 0 ? 1 : -1) * (ramPower * 0.025);
         }
 
+        // Attacker Power-Up Damage Multipliers (1.80x Direct Fire Hit + 1-Second Singe!)
+        let powerupDamageMult = 1.0;
+        if (attacker.activePowerup === 'inferno_ram') {
+            powerupDamageMult = 1.80;
+            victim.burningTimer = 60; // Strictly 1 second (60 frames) of fire burn!
+            victim.burnAttacker = attacker;
+            badgeText = '🔥 1.8x INFERNO FIRE HIT!';
+            badgeColor = '#f97316';
+            Game.spawnSparks(hitX, hitY, 22);
+        } else if (attacker.activePowerup === 'hyper_nitro') {
+            powerupDamageMult = 1.35;
+            badgeText = '⚡ TURBO SPEED HIT!';
+            badgeColor = '#fde047';
+        }
+
+        // Victim Titan Shield Damage Reduction (Blocks 70% of incoming damage!)
+        let victimShieldMult = 1.0;
+        if (victim.activePowerup === 'titan_shield') {
+            victimShieldMult = 0.30;
+            badgeText = '🛡️ SHIELD BLOCKED!';
+            badgeColor = '#c084fc';
+        }
+
         let aiDiffMult = 1.0;
         if (attacker.isAI && !victim.isAI) {
             if (MatchConfig.difficulty === 'easy') aiDiffMult = 0.65;
             if (MatchConfig.difficulty === 'hard') aiDiffMult = 1.25;
         }
 
-        // Sudden-Death Bot Fury: When human player is spectating remaining bots, bots deal 2.2x damage to each other so the match finishes fast!
         if (Game.isSpectating && attacker.isAI && victim.isAI) {
             aiDiffMult = 2.25;
         }
 
-        const finalDamage = ramPower * 1.95 * aiDiffMult * multiplier;
+        const finalDamage = ramPower * 1.95 * aiDiffMult * multiplier * powerupDamageMult * victimShieldMult;
         victim.applyDirectionalDamage(finalDamage, zone, hitX, hitY, attacker);
 
-        if (finalDamage > 5.5) {
+        if (finalDamage > 4.5 || victim.activePowerup === 'titan_shield') {
             Game.floatingTexts.push({ x: hitX, y: hitY - 18, text: badgeText, color: badgeColor, life: 0.95 });
         }
     },
@@ -188,10 +254,62 @@
         const cx = arena.width / 2, cy = arena.height / 2;
         const rx = (arena.width / 2) - 420, ry = (arena.height / 2) - 340;
         for (let i = 0; i < count; i++) {
-            const theta = (i / count) * Math.PI * 2;
+            // Start at PI (Left side) for index 0 so Player 1 is always on the Left of the ring!
+            const theta = Math.PI + (i / count) * Math.PI * 2;
             const x = cx + Math.cos(theta) * rx, y = cy + Math.sin(theta) * ry;
             spawns.push({ x, y, angle: Math.atan2(cy - y, cx - x) });
         }
         return spawns;
+    },
+
+    // Adaptive Stadium Ring & Opposing Arcs for Team Modes:
+    // Spreads Team 1 along the Left Stadium Curve and Team 2 along the Right Stadium Curve
+    // (Widens automatically into a full 360-degree stadium ring as team sizes grow!)
+    generateTeamSpawnPositions(team1Count, team2Count, arena) {
+        const cx = arena.width / 2, cy = arena.height / 2;
+        const rx = (arena.width / 2) - 420, ry = (arena.height / 2) - 340;
+        const total = team1Count + team2Count;
+
+        const buildArc = (count, centerAngle) => {
+            const list = [];
+            if (count <= 0) return list;
+            if (count === 1) {
+                const x = cx + Math.cos(centerAngle) * rx;
+                const y = cy + Math.sin(centerAngle) * ry;
+                list.push({ x, y, angle: Math.atan2(cy - y, cx - x) });
+                return list;
+            }
+
+            // Dynamically scale angular spread based on squad size (wider arc for larger teams)
+            const maxSpread = total >= 8 ? Math.PI * 0.86 : Math.min(Math.PI * 0.80, (count - 1) * 0.34);
+
+            // Order slots from center outward (0, -1, +1, -2, +2...) so the Human Commander
+            // is always at the center of their team's curved arc!
+            const offsets = [0];
+            for (let k = 1; offsets.length < count; k++) {
+                offsets.push(-k);
+                if (offsets.length < count) offsets.push(k);
+            }
+
+            const step = maxSpread / Math.max(1, count - 1);
+            for (let i = 0; i < count; i++) {
+                let theta;
+                if (count % 2 === 1) {
+                    theta = centerAngle + offsets[i] * step;
+                } else {
+                    const start = centerAngle - maxSpread / 2;
+                    theta = start + i * step;
+                }
+                const x = cx + Math.cos(theta) * rx;
+                const y = cy + Math.sin(theta) * ry;
+                list.push({ x, y, angle: Math.atan2(cy - y, cx - x) });
+            }
+            return list;
+        };
+
+        return {
+            team1Spawns: buildArc(team1Count, Math.PI), // Left Stadium Arc
+            team2Spawns: buildArc(team2Count, 0)        // Right Stadium Arc
+        };
     }
 };

@@ -1,4 +1,4 @@
-﻿const ATTACK_SLOTS = [
+const ATTACK_SLOTS = [
     { name: 'REAR_CRUSH',  angleOffset:  Math.PI,        dist: 115 },
     { name: 'LEFT_TBONE',  angleOffset:  Math.PI * 0.55, dist: 135 },
     { name: 'RIGHT_TBONE', angleOffset: -Math.PI * 0.55, dist: 135 },
@@ -121,6 +121,24 @@ class TacticalAIBrain {
             this.hesitating = Math.random() < profile.hesitationChance;
             if (profile.id === 'hard') this.slotIndex = Math.random() < 0.55 ? 0 : (1 + Math.floor(Math.random() * 2));
             else if (Math.random() < 0.3) this.slotIndex = (this.slotIndex + 1) % ATTACK_SLOTS.length;
+        }
+
+                // If a 3D Supply Drop Orb is nearby (or AI is low on HP and a heal orb dropped), race to pick it up!
+        if (typeof ArenaHazards !== 'undefined' && ArenaHazards.powerups.length > 0 && profile.id !== 'easy') {
+            let bestOrb = null, bestOrbDist = Infinity;
+            for (const orb of ArenaHazards.powerups) {
+                if (orb.dropProgress < 0.85) continue;
+                const d = Math.hypot(orb.x - myCar.x, orb.y - myCar.y);
+                const wantsHeal = (myCar.hp < myCar.maxHp * 0.65 && orb.spec.isInstantHeal);
+                const maxSeekRange = wantsHeal ? 1350 : 680;
+                if (d < maxSeekRange && d < bestOrbDist) {
+                    bestOrbDist = d;
+                    bestOrb = orb;
+                }
+            }
+            if (bestOrb) {
+                return this.steerTowardPoint(bestOrb.x, bestOrb.y, allCars, arena, profile);
+            }
         }
 
         if (!this.target) return this.steerTowardPoint(arena.width / 2, arena.height / 2, allCars, arena, profile);

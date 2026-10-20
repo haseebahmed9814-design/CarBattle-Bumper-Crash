@@ -1,4 +1,4 @@
-﻿const GAME_VERSION = 'v2.7.0';
+const GAME_VERSION = 'v3.1.0';
 const GAME_DEVELOPER = 'Muhammad Haseeb Ahmed';
 
 const CAR_COLOR_PALETTES = {
@@ -54,9 +54,6 @@ const AI_DIFFICULTY_PROFILES = {
     }
 };
 
-// Strictly TWO Maps:
-// 1. FOOTBALL GROUND (Plain open stadium pitch without hurdles)
-// 2. PARK GROUND (Realistic park with wooden benches, little trees & bushes that slow cars without damage)
 const ARENA_PRESETS = {
     expanded:    { id: 'expanded',    name: 'FOOTBALL GROUND', width: 3400, height: 2100, wallPad: 52, hasHazards: false },
     park_ground: { id: 'park_ground', name: 'PARK GROUND',     width: 3400, height: 2100, wallPad: 52, hasHazards: true  }
@@ -71,6 +68,7 @@ const UserSettings = {
 
 const MatchConfig = {
     mode: 'single',
+    spSubMode: 'ffa',
     arenaKey: 'expanded',
     difficulty: 'normal',
     p1Name: localStorage.getItem('bc_p1_name') || 'PLAYER 1',
@@ -79,6 +77,8 @@ const MatchConfig = {
     p2Color: 'green',
     enemyBotCount: 3,
     allyBotCount: 1,
+    spAllyBots: 2,
+    spEnemyBots: 3,
     p1TeamBots: 2,
     p2TeamBots: 2,
     timedMode: true,

@@ -1,4 +1,4 @@
-﻿class BattleCar {
+class BattleCar {
     constructor(opts) {
         this.id = opts.id;
         this.label = opts.label || 'CAR';
@@ -42,6 +42,14 @@
         this.kills = 0;
         this.damageDealt = 0;
         this.lastAttacker = null;
+
+        this.activePowerup = null;
+        this.powerupTimer = 0;
+        this.powerupMaxTimer = 0;
+        this.powerupMeta = null;
+
+        this.burningTimer = 0;
+        this.burnAttacker = null;
 
         this.dentFront = 0;
         this.dentRear = 0;
@@ -104,6 +112,8 @@
 
         if (this.hp <= 0 && !this.dead) {
             this.dead = true;
+            this.activePowerup = null;
+            this.burningTimer = 0;
             if (attacker && attacker !== this) attacker.kills++;
             SoundEngine.playExplosion();
             Game.triggerExplosion(this);
@@ -117,15 +127,49 @@
         const L = this.length;
         const W = this.width;
         const hpRatio = Math.max(0, this.hp / this.maxHp);
+        const now = performance.now();
 
-        if (!this.dead && showIndicator) {
+        // Ring is strictly drawn ONLY under human-controlled cars (!this.isAI)
+        if (!this.dead && showIndicator && !this.isAI) {
             ctx.save();
             ctx.strokeStyle = this.teamRingColor;
-            ctx.globalAlpha = this.isAI ? 0.42 : 0.85;
-            ctx.lineWidth = this.isAI ? 3 : 4.5;
+            ctx.globalAlpha = 0.88;
+            ctx.lineWidth = 4.5;
             ctx.beginPath();
             ctx.arc(0, 0, this.radius + 9, 0, Math.PI * 2);
             ctx.stroke();
+            ctx.restore();
+        }
+
+        // Active Timed Power-Up Visual Aura around Car
+        if (!this.dead && this.activePowerup) {
+            ctx.save();
+            if (this.activePowerup === 'inferno_ram') {
+                const flameR = this.radius + 13 + Math.sin(now * 0.025) * 4;
+                const fGrad = ctx.createRadialGradient(0, 0, this.radius * 0.4, 0, 0, flameR);
+                fGrad.addColorStop(0, 'rgba(251, 191, 36, 0.15)');
+                fGrad.addColorStop(0.65, 'rgba(249, 115, 22, 0.55)');
+                fGrad.addColorStop(1, 'rgba(239, 68, 68, 0)');
+                ctx.fillStyle = fGrad;
+                ctx.beginPath();
+                ctx.arc(0, 0, flameR, 0, Math.PI * 2);
+                ctx.fill();
+            } else if (this.activePowerup === 'titan_shield') {
+                ctx.strokeStyle = '#c084fc';
+                ctx.fillStyle = 'rgba(139, 92, 246, 0.22)';
+                ctx.lineWidth = 3;
+                ctx.beginPath();
+                ctx.arc(0, 0, this.radius + 12, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.stroke();
+            } else if (this.activePowerup === 'hyper_nitro') {
+                ctx.strokeStyle = '#fde047';
+                ctx.lineWidth = 2.5;
+                ctx.setLineDash([10, 6]);
+                ctx.beginPath();
+                ctx.arc(0, 0, this.radius + 11, now * 0.01, now * 0.01 + Math.PI * 2);
+                ctx.stroke();
+            }
             ctx.restore();
         }
 
@@ -136,20 +180,19 @@
         const topY = -W / 2 + this.dentLeft;
         const botY = W / 2 - this.dentRight;
 
-        // Unified Dual Exhaust Nitro Flame (Always matches the car's paint color!)
         if (!this.dead) {
             ctx.fillStyle = '#64748b';
             ctx.fillRect(rX - 5, -W * 0.25, 5, 4.5);
             ctx.fillRect(rX - 5, W * 0.25 - 4.5, 5, 4.5);
 
             if (this.isAccelerating) {
-                const pulse = 10 + Math.sin(performance.now() * 0.035 + this.id) * 3.5;
+                const boostMult = this.activePowerup === 'hyper_nitro' ? 1.75 : (this.activePowerup === 'inferno_ram' ? 1.55 : 1.0);
+                const pulse = (10 + Math.sin(now * 0.035 + this.id) * 3.5) * boostMult;
                 ctx.save();
-                ctx.shadowColor = this.glowColor;
+                ctx.shadowColor = this.activePowerup === 'inferno_ram' ? '#f97316' : this.glowColor;
                 ctx.shadowBlur = 10;
 
-                // Outer Car-Colored Flame Cone
-                ctx.fillStyle = this.mainColor;
+                ctx.fillStyle = this.activePowerup === 'inferno_ram' ? '#f97316' : this.mainColor;
                 ctx.beginPath();
                 ctx.moveTo(rX - 5, -W * 0.25 - 0.5);
                 ctx.lineTo(rX - 5 - pulse, -W * 0.25 + 2.2);
@@ -159,8 +202,7 @@
                 ctx.lineTo(rX - 5, W * 0.25 + 0.5);
                 ctx.fill();
 
-                // Inner Bright Core Matching Car Tint
-                ctx.fillStyle = this.lightColor;
+                ctx.fillStyle = this.activePowerup === 'inferno_ram' ? '#fef08a' : this.lightColor;
                 ctx.beginPath();
                 ctx.moveTo(rX - 5, -W * 0.25 + 0.8);
                 ctx.lineTo(rX - 5 - pulse * 0.55, -W * 0.25 + 2.2);
@@ -281,7 +323,9 @@
         }
 
         if (this.parts.frontBumper && !this.dead) {
-            ctx.fillStyle = '#0f172a'; ctx.strokeStyle = '#e2e8f0'; ctx.lineWidth = 1.4;
+            ctx.fillStyle = this.activePowerup === 'inferno_ram' ? '#f97316' : '#0f172a';
+            ctx.strokeStyle = this.activePowerup === 'inferno_ram' ? '#fef08a' : '#e2e8f0';
+            ctx.lineWidth = 1.4;
             ctx.beginPath(); ctx.roundRect(fX - 1, -W * 0.44, 6, W * 0.88, 3); ctx.fill(); ctx.stroke();
         }
         if (this.parts.rearBumper && !this.dead) {
@@ -335,7 +379,6 @@
 
         ctx.restore();
 
-        // LARGER, HIGH-VISIBILITY OVERHEAD HEALTH BAR & NAME TAG
         if (showIndicator && !this.dead) {
             ctx.save();
             ctx.translate(this.x, this.y - this.radius - 28);
@@ -352,7 +395,6 @@
             ctx.fillStyle = isHuman ? this.lightColor : '#ffffff';
             ctx.fillText(labelText, 0, -5);
 
-            // Outer High-Contrast Bar Frame
             ctx.fillStyle = 'rgba(9, 13, 22, 0.92)';
             ctx.strokeStyle = isHuman ? '#ffffff' : this.lightColor;
             ctx.lineWidth = isHuman ? 1.8 : 1.3;
@@ -361,7 +403,6 @@
             ctx.fill();
             ctx.stroke();
 
-            // Health Fill
             const fillColor = hpRatio > 0.55 ? '#00e676' : (hpRatio > 0.28 ? '#ffb703' : '#ff1e42');
             ctx.fillStyle = fillColor;
             const fillW = Math.max(0, (bw - 4) * hpRatio);
@@ -371,7 +412,6 @@
                 ctx.fill();
             }
 
-            // 25% Segment Tick Marks for easy reading in Team Battles
             ctx.strokeStyle = 'rgba(9, 13, 22, 0.65)';
             ctx.lineWidth = 1;
             for (let s = 1; s <= 3; s++) {
@@ -380,6 +420,15 @@
                 ctx.moveTo(tx, 2);
                 ctx.lineTo(tx, bh);
                 ctx.stroke();
+            }
+
+            // Active Timed Power-Up Duration Bar right under the HP Bar!
+            if (this.activePowerup && this.powerupTimer > 0 && this.powerupMeta) {
+                const pRatio = Math.max(0, this.powerupTimer / (this.powerupMaxTimer || 600));
+                ctx.fillStyle = 'rgba(9, 13, 22, 0.9)';
+                ctx.fillRect(-bw / 2, bh + 3, bw, 4);
+                ctx.fillStyle = this.powerupMeta.ringColor || '#fde047';
+                ctx.fillRect(-bw / 2 + 1, bh + 3.5, (bw - 2) * pRatio, 3);
             }
 
             ctx.restore();
