@@ -9,6 +9,7 @@ const UIManager = {
         this.bind1v1Config();
         this.bindCoopConfig();
         this.bindTeamVsConfig();
+        this.bindCtfConfigs();
         this.bindSettings();
         this.bindControlsScreen();
         this.bindPauseAndResults();
@@ -75,8 +76,8 @@ const UIManager = {
     },
 
     buildAllColorPickers() {
-        ['sp-color-picker', 'spt-color-picker', 'duel-p1-colors', 'coop-p1-colors', 'tvs-p1-colors'].forEach(id => this.buildColorPicker(id, 'p1'));
-        ['duel-p2-colors', 'coop-p2-colors', 'tvs-p2-colors'].forEach(id => this.buildColorPicker(id, 'p2'));
+        ['sp-color-picker', 'spt-color-picker', 'spctf-color-picker', 'mpctf-p1-colors', 'duel-p1-colors', 'coop-p1-colors', 'tvs-p1-colors'].forEach(id => this.buildColorPicker(id, 'p1'));
+        ['duel-p2-colors', 'coop-p2-colors', 'tvs-p2-colors', 'mpctf-p2-colors'].forEach(id => this.buildColorPicker(id, 'p2'));
     },
 
     syncColorPickerHighlights() {
@@ -101,6 +102,7 @@ const UIManager = {
             this.syncColorPickerHighlights();
             this.refreshAllPreviews();
             if (screenId === 'screen-analytics') TelemetryTracker.renderAnalyticsDashboard();
+            if (screenId === 'screen-guide') this.renderAbilitiesGuideIcons();
         }
     },
 
@@ -125,6 +127,21 @@ const UIManager = {
             SoundEngine.playUIClick();
             document.getElementById('modal-coming-soon').classList.add('hidden');
         });
+
+        const spCtfBtn = document.getElementById('btn-goto-sp-ctf');
+        if (spCtfBtn) spCtfBtn.addEventListener('click', () => {
+            MatchConfig.ctfType = 'solo';
+            this.showScreen('screen-sp-ctf-config');
+        });
+        const mpCtfBtn = document.getElementById('btn-goto-mp-ctf');
+        if (mpCtfBtn) mpCtfBtn.addEventListener('click', () => {
+            MatchConfig.ctfType = 'versus';
+            this.showScreen('screen-mp-ctf-config');
+        });
+        const guideBtn = document.getElementById('btn-goto-guide');
+        if (guideBtn) guideBtn.addEventListener('click', () => this.showScreen('screen-guide'));
+        const setGuideBtn = document.getElementById('btn-settings-guide');
+        if (setGuideBtn) setGuideBtn.addEventListener('click', () => this.showScreen('screen-guide'));
 
         document.getElementById('btn-goto-1v1').addEventListener('click', () => this.showScreen('screen-1v1-config'));
         document.getElementById('btn-goto-coop').addEventListener('click', () => this.showScreen('screen-coop-config'));
@@ -165,81 +182,51 @@ const UIManager = {
     },
 
     renderArenaMapPreview(canvasEl, arenaKey) {
-        if (!canvasEl) return;
+        if (!canvasEl || typeof Game === 'undefined') return;
         const ctx = canvasEl.getContext('2d');
         const W = canvasEl.width, H = canvasEl.height;
+        const preset = ARENA_PRESETS[arenaKey] || ARENA_PRESETS.expanded;
+
         ctx.clearRect(0, 0, W, H);
+        ctx.fillStyle = '#050b14';
+        ctx.fillRect(0, 0, W, H);
 
-        if (arenaKey !== 'park_ground') {
-            // Football Ground Visual Thumbnail
-            ctx.fillStyle = '#1f6f38';
-            ctx.fillRect(0, 0, W, H);
-            ctx.fillStyle = '#247a3f';
-            for (let x = 0; x < W; x += 40) ctx.fillRect(x, 0, 20, H);
+        // Scale the exact in-game map renderer into the preview canvas so the picture & real map match 100%!
+        const scale = Math.min((W - 6) / preset.width, (H - 6) / preset.height);
+        const offsetX = (W - preset.width * scale) / 2;
+        const offsetY = (H - preset.height * scale) / 2;
 
-            ctx.strokeStyle = 'rgba(255,255,255,0.55)';
-            ctx.lineWidth = 1.8;
-            ctx.strokeRect(10, 8, W - 20, H - 16);
-            ctx.beginPath();
-            ctx.moveTo(W / 2, 8); ctx.lineTo(W / 2, H - 8);
-            ctx.stroke();
-            ctx.beginPath();
-            ctx.arc(W / 2, H / 2, 16, 0, Math.PI * 2);
-            ctx.stroke();
-            ctx.strokeRect(10, H / 2 - 20, 22, 40);
-            ctx.strokeRect(W - 32, H / 2 - 20, 22, 40);
-        } else {
-            // Park Ground Visual Thumbnail (Walkways, Trees & Benches)
-            ctx.fillStyle = '#216836';
-            ctx.fillRect(0, 0, W, H);
-            ctx.fillStyle = '#26733d';
-            for (let y = 0; y < H; y += 28) ctx.fillRect(0, y, W, 14);
+        ctx.save();
+        ctx.translate(offsetX, offsetY);
+        ctx.scale(scale, scale);
 
-            ctx.fillStyle = 'rgba(180, 154, 118, 0.42)';
-            ctx.fillRect(8, H / 2 - 7, W - 16, 14);
-            ctx.fillRect(W / 2 - 7, 8, 14, H - 16);
-            ctx.beginPath();
-            ctx.arc(W / 2, H / 2, 16, 0, Math.PI * 2);
-            ctx.fill();
+        Game.drawArenaGround(ctx, preset);
 
-            // Miniature Benches
-            ctx.fillStyle = '#d97706';
-            const benchCoords = [
-                [W * 0.36, H * 0.32], [W * 0.64, H * 0.32],
-                [W * 0.36, H * 0.68], [W * 0.64, H * 0.68],
-                [W * 0.20, H * 0.30], [W * 0.80, H * 0.70]
-            ];
-            benchCoords.forEach(([bx, by]) => ctx.fillRect(bx - 5, by - 2, 10, 4));
+        // Draw Left & Right Team Base Rectangles in the preview
+        const { leftRect, rightRect } = PhysicsEngine.getTeamBaseRects(preset);
+        ctx.strokeStyle = '#38bdf8';
+        ctx.fillStyle = 'rgba(56, 189, 248, 0.28)';
+        ctx.lineWidth = 28;
+        ctx.beginPath(); ctx.roundRect(leftRect.xMin, leftRect.yMin, leftRect.w, leftRect.h, 24); ctx.fill(); ctx.stroke();
 
-            // Miniature Trees
-            const treeCoords = [
-                [W * 0.28, H * 0.24], [W * 0.72, H * 0.24],
-                [W * 0.28, H * 0.76], [W * 0.72, H * 0.76],
-                [W * 0.14, H * 0.20], [W * 0.86, H * 0.20],
-                [W * 0.14, H * 0.80], [W * 0.86, H * 0.80],
-                [W * 0.50, H * 0.20], [W * 0.50, H * 0.80]
-            ];
-            treeCoords.forEach(([tx, ty]) => {
-                ctx.fillStyle = '#14532d';
-                ctx.beginPath(); ctx.arc(tx, ty, 5.5, 0, Math.PI * 2); ctx.fill();
-                ctx.fillStyle = '#4ade80';
-                ctx.beginPath(); ctx.arc(tx - 1.5, ty - 1.5, 2.5, 0, Math.PI * 2); ctx.fill();
-            });
-        }
+        ctx.strokeStyle = '#ff4d6d';
+        ctx.fillStyle = 'rgba(255, 77, 109, 0.28)';
+        ctx.beginPath(); ctx.roundRect(rightRect.xMin, rightRect.yMin, rightRect.w, rightRect.h, 24); ctx.fill(); ctx.stroke();
 
-        // Stadium Safety Border
-        ctx.strokeStyle = '#f59e0b';
-        ctx.lineWidth = 3;
-        ctx.strokeRect(2, 2, W - 4, H - 4);
+        ctx.restore();
     },
 
     refreshAllMapPreviews() {
         document.querySelectorAll('.map-preview-canvas').forEach(canvas => {
             this.renderArenaMapPreview(canvas, MatchConfig.arenaKey);
         });
-        const caption = MatchConfig.arenaKey === 'park_ground'
-            ? 'PARK GROUND: 14 Trees & 10 Wooden Benches + 30s Supply Drops'
-            : 'FOOTBALL GROUND: Wide-Open Stadium Pitch + 30s Supply Drops';
+        const captionMap = {
+            expanded:     'FOOTBALL GROUND: Open Stadium Pitch + 30s Mystery [?] Drops',
+            park_ground:  'PARK GROUND: Trees & Benches + 30s Mystery [?] Drops',
+            desert_dunes: 'DESERT DUNES: Golden Sand & 4 Giant Cacti + 30s Mystery [?] Drops',
+            ice_rink:     'FROSTBITE ICE: Glacier Arena & 4 Pine Trees + 30s Mystery [?] Drops'
+        };
+        const caption = captionMap[MatchConfig.arenaKey] || captionMap.expanded;
         document.querySelectorAll('.map-preview-caption').forEach(el => {
             el.textContent = caption;
         });
@@ -251,6 +238,9 @@ const UIManager = {
     refreshAllPreviews() {
         renderCarPreviewCanvas('sp-car-preview', MatchConfig.p1Color);
         renderCarPreviewCanvas('spt-car-preview', MatchConfig.p1Color);
+        renderCarPreviewCanvas('spctf-car-preview', MatchConfig.p1Color);
+        renderCarPreviewCanvas('mpctf-p1-preview', MatchConfig.p1Color);
+        renderCarPreviewCanvas('mpctf-p2-preview', MatchConfig.p2Color);
         this.renderStatsBars('sp-car-stats');
         renderCarPreviewCanvas('duel-p1-preview', MatchConfig.p1Color);
         renderCarPreviewCanvas('duel-p2-preview', MatchConfig.p2Color);
@@ -280,10 +270,27 @@ const UIManager = {
             document.getElementById('sp-diff-desc').textContent = AI_DIFFICULTY_PROFILES[MatchConfig.difficulty].description;
         }));
 
+        const spRuleRow = document.getElementById('sp-rule-selector');
+        if (spRuleRow) {
+            spRuleRow.querySelectorAll('.seg-btn').forEach(btn => btn.addEventListener('click', () => {
+                SoundEngine.playUIClick();
+                spRuleRow.querySelectorAll('.seg-btn').forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                MatchConfig.timedMode = btn.dataset.timed === 'true';
+                const tb = document.getElementById('sp-time-box');
+                if (tb) tb.classList.toggle('hidden', !MatchConfig.timedMode);
+            }));
+        }
+        document.querySelectorAll('#sp-time-pills .pill-btn').forEach(btn => btn.addEventListener('click', () => {
+            SoundEngine.playUIClick();
+            this.syncTimeLimitPills(Math.max(1, Math.min(5, parseInt(btn.dataset.min, 10))));
+        }));
+
         document.getElementById('btn-start-single').addEventListener('click', () => {
             MatchConfig.mode = 'single';
             MatchConfig.spSubMode = 'ffa';
-            MatchConfig.timedMode = false;
+            const activeRule = document.querySelector('#sp-rule-selector .seg-btn.active');
+            MatchConfig.timedMode = activeRule ? activeRule.dataset.timed === 'true' : false;
             Game.startConfiguredMatch();
         });
     },
@@ -344,8 +351,26 @@ const UIManager = {
     },
 
     bind1v1Config() {
+        const duelRuleRow = document.getElementById('duel-rule-selector');
+        if (duelRuleRow) {
+            duelRuleRow.querySelectorAll('.seg-btn').forEach(btn => btn.addEventListener('click', () => {
+                SoundEngine.playUIClick();
+                duelRuleRow.querySelectorAll('.seg-btn').forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                MatchConfig.timedMode = btn.dataset.timed === 'true';
+                const tb = document.getElementById('duel-time-box');
+                if (tb) tb.classList.toggle('hidden', !MatchConfig.timedMode);
+            }));
+        }
+        document.querySelectorAll('#duel-time-pills .pill-btn').forEach(btn => btn.addEventListener('click', () => {
+            SoundEngine.playUIClick();
+            this.syncTimeLimitPills(Math.max(1, Math.min(5, parseInt(btn.dataset.min, 10))));
+        }));
+
         document.getElementById('btn-start-1v1').addEventListener('click', () => {
-            MatchConfig.mode = '1v1'; MatchConfig.timedMode = false;
+            MatchConfig.mode = '1v1';
+            const activeRule = document.querySelector('#duel-rule-selector .seg-btn.active');
+            MatchConfig.timedMode = activeRule ? activeRule.dataset.timed === 'true' : false;
             Game.startConfiguredMatch();
         });
     },
@@ -446,12 +471,125 @@ const UIManager = {
 
     syncTimeLimitPills(mins) {
         MatchConfig.timeLimitMinutes = mins;
-        const sptLbl = document.getElementById('spt-time-label');
-        if (sptLbl) sptLbl.textContent = mins;
-        document.getElementById('coop-time-label').textContent = mins;
-        document.getElementById('tvs-time-label').textContent = mins;
-        document.querySelectorAll('#spt-time-pills .pill-btn, #coop-time-pills .pill-btn, #tvs-time-pills .pill-btn').forEach(b => {
+        ['sp-time-label', 'spt-time-label', 'spctf-time-label', 'mpctf-time-label', 'duel-time-label', 'coop-time-label', 'tvs-time-label'].forEach(id => {
+            const el = document.getElementById(id);
+            if (el) el.textContent = mins;
+        });
+        document.querySelectorAll('#sp-time-pills .pill-btn, #spt-time-pills .pill-btn, #spctf-time-pills .pill-btn, #mpctf-time-pills .pill-btn, #duel-time-pills .pill-btn, #coop-time-pills .pill-btn, #tvs-time-pills .pill-btn').forEach(b => {
             b.classList.toggle('active', parseInt(b.dataset.min, 10) === mins);
+        });
+    },
+
+    bindCtfConfigs() {
+        document.querySelectorAll("#spctf-ally-pills .pill-btn").forEach(btn => btn.addEventListener("click", () => {
+            SoundEngine.playUIClick();
+            document.querySelectorAll("#spctf-ally-pills .pill-btn").forEach(b => b.classList.remove("active"));
+            btn.classList.add("active");
+            MatchConfig.ctfSpAllyBots = parseInt(btn.dataset.count, 10);
+            document.getElementById("spctf-ally-label").textContent = MatchConfig.ctfSpAllyBots;
+        }));
+        document.querySelectorAll("#spctf-enemy-pills .pill-btn").forEach(btn => btn.addEventListener("click", () => {
+            SoundEngine.playUIClick();
+            document.querySelectorAll("#spctf-enemy-pills .pill-btn").forEach(b => b.classList.remove("active"));
+            btn.classList.add("active");
+            MatchConfig.ctfSpEnemyBots = parseInt(btn.dataset.count, 10);
+            document.getElementById("spctf-enemy-label").textContent = MatchConfig.ctfSpEnemyBots;
+        }));
+        document.querySelectorAll("#spctf-time-pills .pill-btn").forEach(btn => btn.addEventListener("click", () => {
+            SoundEngine.playUIClick();
+            this.syncTimeLimitPills(Math.max(1, Math.min(5, parseInt(btn.dataset.min, 10))));
+        }));
+        const spCtfDiff = document.getElementById("spctf-diff-selector");
+        if (spCtfDiff) {
+            spCtfDiff.querySelectorAll(".seg-btn").forEach(btn => btn.addEventListener("click", () => {
+                SoundEngine.playUIClick();
+                spCtfDiff.querySelectorAll(".seg-btn").forEach(b => b.classList.remove("active"));
+                btn.classList.add("active");
+                MatchConfig.difficulty = btn.dataset.diff;
+            }));
+        }
+        const startSpCtf = document.getElementById("btn-start-sp-ctf");
+        if (startSpCtf) {
+            startSpCtf.addEventListener("click", () => {
+                MatchConfig.mode = "ctf";
+                MatchConfig.ctfType = "solo";
+                MatchConfig.timedMode = true;
+                Game.startConfiguredMatch();
+            });
+        }
+
+        const mpTypeRow = document.getElementById("mpctf-type-selector");
+        if (mpTypeRow) {
+            mpTypeRow.querySelectorAll(".seg-btn").forEach(btn => btn.addEventListener("click", () => {
+                SoundEngine.playUIClick();
+                mpTypeRow.querySelectorAll(".seg-btn").forEach(b => b.classList.remove("active"));
+                btn.classList.add("active");
+                MatchConfig.ctfType = btn.dataset.ctftype;
+            }));
+        }
+        document.querySelectorAll("#mpctf-p1-bot-pills .pill-btn").forEach(btn => btn.addEventListener("click", () => {
+            SoundEngine.playUIClick();
+            document.querySelectorAll("#mpctf-p1-bot-pills .pill-btn").forEach(b => b.classList.remove("active"));
+            btn.classList.add("active");
+            MatchConfig.ctfMpP1Bots = parseInt(btn.dataset.count, 10);
+            document.getElementById("mpctf-p1-bots-label").textContent = MatchConfig.ctfMpP1Bots;
+        }));
+        document.querySelectorAll("#mpctf-p2-bot-pills .pill-btn").forEach(btn => btn.addEventListener("click", () => {
+            SoundEngine.playUIClick();
+            document.querySelectorAll("#mpctf-p2-bot-pills .pill-btn").forEach(b => b.classList.remove("active"));
+            btn.classList.add("active");
+            MatchConfig.ctfMpP2Bots = parseInt(btn.dataset.count, 10);
+            document.getElementById("mpctf-p2-bots-label").textContent = MatchConfig.ctfMpP2Bots;
+        }));
+        document.querySelectorAll("#mpctf-time-pills .pill-btn").forEach(btn => btn.addEventListener("click", () => {
+            SoundEngine.playUIClick();
+            this.syncTimeLimitPills(Math.max(1, Math.min(5, parseInt(btn.dataset.min, 10))));
+        }));
+        const mpCtfDiff = document.getElementById("mpctf-diff-selector");
+        if (mpCtfDiff) {
+            mpCtfDiff.querySelectorAll(".seg-btn").forEach(btn => btn.addEventListener("click", () => {
+                SoundEngine.playUIClick();
+                mpCtfDiff.querySelectorAll(".seg-btn").forEach(b => b.classList.remove("active"));
+                btn.classList.add("active");
+                MatchConfig.difficulty = btn.dataset.diff;
+            }));
+        }
+        const startMpCtf = document.getElementById("btn-start-mp-ctf");
+        if (startMpCtf) {
+            startMpCtf.addEventListener("click", () => {
+                MatchConfig.mode = "ctf";
+                const activeType = document.querySelector("#mpctf-type-selector .seg-btn.active");
+                MatchConfig.ctfType = activeType ? activeType.dataset.ctftype : "versus";
+                MatchConfig.timedMode = true;
+                Game.startConfiguredMatch();
+            });
+        }
+    },
+
+    renderAbilitiesGuideIcons() {
+        document.querySelectorAll('.guide-icon-canvas').forEach(c => {
+            const ctx = c.getContext('2d');
+            const id = c.dataset.ability;
+            ctx.clearRect(0, 0, c.width, c.height);
+            ctx.save();
+            ctx.translate(c.width / 2, c.height / 2);
+
+            if (id === 'mystery_orb') {
+                ctx.fillStyle = 'rgba(15, 23, 42, 0.75)';
+                ctx.strokeStyle = '#38bdf8';
+                ctx.lineWidth = 2.5;
+                ctx.beginPath(); ctx.arc(0, 0, 24, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+                ctx.scale(0.82, 0.82);
+                ArenaHazards.drawVectorQuestionMark(ctx, '#38bdf8');
+            } else {
+                const spec = POWERUP_CATALOG.find(p => p.id === id);
+                ctx.fillStyle = 'rgba(15, 23, 42, 0.85)';
+                ctx.strokeStyle = spec ? spec.ringColor : '#38bdf8';
+                ctx.lineWidth = 2.5;
+                ctx.beginPath(); ctx.arc(0, 0, 24, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+                ArenaHazards.drawPowerupLogo(ctx, id);
+            }
+            ctx.restore();
         });
     },
 
@@ -568,13 +706,7 @@ const UIManager = {
         if (!strip) return;
 
         const timerBox = document.getElementById('hud-timer-box');
-        const isTeamMode = (
-            MatchConfig.mode === 'coop' ||
-            MatchConfig.mode === 'team_vs' ||
-            (MatchConfig.mode === 'single' && MatchConfig.spSubMode === 'team')
-        );
-
-        if (isTeamMode && MatchConfig.timedMode) {
+        if (MatchConfig.timedMode) {
             timerBox.classList.remove('hidden');
             const totalSec = Math.max(0, Math.ceil(TimedSiegeMode.timeRemaining));
             const mins = Math.floor(totalSec / 60), secs = totalSec % 60;
@@ -586,9 +718,17 @@ const UIManager = {
 
         if (MatchConfig.mode === 'single' && MatchConfig.spSubMode === 'team') {
             const p1 = cars.find(c => c.playerSlot === 'p1');
+            const allyKills = cars.filter(c => c.team === 'ALLIES').reduce((s, c) => s + c.kills, 0);
+            const enemyKills = cars.filter(c => c.team === 'ENEMIES').reduce((s, c) => s + c.kills, 0);
             const alliesAlive = cars.filter(c => c.team === 'ALLIES' && !c.dead).length;
             const enemiesAlive = cars.filter(c => c.team === 'ENEMIES' && !c.dead).length;
-            strip.innerHTML = `
+            strip.innerHTML = MatchConfig.timedMode ? `
+                <div class="hud-mini-tag" style="border-color:${p1 ? p1.mainColor : '#38bdf8'}">
+                    ${p1 ? p1.label : 'P1'}: <span style="color:${p1 ? p1.lightColor : '#fff'}">${p1 && !p1.dead ? Math.ceil(p1.hp) + ' HP' : 'RESPAWNING...'}</span>
+                </div>
+                <div class="hud-mini-tag">YOUR SQUAD KILLS: <span style="color:#00e676">${allyKills}</span></div>
+                <div class="hud-mini-tag">ENEMY KILLS: <span style="color:#ff4d6d">${enemyKills}</span></div>
+            ` : `
                 <div class="hud-mini-tag" style="border-color:${p1 ? p1.mainColor : '#38bdf8'}">
                     ${p1 ? p1.label : 'P1'}: <span style="color:${p1 ? p1.lightColor : '#fff'}">${p1 ? Math.ceil(p1.hp) : 0} HP</span>
                 </div>
@@ -598,7 +738,12 @@ const UIManager = {
         } else if (MatchConfig.mode === 'single') {
             const p1 = cars.find(c => c.playerSlot === 'p1');
             const botsAlive = cars.filter(c => c.isAI && !c.dead).length;
-            strip.innerHTML = `
+            strip.innerHTML = MatchConfig.timedMode ? `
+                <div class="hud-mini-tag" style="border-color:${p1 ? p1.mainColor : '#38bdf8'}">
+                    ${p1 ? p1.label : 'P1'}: <span style="color:${p1 ? p1.lightColor : '#fff'}">${p1 && !p1.dead ? Math.ceil(p1.hp) + ' HP' : 'RESPAWNING...'}</span>
+                </div>
+                <div class="hud-mini-tag">YOUR KILLS: <span style="color:#fbbf24">${p1 ? p1.kills : 0}</span></div>
+            ` : `
                 <div class="hud-mini-tag" style="border-color:${p1 ? p1.mainColor : '#38bdf8'}">
                     ${p1 ? p1.label : 'P1'}: <span style="color:${p1 ? p1.lightColor : '#fff'}">${p1 ? Math.ceil(p1.hp) : 0} HP</span>
                 </div>
@@ -606,22 +751,45 @@ const UIManager = {
             `;
         } else if (MatchConfig.mode === '1v1') {
             const p1 = cars.find(c => c.playerSlot === 'p1'), p2 = cars.find(c => c.playerSlot === 'p2');
-            strip.innerHTML = `
+            strip.innerHTML = MatchConfig.timedMode ? `
+                <div class="hud-mini-tag" style="border-color:${p1.mainColor}">${p1.label}: <span style="color:${p1.lightColor}">${p1.kills} KILLS</span> (${p1.dead ? 'RESPAWN' : Math.ceil(p1.hp) + ' HP'})</div>
+                <div class="hud-mini-tag" style="border-color:${p2.mainColor}">${p2.label}: <span style="color:${p2.lightColor}">${p2.kills} KILLS</span> (${p2.dead ? 'RESPAWN' : Math.ceil(p2.hp) + ' HP'})</div>
+            ` : `
                 <div class="hud-mini-tag" style="border-color:${p1.mainColor}">${p1.label}: <span style="color:${p1.lightColor}">${Math.ceil(p1.hp)} HP</span></div>
                 <div class="hud-mini-tag" style="border-color:${p2.mainColor}">${p2.label}: <span style="color:${p2.lightColor}">${Math.ceil(p2.hp)} HP</span></div>
             `;
         } else if (MatchConfig.mode === 'coop') {
+            const allyKills = cars.filter(c => c.team === 'ALLIES').reduce((s, c) => s + c.kills, 0);
+            const enemyKills = cars.filter(c => c.team === 'ENEMIES').reduce((s, c) => s + c.kills, 0);
             const blueAlive = cars.filter(c => c.team === 'ALLIES' && !c.dead).length;
             const redAlive = cars.filter(c => c.team === 'ENEMIES' && !c.dead).length;
-            strip.innerHTML = `
+            strip.innerHTML = MatchConfig.timedMode ? `
+                <div class="hud-mini-tag">ALLIED KILLS: <span style="color:#00e676">${allyKills}</span></div>
+                <div class="hud-mini-tag">ENEMY KILLS: <span style="color:#ff4d6d">${enemyKills}</span></div>
+            ` : `
                 <div class="hud-mini-tag">ALLIES ALIVE: <span style="color:#38bdf8">${blueAlive}</span></div>
                 <div class="hud-mini-tag">ENEMIES ALIVE: <span style="color:#ff4d6d">${redAlive}</span></div>
             `;
-        } else if (MatchConfig.mode === 'team_vs') {
+        } else if (MatchConfig.mode === "ctf" && typeof CaptureFlagMode !== "undefined" && CaptureFlagMode.flags.length === 2) {
+            const f1 = CaptureFlagMode.flags[0], f2 = CaptureFlagMode.flags[1];
+            const c1 = CaptureFlagMode.team1Captures || 0;
+            const c2 = CaptureFlagMode.team2Captures || 0;
+            const st1 = f1.state === "AT_BASE" ? "AT BASE" : (f1.state === "DROPPED" ? "DROPPED" : "TAKEN");
+            const st2 = f2.state === "AT_BASE" ? "AT BASE" : (f2.state === "DROPPED" ? "DROPPED" : "TAKEN");
+            strip.innerHTML = `
+                <div class="hud-mini-tag" style="border-color:${f1.mainColor}">\uD83C\uDFF3\uFE0F ${f1.teamName}: <span style="color:#00e676">${c1} FLAGS</span> <small>(${st1})</small></div>
+                <div class="hud-mini-tag" style="border-color:${f2.mainColor}">\uD83C\uDFF3\uFE0F ${f2.teamName}: <span style="color:#fbbf24">${c2} FLAGS</span> <small>(${st2})</small></div>
+            `;
+        } else if (MatchConfig.mode === "team_vs") {
+            const t1Kills = cars.filter(c => c.team === 'P1_SQUAD').reduce((s, c) => s + c.kills, 0);
+            const t2Kills = cars.filter(c => c.team === 'P2_SQUAD').reduce((s, c) => s + c.kills, 0);
             const t1Alive = cars.filter(c => c.team === 'P1_SQUAD' && !c.dead).length;
             const t2Alive = cars.filter(c => c.team === 'P2_SQUAD' && !c.dead).length;
             const p1Pal = CAR_COLOR_PALETTES[MatchConfig.p1Color], p2Pal = CAR_COLOR_PALETTES[MatchConfig.p2Color];
-            strip.innerHTML = `
+            strip.innerHTML = MatchConfig.timedMode ? `
+                <div class="hud-mini-tag" style="border-color:${p1Pal.main}">${MatchConfig.p1Name} KILLS: <span style="color:${p1Pal.light}">${t1Kills}</span></div>
+                <div class="hud-mini-tag" style="border-color:${p2Pal.main}">${MatchConfig.p2Name} KILLS: <span style="color:${p2Pal.light}">${t2Kills}</span></div>
+            ` : `
                 <div class="hud-mini-tag" style="border-color:${p1Pal.main}">${MatchConfig.p1Name} SQUAD: <span style="color:${p1Pal.light}">${t1Alive}</span></div>
                 <div class="hud-mini-tag" style="border-color:${p2Pal.main}">${MatchConfig.p2Name} SQUAD: <span style="color:${p2Pal.light}">${t2Alive}</span></div>
             `;
@@ -629,41 +797,43 @@ const UIManager = {
     },
 
     showMatchResults(outcome) {
-        const modal = document.getElementById('modal-results');
-        document.getElementById('result-badge').textContent = outcome.badge;
-        const title = document.getElementById('result-title');
+        const modal = document.getElementById("modal-results");
+        document.getElementById("result-badge").textContent = outcome.badge;
+        const title = document.getElementById("result-title");
         title.textContent = outcome.title; title.style.color = outcome.color;
-        document.getElementById('result-subtitle').textContent = outcome.subtitle;
+        document.getElementById("result-subtitle").textContent = outcome.subtitle;
 
-        const teamSummary = document.getElementById('result-team-summary');
+        const teamSummary = document.getElementById("result-team-summary");
         if (outcome.teamStats) {
-            teamSummary.classList.remove('hidden');
+            teamSummary.classList.remove("hidden");
             const t1 = outcome.teamStats.team1, t2 = outcome.teamStats.team2;
+            const c1Line = t1.captures !== undefined ? `<div style="margin-top:4px;color:#fde047;">Flags Captured: <b>${t1.captures}</b></div>` : "";
+            const c2Line = t2.captures !== undefined ? `<div style="margin-top:4px;color:#fde047;">Flags Captured: <b>${t2.captures}</b></div>` : "";
             teamSummary.innerHTML = `
                 <div class="team-stat-card" style="border-color:${t1.color}">
                     <strong style="color:${t1.color};font-size:14px;">${t1.name}</strong>
+                    ${c1Line}
                     <div style="margin-top:4px;">Cars Destroyed: <b>${t1.kills}</b></div>
                     <div>Total Car Damage Dealt: <b>${t1.damage} DMG</b></div>
-                    <div>Survivors Left: <b>${t1.alive}</b></div>
                 </div>
                 <div class="team-stat-card" style="border-color:${t2.color}">
                     <strong style="color:${t2.color};font-size:14px;">${t2.name}</strong>
+                    ${c2Line}
                     <div style="margin-top:4px;">Cars Destroyed: <b>${t2.kills}</b></div>
                     <div>Total Car Damage Dealt: <b>${t2.damage} DMG</b></div>
-                    <div>Survivors Left: <b>${t2.alive}</b></div>
                 </div>
             `;
         } else {
-            teamSummary.classList.add('hidden');
+            teamSummary.classList.add("hidden");
         }
 
-        document.getElementById('result-stats-table').innerHTML = Game.cars.map(c => `
+        document.getElementById("result-stats-table").innerHTML = Game.cars.map(c => `
             <div class="result-row">
                 <span><strong style="color:${c.lightColor}">${c.label}</strong></span>
-                <span>${c.dead ? '<em style="color:#ff4d6d">WRECKED</em>' : `<strong style="color:#00e676">${Math.ceil(c.hp)} HP LEFT</strong>`} &bull; Kills: <b>${c.kills}</b> &bull; Damage: <b>${c.damageDealt}</b></span>
+                <span>${c.dead ? "<em style=\"color:#ff4d6d\">WRECKED</em>" : `<strong style=\"color:#00e676\">${Math.ceil(c.hp)} HP LEFT</strong>`} &bull; Kills: <b>${c.kills}</b> &bull; Damage: <b>${c.damageDealt}</b></span>
             </div>
-        `).join('');
+        `).join("");
 
-        modal.classList.remove('hidden');
+        modal.classList.remove("hidden");
     }
 };

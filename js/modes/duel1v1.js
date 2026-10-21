@@ -1,30 +1,40 @@
 const Duel1v1Mode = {
     spawn(cars, spawns) {
-        document.getElementById('hud-mode-pill').textContent = '1V1 SOLO DUEL';
+        const ruleTag = MatchConfig.timedMode ? `RESPAWN BLITZ (${MatchConfig.timeLimitMinutes}M)` : 'KNOCKOUT';
+        document.getElementById('hud-mode-pill').textContent = `1V1 DUEL • ${ruleTag}`;
         const n1 = (MatchConfig.p1Name || 'PLAYER 1').trim().toUpperCase();
         const n2 = (MatchConfig.p2Name || 'PLAYER 2').trim().toUpperCase();
 
-        // Ensure P1 is always on the Left spawn and P2 is always on the Right spawn
-        const sortedByX = [...spawns].sort((a, b) => a.x - b.x);
-        const leftSpawn = sortedByX[0];
-        const rightSpawn = sortedByX[sortedByX.length - 1];
+        const { team1Spawns, team2Spawns } = PhysicsEngine.generateTeamSpawnPositions(1, 1, Game.arena);
+        const leftSpawn = team1Spawns[0];
+        const rightSpawn = team2Spawns[0];
 
         cars.push(new BattleCar({
             id: 1, label: n1, team: 'P1',
             isAI: false, playerSlot: 'p1', colorKey: MatchConfig.p1Color,
-            x: leftSpawn.x, y: leftSpawn.y, angle: leftSpawn.angle
+            x: leftSpawn.x, y: leftSpawn.y, angle: leftSpawn.angle, baseRect: leftSpawn.baseRect
         }));
 
         cars.push(new BattleCar({
             id: 2, label: n2, team: 'P2',
             isAI: false, playerSlot: 'p2', colorKey: MatchConfig.p2Color,
-            x: rightSpawn.x, y: rightSpawn.y, angle: rightSpawn.angle
+            x: rightSpawn.x, y: rightSpawn.y, angle: rightSpawn.angle, baseRect: rightSpawn.baseRect
         }));
     },
 
-    checkResult(cars) {
+    checkResult(cars, dt) {
         const p1 = cars.find(c => c.playerSlot === 'p1');
         const p2 = cars.find(c => c.playerSlot === 'p2');
+
+        if (MatchConfig.timedMode) {
+            const timeExpired = TimedSiegeMode.tick(dt);
+            if (!timeExpired) return null;
+
+            const stats = TimedSiegeMode.computeTeamSummary(
+                cars, 'P1', p1.label, p1.lightColor, 'P2', p2.label, p2.lightColor
+            );
+            return TimedSiegeMode.buildTimeUpResult(stats);
+        }
 
         if (p1.dead && p2.dead) {
             return {

@@ -39,12 +39,29 @@ const SoundEngine = {
         osc.connect(gain); gain.connect(this.ctx.destination);
         osc.start(now); osc.stop(now + (isFinal ? 0.36 : 0.2));
     },
-    playPowerupPickup(isHeal = false) {
+    playPowerupPickup(isHeal = false, isTrap = false) {
         this.init();
         if (!this.ctx) return;
-        const vol = this.getGain() * 0.34;
+        const vol = this.getGain() * 0.36;
         if (vol <= 0.001) return;
         const now = this.ctx.currentTime;
+
+        if (isTrap) {
+            // Descending Wah-Wah / Tire Deflate Trap Sound
+            const freqs = [392, 311.13, 233.08, 155.56];
+            freqs.forEach((f, i) => {
+                const osc = this.ctx.createOscillator();
+                const gain = this.ctx.createGain();
+                osc.type = 'sawtooth';
+                osc.frequency.setValueAtTime(f, now + i * 0.065);
+                gain.gain.setValueAtTime(vol * 0.85, now + i * 0.065);
+                gain.gain.exponentialRampToValueAtTime(0.001, now + i * 0.065 + 0.18);
+                osc.connect(gain); gain.connect(this.ctx.destination);
+                osc.start(now + i * 0.065); osc.stop(now + i * 0.065 + 0.20);
+            });
+            return;
+        }
+
         const freqs = isHeal ? [523.25, 659.25, 783.99, 1046.5] : [440, 587.33, 880, 1174.66];
         freqs.forEach((f, i) => {
             const osc = this.ctx.createOscillator();

@@ -87,7 +87,8 @@
                     <span class="btn-sub-text">Online rooms, global matchmaking &amp; ranked leaderboards</span>
                 </button>
 
-                <div class="menu-row-4">
+                <div class="menu-row-5">
+                    <button id="btn-goto-guide" class="menu-btn secondary-btn" style="border-color:#38bdf8;color:#38bdf8;">HOW TO PLAY</button>
                     <button id="btn-goto-controls" class="menu-btn secondary-btn">CONTROLS</button>
                     <button id="btn-goto-settings" class="menu-btn secondary-btn">SETTINGS</button>
                     <button id="btn-goto-analytics" class="menu-btn secondary-btn">GAME STATS</button>
@@ -98,12 +99,12 @@
             </div>
 
             <div class="menu-footer-tip">
-                <span>Developed by <strong>Muhammad Haseeb Ahmed</strong> &bull; Version <strong class="version-pill-text">v3.1.0</strong></span>
+                <span>Developed by <strong>Muhammad Haseeb Ahmed</strong> &bull; Version <strong class="version-pill-text">v5.0.0</strong></span>
             </div>
         </div>
     </div>
 
-    <!-- SCREEN 2A: SINGLE PLAYER MODE SELECT (Divided like Two Players!) -->
+    <!-- SCREEN 2A: SINGLE PLAYER MODE SELECT (3 Dedicated Modes!) -->
     <div id="screen-single-select" class="menu-screen hidden">
         <div class="menu-panel config-panel">
             <div class="panel-header">
@@ -112,12 +113,12 @@
                 <span class="header-badge">CHOOSE SOLO MODE</span>
             </div>
 
-            <div class="mode-cards-two">
+            <div class="mode-cards-three">
                 <div class="mode-big-card" id="btn-goto-sp-ffa">
                     <div>
                         <div class="mode-tag">SOLO FREE-FOR-ALL</div>
                         <h3>KING OF THE RING</h3>
-                        <p>Every car for itself! Battle 1 to 8 AI opponents in an all-out demolition derby where everyone is your enemy and the last car driving claims the crown.</p>
+                        <p>Every car for itself! Battle 1 to 8 AI opponents in an all-out demolition derby where everyone is your enemy.</p>
                     </div>
                     <span class="mode-action-link">PLAY KING OF THE RING &rarr;</span>
                 </div>
@@ -126,9 +127,18 @@
                     <div>
                         <div class="mode-tag">SOLO COMMANDER SQUAD WAR</div>
                         <h3>STADIUM SQUAD SIEGE</h3>
-                        <p>Command your own squad of Allied AI Bots against an Enemy AI Team in Timed Blitz Siege or Knockout—full team warfare built for a single player!</p>
+                        <p>Command your own squad of Allied AI Bots against an Enemy AI Team in Timed Respawn Blitz or Knockout!</p>
                     </div>
                     <span class="mode-action-link">PLAY STADIUM SQUAD SIEGE &rarr;</span>
+                </div>
+
+                <div class="mode-big-card versus-card" id="btn-goto-sp-ctf">
+                    <div>
+                        <div class="mode-tag">BASE FLAG WARFARE</div>
+                        <h3>CAPTURE THE FLAG</h3>
+                        <p>Hold the Enemy Flag Stand for 3s to steal their flag, pass it to healthier allies, and hold your Home Stand for 3s to win!</p>
+                    </div>
+                    <span class="mode-action-link">PLAY CAPTURE THE FLAG &rarr;</span>
                 </div>
             </div>
         </div>
@@ -144,53 +154,82 @@
             </div>
 
             <div class="config-grid">
-                <div class="config-card">
-                    <h3>1. DRIVER NAME &amp; VEHICLE COLOR</h3>
-                    <div class="name-input-wrap mb-10">
-                        <label>DRIVER NAME:</label>
-                        <input type="text" class="name-field input-p1-name" maxlength="14" placeholder="Enter your name">
+                <!-- Left Column: Driver Identity & Arena Map Preview -->
+                <div class="config-card p1-border">
+                    <div class="ui-sub-box">
+                        <h3><span>1. YOUR DRIVER &amp; COLOR</span><small>WASD + SPACE</small></h3>
+                        <div class="name-input-wrap mb-10">
+                            <label>NAME:</label>
+                            <input type="text" class="name-field input-p1-name" maxlength="14" placeholder="Enter your name">
+                        </div>
+                        <div id="sp-color-picker" class="color-swatch-row"></div>
+                        <div class="car-preview-wrap">
+                            <canvas id="sp-car-preview" width="260" height="110"></canvas>
+                        </div>
+                        <div id="sp-car-stats" class="car-stats-bars hidden"></div>
                     </div>
 
-                    <div id="sp-color-picker" class="color-swatch-row"></div>
-                    <div class="car-preview-wrap">
-                        <canvas id="sp-car-preview" width="270" height="125"></canvas>
+                    <div class="ui-sub-box">
+                        <h3><span>2. ARENA MAP</span><small>LIVE PREVIEW</small></h3>
+                        <div class="segmented-row map-select-group map-grid-4" id="sp-arena-selector">
+                            <button class="seg-btn active" data-arena="expanded">FOOTBALL GROUND</button>
+                            <button class="seg-btn" data-arena="park_ground">PARK GROUND</button>
+                            <button class="seg-btn" data-arena="desert_dunes">DESERT DUNES</button>
+                            <button class="seg-btn" data-arena="ice_rink">FROSTBITE ICE (ROUND)</button>
+                        </div>
+                        <div class="map-preview-wrap">
+                            <canvas class="map-preview-canvas" width="300" height="104"></canvas>
+                            <span class="map-preview-caption">FOOTBALL GROUND: Open Stadium Pitch</span>
+                        </div>
                     </div>
-                    <div id="sp-car-stats" class="car-stats-bars"></div>
                 </div>
 
+                <!-- Right Column: Cleanly Grouped Match Rules -->
                 <div class="config-card">
-                    <h3>2. AI OPPONENTS (<span id="sp-bot-count-label">3</span> CARS)</h3>
-                    <div class="stepper-control">
-                        <button id="sp-bot-dec" class="stepper-btn">&minus;</button>
-                        <input type="number" id="sp-bot-input" min="1" max="8" value="3" readonly>
-                        <button id="sp-bot-inc" class="stepper-btn">&plus;</button>
-                    </div>
-                    <div class="quick-pills" id="sp-bot-pills">
-                        <button class="pill-btn" data-count="1">1</button>
-                        <button class="pill-btn" data-count="2">2</button>
-                        <button class="pill-btn active" data-count="3">3</button>
-                        <button class="pill-btn" data-count="4">4</button>
-                        <button class="pill-btn" data-count="5">5</button>
-                        <button class="pill-btn" data-count="6">6</button>
-                        <button class="pill-btn" data-count="8">8</button>
+                    <div class="ui-sub-box">
+                        <h3><span>3. NUMBER OF AI OPPONENTS</span><strong style="color:#4ade80"><span id="sp-bot-count-label">3</span> BOTS</strong></h3>
+                        <div class="stepper-control compact-hidden">
+                            <button id="sp-bot-dec" class="stepper-btn">&minus;</button>
+                            <input type="number" id="sp-bot-input" min="1" max="8" value="3" readonly>
+                            <button id="sp-bot-inc" class="stepper-btn">&plus;</button>
+                        </div>
+                        <div class="quick-pills" id="sp-bot-pills">
+                            <button class="pill-btn" data-count="1">1</button>
+                            <button class="pill-btn" data-count="2">2</button>
+                            <button class="pill-btn active" data-count="3">3</button>
+                            <button class="pill-btn" data-count="4">4</button>
+                            <button class="pill-btn" data-count="5">5</button>
+                            <button class="pill-btn" data-count="6">6</button>
+                            <button class="pill-btn" data-count="8">8</button>
+                        </div>
                     </div>
 
-                    <h3 class="mt-10">3. AI DIFFICULTY</h3>
-                    <div class="segmented-row" id="sp-diff-selector">
-                        <button class="seg-btn" data-diff="easy">EASY</button>
-                        <button class="seg-btn active" data-diff="normal">NORMAL</button>
-                        <button class="seg-btn" data-diff="hard">HARD</button>
+                    <div class="ui-sub-box">
+                        <h3><span>4. AI SKILL LEVEL</span><small>BOT DIFFICULTY</small></h3>
+                        <div class="segmented-row" id="sp-diff-selector">
+                            <button class="seg-btn" data-diff="easy">EASY</button>
+                            <button class="seg-btn active" data-diff="normal">NORMAL</button>
+                            <button class="seg-btn" data-diff="hard">HARD</button>
+                        </div>
+                        <p id="sp-diff-desc" class="helper-note">Balanced AI drivers with smart flanking, obstacle recovery, and equal top speed.</p>
                     </div>
-                    <p id="sp-diff-desc" class="helper-note">Balanced AI drivers with smart flanking, obstacle recovery, and equal top speed.</p>
 
-                    <h3 class="mt-10">4. SELECT ARENA MAP</h3>
-                    <div class="segmented-row map-select-group" id="sp-arena-selector">
-                        <button class="seg-btn active" data-arena="expanded">FOOTBALL GROUND</button>
-                        <button class="seg-btn" data-arena="park_ground">PARK GROUND</button>
-                    </div>
-                    <div class="map-preview-wrap">
-                        <canvas class="map-preview-canvas" width="280" height="92"></canvas>
-                        <span class="map-preview-caption">FOOTBALL GROUND: Wide-Open Stadium Pitch</span>
+                    <div class="ui-sub-box">
+                        <h3><span>5. MATCH RULE</span><small>WIN CONDITION</small></h3>
+                        <div class="segmented-row" id="sp-rule-selector">
+                            <button class="seg-btn active" data-timed="false">LAST CAR STANDING</button>
+                            <button class="seg-btn" data-timed="true">TIMED RESPAWN BLITZ</button>
+                        </div>
+                        <div id="sp-time-box" class="mt-10 hidden">
+                            <h3><span>MATCH DURATION</span><strong style="color:#fbbf24"><span id="sp-time-label">3</span> MIN (2.5S RESPAWN)</strong></h3>
+                            <div class="quick-pills" id="sp-time-pills">
+                                <button class="pill-btn" data-min="1">1M</button>
+                                <button class="pill-btn" data-min="2">2M</button>
+                                <button class="pill-btn active" data-min="3">3M</button>
+                                <button class="pill-btn" data-min="4">4M</button>
+                                <button class="pill-btn" data-min="5">5M</button>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -212,70 +251,80 @@
 
             <div class="config-grid">
                 <div class="config-card p1-border">
-                    <h3>1. COMMANDER NAME &amp; SQUAD COLOR</h3>
-                    <div class="name-input-wrap mb-10">
-                        <label>YOUR NAME:</label>
-                        <input type="text" class="name-field input-p1-name" maxlength="14" placeholder="Enter your name">
+                    <div class="ui-sub-box">
+                        <h3><span>1. COMMANDER &amp; SQUAD COLOR</span><small>LEFT BASE</small></h3>
+                        <div class="name-input-wrap mb-10">
+                            <label>NAME:</label>
+                            <input type="text" class="name-field input-p1-name" maxlength="14" placeholder="Enter your name">
+                        </div>
+                        <div id="spt-color-picker" class="color-swatch-row"></div>
+                        <div class="car-preview-wrap">
+                            <canvas id="spt-car-preview" width="250" height="105"></canvas>
+                        </div>
                     </div>
 
-                    <div id="spt-color-picker" class="color-swatch-row"></div>
-                    <div class="car-preview-wrap">
-                        <canvas id="spt-car-preview" width="250" height="110"></canvas>
-                    </div>
-
-                    <h3 class="mt-10">2. SELECT ARENA MAP</h3>
-                    <div class="segmented-row map-select-group">
-                        <button class="seg-btn active" data-arena="expanded">FOOTBALL GROUND</button>
-                        <button class="seg-btn" data-arena="park_ground">PARK GROUND</button>
-                    </div>
-                    <div class="map-preview-wrap">
-                        <canvas class="map-preview-canvas" width="280" height="92"></canvas>
-                        <span class="map-preview-caption">FOOTBALL GROUND: Wide-Open Stadium Pitch</span>
+                    <div class="ui-sub-box">
+                        <h3><span>2. ARENA MAP</span><small>LIVE PREVIEW</small></h3>
+                        <div class="segmented-row map-select-group map-grid-4">
+                            <button class="seg-btn active" data-arena="expanded">FOOTBALL GROUND</button>
+                            <button class="seg-btn" data-arena="park_ground">PARK GROUND</button>
+                            <button class="seg-btn" data-arena="desert_dunes">DESERT DUNES</button>
+                            <button class="seg-btn" data-arena="ice_rink">FROSTBITE ICE (ROUND)</button>
+                        </div>
+                        <div class="map-preview-wrap">
+                            <canvas class="map-preview-canvas" width="300" height="104"></canvas>
+                            <span class="map-preview-caption">FOOTBALL GROUND: Open Stadium Pitch</span>
+                        </div>
                     </div>
                 </div>
 
                 <div class="config-card">
-                    <h3>3. YOUR ALLIED AI BOTS: <span id="spt-ally-label">2</span></h3>
-                    <div class="quick-pills" id="spt-ally-pills">
-                        <button class="pill-btn" data-count="1">1</button>
-                        <button class="pill-btn active" data-count="2">2</button>
-                        <button class="pill-btn" data-count="3">3</button>
-                        <button class="pill-btn" data-count="4">4</button>
-                        <button class="pill-btn" data-count="5">5</button>
-                    </div>
+                    <div class="ui-sub-box">
+                        <h3><span>3. YOUR ALLIED BOTS</span><strong style="color:#38bdf8"><span id="spt-ally-label">2</span> ALLIES</strong></h3>
+                        <div class="quick-pills" id="spt-ally-pills">
+                            <button class="pill-btn" data-count="1">1</button>
+                            <button class="pill-btn active" data-count="2">2</button>
+                            <button class="pill-btn" data-count="3">3</button>
+                            <button class="pill-btn" data-count="4">4</button>
+                            <button class="pill-btn" data-count="5">5</button>
+                        </div>
 
-                    <h3 class="mt-14">4. ENEMY SQUAD BOTS: <span id="spt-enemy-label">3</span></h3>
-                    <div class="quick-pills" id="spt-enemy-pills">
-                        <button class="pill-btn" data-count="1">1</button>
-                        <button class="pill-btn" data-count="2">2</button>
-                        <button class="pill-btn active" data-count="3">3</button>
-                        <button class="pill-btn" data-count="4">4</button>
-                        <button class="pill-btn" data-count="5">5</button>
-                        <button class="pill-btn" data-count="6">6</button>
-                    </div>
-
-                    <h3 class="mt-14">5. MATCH RULE</h3>
-                    <div class="segmented-row" id="spt-rule-selector">
-                        <button class="seg-btn active" data-timed="true">TIMED SIEGE (1–5 MIN)</button>
-                        <button class="seg-btn" data-timed="false">KNOCKOUT</button>
-                    </div>
-
-                    <div id="spt-time-box" class="mt-10">
-                        <h3>TIME LIMIT (<span id="spt-time-label">3</span> MINUTES)</h3>
-                        <div class="quick-pills" id="spt-time-pills">
-                            <button class="pill-btn" data-min="1">1 MIN</button>
-                            <button class="pill-btn" data-min="2">2 MIN</button>
-                            <button class="pill-btn active" data-min="3">3 MIN</button>
-                            <button class="pill-btn" data-min="4">4 MIN</button>
-                            <button class="pill-btn" data-min="5">5 MIN</button>
+                        <h3 class="mt-10"><span>4. ENEMY SQUAD BOTS</span><strong style="color:#ff4d6d"><span id="spt-enemy-label">3</span> ENEMIES</strong></h3>
+                        <div class="quick-pills" id="spt-enemy-pills">
+                            <button class="pill-btn" data-count="1">1</button>
+                            <button class="pill-btn" data-count="2">2</button>
+                            <button class="pill-btn active" data-count="3">3</button>
+                            <button class="pill-btn" data-count="4">4</button>
+                            <button class="pill-btn" data-count="5">5</button>
+                            <button class="pill-btn" data-count="6">6</button>
                         </div>
                     </div>
 
-                    <h3 class="mt-14">6. AI DIFFICULTY</h3>
-                    <div class="segmented-row" id="spt-diff-selector">
-                        <button class="seg-btn" data-diff="easy">EASY</button>
-                        <button class="seg-btn active" data-diff="normal">NORMAL</button>
-                        <button class="seg-btn" data-diff="hard">HARD</button>
+                    <div class="ui-sub-box">
+                        <h3><span>5. MATCH RULE</span><small>BASE RESPAWN OR KNOCKOUT</small></h3>
+                        <div class="segmented-row" id="spt-rule-selector">
+                            <button class="seg-btn active" data-timed="true">TIMED RESPAWN BLITZ</button>
+                            <button class="seg-btn" data-timed="false">KNOCKOUT (NO RESPAWN)</button>
+                        </div>
+                        <div id="spt-time-box" class="mt-10">
+                            <h3><span>MATCH DURATION</span><strong style="color:#fbbf24"><span id="spt-time-label">3</span> MIN (2.5S RESPAWN)</strong></h3>
+                            <div class="quick-pills" id="spt-time-pills">
+                                <button class="pill-btn" data-min="1">1M</button>
+                                <button class="pill-btn" data-min="2">2M</button>
+                                <button class="pill-btn active" data-min="3">3M</button>
+                                <button class="pill-btn" data-min="4">4M</button>
+                                <button class="pill-btn" data-min="5">5M</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="ui-sub-box">
+                        <h3><span>6. AI SKILL LEVEL</span><small>BOT DIFFICULTY</small></h3>
+                        <div class="segmented-row" id="spt-diff-selector">
+                            <button class="seg-btn" data-diff="easy">EASY</button>
+                            <button class="seg-btn active" data-diff="normal">NORMAL</button>
+                            <button class="seg-btn" data-diff="hard">HARD</button>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -286,7 +335,7 @@
         </div>
     </div>
 
-    <!-- SCREEN 3: TWO PLAYERS MODE SELECT -->
+    <!-- SCREEN 3: TWO PLAYERS MODE SELECT (4 Dedicated Modes!) -->
     <div id="screen-multi-select" class="menu-screen hidden">
         <div class="menu-panel config-panel">
             <div class="panel-header">
@@ -295,12 +344,12 @@
                 <span class="header-badge">LOCAL SPLIT-KEYBOARD</span>
             </div>
 
-            <div class="mode-cards-three">
+            <div class="mode-cards-four">
                 <div class="mode-big-card" id="btn-goto-1v1">
                     <div>
                         <div class="mode-tag">HEAD-TO-HEAD</div>
                         <h3>1 VS 1 DUEL</h3>
-                        <p>Player 1 vs Player 2 pure head-to-head combat on one screen. No AI bots—just driving skill and tactical collisions.</p>
+                        <p>Player 1 vs Player 2 pure head-to-head combat on one screen in Knockout or Timed Respawn Blitz.</p>
                     </div>
                     <span class="mode-action-link">SELECT 1V1 DUEL &rarr;</span>
                 </div>
@@ -309,7 +358,7 @@
                     <div>
                         <div class="mode-tag">CO-OP TEAMWORK</div>
                         <h3>P1 + P2 VS AI</h3>
-                        <p>Player 1 and Player 2 unite on the same squad against an Enemy AI Team in Knockout or Timed Blitz Siege.</p>
+                        <p>Player 1 and Player 2 unite on the same squad against an Enemy AI Team in Knockout or Timed Respawn Blitz.</p>
                     </div>
                     <span class="mode-action-link">SELECT CO-OP TEAM &rarr;</span>
                 </div>
@@ -318,9 +367,18 @@
                     <div>
                         <div class="mode-tag">TEAM BATTLE</div>
                         <h3>P1 TEAM VS P2 TEAM</h3>
-                        <p>Player 1 commands Squad 1 against Player 2 commanding Squad 2 in Knockout or Timed Blitz Siege.</p>
+                        <p>Player 1 commands Squad 1 against Player 2 commanding Squad 2 in Knockout or Timed Respawn Blitz.</p>
                     </div>
                     <span class="mode-action-link">SELECT SQUAD WAR &rarr;</span>
+                </div>
+
+                <div class="mode-big-card" id="btn-goto-mp-ctf" style="border-color:rgba(251,191,36,0.5);">
+                    <div>
+                        <div class="mode-tag" style="color:#fbbf24;">TWO-PLAYER FLAG WARFARE</div>
+                        <h3>CAPTURE THE FLAG</h3>
+                        <p>Steal the enemy flag (3s hold), pass to healthier teammates, defend your flag stand, and capture at Home Base to win!</p>
+                    </div>
+                    <span class="mode-action-link">SELECT CAPTURE THE FLAG &rarr;</span>
                 </div>
             </div>
         </div>
@@ -337,42 +395,64 @@
 
             <div class="config-grid">
                 <div class="config-card p1-border">
-                    <h3>PLAYER 1 (LEFT SIDE) &bull; <small>WASD + SPACE</small></h3>
+                    <h3>PLAYER 1 (LEFT BASE) &bull; <small>WASD + SPACE</small></h3>
                     <div class="name-input-wrap mb-10">
                         <label>P1 NAME:</label>
                         <input type="text" class="name-field input-p1-name" maxlength="14" placeholder="Player 1">
                     </div>
                     <div id="duel-p1-colors" class="color-swatch-row"></div>
                     <div class="car-preview-wrap">
-                        <canvas id="duel-p1-preview" width="250" height="115"></canvas>
+                        <canvas id="duel-p1-preview" width="250" height="105"></canvas>
                     </div>
                 </div>
 
                 <div class="config-card p2-border">
-                    <h3>PLAYER 2 (RIGHT SIDE) &bull; <small>ARROWS + R-SHIFT / R-CTRL / NUMPAD 0</small></h3>
+                    <h3>PLAYER 2 (RIGHT BASE) &bull; <small>ARROWS + R-SHIFT / NUMPAD 0</small></h3>
                     <div class="name-input-wrap mb-10">
                         <label>P2 NAME:</label>
                         <input type="text" class="name-field input-p2-name" maxlength="14" placeholder="Player 2">
                     </div>
                     <div id="duel-p2-colors" class="color-swatch-row"></div>
                     <div class="car-preview-wrap">
-                        <canvas id="duel-p2-preview" width="250" height="115"></canvas>
+                        <canvas id="duel-p2-preview" width="250" height="105"></canvas>
                     </div>
                 </div>
             </div>
 
-            <div class="config-card mt-10">
-                <div class="config-grid" style="align-items:center;">
-                    <div>
-                        <h3>SELECT ARENA MAP</h3>
-                        <div class="segmented-row map-select-group">
-                            <button class="seg-btn active" data-arena="expanded">FOOTBALL GROUND (OPEN)</button>
-                            <button class="seg-btn" data-arena="park_ground">PARK GROUND (TREES &amp; BENCHES)</button>
+            <div class="config-grid mt-10">
+                <div class="config-card">
+                    <div class="ui-sub-box">
+                        <h3><span>MATCH RULE</span><small>DUEL FORMAT</small></h3>
+                        <div class="segmented-row" id="duel-rule-selector">
+                            <button class="seg-btn active" data-timed="false">SINGLE KNOCKOUT</button>
+                            <button class="seg-btn" data-timed="true">TIMED RESPAWN BLITZ</button>
+                        </div>
+                        <div id="duel-time-box" class="mt-10 hidden">
+                            <h3><span>DURATION</span><strong style="color:#fbbf24"><span id="duel-time-label">3</span> MIN (2.5S RESPAWN)</strong></h3>
+                            <div class="quick-pills" id="duel-time-pills">
+                                <button class="pill-btn" data-min="1">1M</button>
+                                <button class="pill-btn" data-min="2">2M</button>
+                                <button class="pill-btn active" data-min="3">3M</button>
+                                <button class="pill-btn" data-min="4">4M</button>
+                                <button class="pill-btn" data-min="5">5M</button>
+                            </div>
                         </div>
                     </div>
-                    <div class="map-preview-wrap" style="margin-top:0;">
-                        <canvas class="map-preview-canvas" width="280" height="92"></canvas>
-                        <span class="map-preview-caption">FOOTBALL GROUND: Wide-Open Stadium Pitch</span>
+                </div>
+
+                <div class="config-card">
+                    <div class="ui-sub-box">
+                        <h3><span>SELECT ARENA MAP</span><small>LIVE PREVIEW</small></h3>
+                        <div class="segmented-row map-select-group map-grid-4">
+                            <button class="seg-btn active" data-arena="expanded">FOOTBALL GROUND</button>
+                            <button class="seg-btn" data-arena="park_ground">PARK GROUND</button>
+                            <button class="seg-btn" data-arena="desert_dunes">DESERT DUNES</button>
+                            <button class="seg-btn" data-arena="ice_rink">FROSTBITE ICE (ROUND)</button>
+                        </div>
+                        <div class="map-preview-wrap">
+                            <canvas class="map-preview-canvas" width="300" height="104"></canvas>
+                            <span class="map-preview-caption">FOOTBALL GROUND: Open Stadium Pitch</span>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -393,77 +473,88 @@
             </div>
 
             <div class="config-grid">
-                <div class="config-card">
-                    <div class="form-row-2 mb-10">
-                        <div class="name-input-wrap">
-                            <label>P1 NAME:</label>
-                            <input type="text" class="name-field input-p1-name" maxlength="14">
+                <div class="config-card p1-border">
+                    <div class="ui-sub-box">
+                        <h3><span>1. ALLIED DRIVERS (LEFT BASE)</span><small>HUMAN CO-OP</small></h3>
+                        <div class="form-row-2 mb-10">
+                            <div class="name-input-wrap">
+                                <label>P1:</label>
+                                <input type="text" class="name-field input-p1-name" maxlength="14">
+                            </div>
+                            <div class="name-input-wrap">
+                                <label>P2:</label>
+                                <input type="text" class="name-field input-p2-name" maxlength="14">
+                            </div>
                         </div>
-                        <div class="name-input-wrap">
-                            <label>P2 NAME:</label>
-                            <input type="text" class="name-field input-p2-name" maxlength="14">
+                        <h3><span>P1 COLOR</span><small>WASD + SPACE</small></h3>
+                        <div id="coop-p1-colors" class="color-swatch-row"></div>
+                        <h3 class="mt-10"><span>P2 COLOR</span><small>ARROWS + R-SHIFT / NUM0</small></h3>
+                        <div id="coop-p2-colors" class="color-swatch-row"></div>
+                    </div>
+
+                    <div class="ui-sub-box">
+                        <h3><span>2. ARENA MAP</span><small>LIVE PREVIEW</small></h3>
+                        <div class="segmented-row map-select-group map-grid-4">
+                            <button class="seg-btn active" data-arena="expanded">FOOTBALL GROUND</button>
+                            <button class="seg-btn" data-arena="park_ground">PARK GROUND</button>
+                            <button class="seg-btn" data-arena="desert_dunes">DESERT DUNES</button>
+                            <button class="seg-btn" data-arena="ice_rink">FROSTBITE ICE (ROUND)</button>
                         </div>
-                    </div>
-
-                    <h3>PLAYER 1 COLOR <small>(WASD + SPACE)</small></h3>
-                    <div id="coop-p1-colors" class="color-swatch-row"></div>
-
-                    <h3 class="mt-10">PLAYER 2 COLOR <small>(ARROWS + R-SHIFT / R-CTRL / NUMPAD 0)</small></h3>
-                    <div id="coop-p2-colors" class="color-swatch-row"></div>
-
-                    <h3 class="mt-10">ALLIED AI BOTS: <span id="coop-ally-label">1</span></h3>
-                    <div class="quick-pills" id="coop-ally-pills">
-                        <button class="pill-btn" data-count="0">0 (NONE)</button>
-                        <button class="pill-btn active" data-count="1">1</button>
-                        <button class="pill-btn" data-count="2">2</button>
-                        <button class="pill-btn" data-count="3">3</button>
-                        <button class="pill-btn" data-count="4">4</button>
-                    </div>
-
-                    <h3 class="mt-10">SELECT ARENA MAP</h3>
-                    <div class="segmented-row map-select-group">
-                        <button class="seg-btn active" data-arena="expanded">FOOTBALL GROUND</button>
-                        <button class="seg-btn" data-arena="park_ground">PARK GROUND</button>
-                    </div>
-                    <div class="map-preview-wrap">
-                        <canvas class="map-preview-canvas" width="280" height="92"></canvas>
-                        <span class="map-preview-caption">FOOTBALL GROUND: Wide-Open Stadium Pitch</span>
+                        <div class="map-preview-wrap">
+                            <canvas class="map-preview-canvas" width="300" height="104"></canvas>
+                            <span class="map-preview-caption">FOOTBALL GROUND: Open Stadium Pitch</span>
+                        </div>
                     </div>
                 </div>
 
                 <div class="config-card">
-                    <h3>ENEMY AI BOTS: <span id="coop-enemy-label">3</span></h3>
-                    <div class="quick-pills" id="coop-enemy-pills">
-                        <button class="pill-btn" data-count="1">1</button>
-                        <button class="pill-btn" data-count="2">2</button>
-                        <button class="pill-btn active" data-count="3">3</button>
-                        <button class="pill-btn" data-count="4">4</button>
-                        <button class="pill-btn" data-count="5">5</button>
-                        <button class="pill-btn" data-count="6">6</button>
-                    </div>
+                    <div class="ui-sub-box">
+                        <h3><span>3. EXTRA ALLIED AI BOTS</span><strong style="color:#38bdf8"><span id="coop-ally-label">1</span> ALLY</strong></h3>
+                        <div class="quick-pills" id="coop-ally-pills">
+                            <button class="pill-btn" data-count="0">0 (NONE)</button>
+                            <button class="pill-btn active" data-count="1">1</button>
+                            <button class="pill-btn" data-count="2">2</button>
+                            <button class="pill-btn" data-count="3">3</button>
+                            <button class="pill-btn" data-count="4">4</button>
+                        </div>
 
-                    <h3 class="mt-14">MATCH RULE</h3>
-                    <div class="segmented-row" id="coop-rule-selector">
-                        <button class="seg-btn active" data-timed="true">TIMED SIEGE (1–5 MIN)</button>
-                        <button class="seg-btn" data-timed="false">KNOCKOUT</button>
-                    </div>
-
-                    <div id="coop-time-box" class="time-limit-box mt-14">
-                        <h3>TIME LIMIT (<span id="coop-time-label">3</span> MINUTES)</h3>
-                        <div class="quick-pills" id="coop-time-pills">
-                            <button class="pill-btn" data-min="1">1 MIN</button>
-                            <button class="pill-btn" data-min="2">2 MIN</button>
-                            <button class="pill-btn active" data-min="3">3 MIN</button>
-                            <button class="pill-btn" data-min="4">4 MIN</button>
-                            <button class="pill-btn" data-min="5">5 MIN</button>
+                        <h3 class="mt-10"><span>4. ENEMY SQUAD BOTS</span><strong style="color:#ff4d6d"><span id="coop-enemy-label">3</span> ENEMIES</strong></h3>
+                        <div class="quick-pills" id="coop-enemy-pills">
+                            <button class="pill-btn" data-count="1">1</button>
+                            <button class="pill-btn" data-count="2">2</button>
+                            <button class="pill-btn active" data-count="3">3</button>
+                            <button class="pill-btn" data-count="4">4</button>
+                            <button class="pill-btn" data-count="5">5</button>
+                            <button class="pill-btn" data-count="6">6</button>
                         </div>
                     </div>
 
-                    <h3 class="mt-14">AI DIFFICULTY</h3>
-                    <div class="segmented-row" id="coop-diff-selector">
-                        <button class="seg-btn" data-diff="easy">EASY</button>
-                        <button class="seg-btn active" data-diff="normal">NORMAL</button>
-                        <button class="seg-btn" data-diff="hard">HARD</button>
+                    <div class="ui-sub-box">
+                        <h3><span>5. MATCH RULE</span><small>BASE RESPAWN OR KNOCKOUT</small></h3>
+                        <div class="segmented-row" id="coop-rule-selector">
+                            <button class="seg-btn active" data-timed="true">TIMED RESPAWN BLITZ</button>
+                            <button class="seg-btn" data-timed="false">KNOCKOUT (NO RESPAWN)</button>
+                        </div>
+
+                        <div id="coop-time-box" class="time-limit-box mt-10">
+                            <h3><span>DURATION</span><strong style="color:#fbbf24"><span id="coop-time-label">3</span> MIN (2.5S RESPAWN)</strong></h3>
+                            <div class="quick-pills" id="coop-time-pills">
+                                <button class="pill-btn" data-min="1">1M</button>
+                                <button class="pill-btn" data-min="2">2M</button>
+                                <button class="pill-btn active" data-min="3">3M</button>
+                                <button class="pill-btn" data-min="4">4M</button>
+                                <button class="pill-btn" data-min="5">5M</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="ui-sub-box">
+                        <h3><span>6. AI SKILL LEVEL</span><small>BOT DIFFICULTY</small></h3>
+                        <div class="segmented-row" id="coop-diff-selector">
+                            <button class="seg-btn" data-diff="easy">EASY</button>
+                            <button class="seg-btn active" data-diff="normal">NORMAL</button>
+                            <button class="seg-btn" data-diff="hard">HARD</button>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -486,82 +577,89 @@
             <div class="config-grid">
                 <div class="config-card p1-border">
                     <div class="name-input-wrap mb-10">
-                        <label>P1 COMMANDER (LEFT):</label>
+                        <label>P1 (LEFT BASE):</label>
                         <input type="text" class="name-field input-p1-name" maxlength="14">
                     </div>
                     <div id="tvs-p1-colors" class="color-swatch-row"></div>
                     <div class="car-preview-wrap">
-                        <canvas id="tvs-p1-preview" width="230" height="95"></canvas>
+                        <canvas id="tvs-p1-preview" width="230" height="90"></canvas>
                     </div>
-
-                    <h3 class="mt-10">P1 ALLIED BOTS: <span id="tvs-p1-bots-label">2</span></h3>
-                    <div class="quick-pills" id="tvs-p1-bot-pills">
-                        <button class="pill-btn" data-count="1">1</button>
-                        <button class="pill-btn active" data-count="2">2</button>
-                        <button class="pill-btn" data-count="3">3</button>
-                        <button class="pill-btn" data-count="4">4</button>
-                        <button class="pill-btn" data-count="5">5</button>
+                    <div class="ui-sub-box">
+                        <h3><span>P1 ALLIED BOTS</span><strong style="color:#38bdf8"><span id="tvs-p1-bots-label">2</span> BOTS</strong></h3>
+                        <div class="quick-pills" id="tvs-p1-bot-pills">
+                            <button class="pill-btn" data-count="1">1</button>
+                            <button class="pill-btn active" data-count="2">2</button>
+                            <button class="pill-btn" data-count="3">3</button>
+                            <button class="pill-btn" data-count="4">4</button>
+                            <button class="pill-btn" data-count="5">5</button>
+                        </div>
                     </div>
                 </div>
 
                 <div class="config-card p2-border">
                     <div class="name-input-wrap mb-10">
-                        <label>P2 COMMANDER (RIGHT):</label>
+                        <label>P2 (RIGHT BASE):</label>
                         <input type="text" class="name-field input-p2-name" maxlength="14">
                     </div>
                     <div id="tvs-p2-colors" class="color-swatch-row"></div>
                     <div class="car-preview-wrap">
-                        <canvas id="tvs-p2-preview" width="230" height="95"></canvas>
+                        <canvas id="tvs-p2-preview" width="230" height="90"></canvas>
                     </div>
-
-                    <h3 class="mt-10">P2 ALLIED BOTS: <span id="tvs-p2-bots-label">2</span></h3>
-                    <div class="quick-pills" id="tvs-p2-bot-pills">
-                        <button class="pill-btn" data-count="1">1</button>
-                        <button class="pill-btn active" data-count="2">2</button>
-                        <button class="pill-btn" data-count="3">3</button>
-                        <button class="pill-btn" data-count="4">4</button>
-                        <button class="pill-btn" data-count="5">5</button>
+                    <div class="ui-sub-box">
+                        <h3><span>P2 ALLIED BOTS</span><strong style="color:#4ade80"><span id="tvs-p2-bots-label">2</span> BOTS</strong></h3>
+                        <div class="quick-pills" id="tvs-p2-bot-pills">
+                            <button class="pill-btn" data-count="1">1</button>
+                            <button class="pill-btn active" data-count="2">2</button>
+                            <button class="pill-btn" data-count="3">3</button>
+                            <button class="pill-btn" data-count="4">4</button>
+                            <button class="pill-btn" data-count="5">5</button>
+                        </div>
                     </div>
                 </div>
             </div>
 
-            <div class="config-card mt-10">
-                <div class="config-grid">
-                    <div>
-                        <h3>MATCH RULE &amp; AI DIFFICULTY</h3>
+            <div class="config-grid mt-10">
+                <div class="config-card">
+                    <div class="ui-sub-box">
+                        <h3><span>MATCH RULE</span><small>BASE RESPAWN OR KNOCKOUT</small></h3>
                         <div class="segmented-row" id="tvs-rule-selector">
-                            <button class="seg-btn active" data-timed="true">TIMED SIEGE (1–5 MIN)</button>
-                            <button class="seg-btn" data-timed="false">KNOCKOUT</button>
+                            <button class="seg-btn active" data-timed="true">TIMED RESPAWN BLITZ</button>
+                            <button class="seg-btn" data-timed="false">KNOCKOUT (NO RESPAWN)</button>
                         </div>
-
                         <div id="tvs-time-box" class="mt-10">
-                            <h3>TIME LIMIT: <span id="tvs-time-label">3</span> MINUTES</h3>
+                            <h3><span>DURATION</span><strong style="color:#fbbf24"><span id="tvs-time-label">3</span> MIN (2.5S RESPAWN)</strong></h3>
                             <div class="quick-pills" id="tvs-time-pills">
-                                <button class="pill-btn" data-min="1">1 MIN</button>
-                                <button class="pill-btn" data-min="2">2 MIN</button>
-                                <button class="pill-btn active" data-min="3">3 MIN</button>
-                                <button class="pill-btn" data-min="4">4 MIN</button>
-                                <button class="pill-btn" data-min="5">5 MIN</button>
+                                <button class="pill-btn" data-min="1">1M</button>
+                                <button class="pill-btn" data-min="2">2M</button>
+                                <button class="pill-btn active" data-min="3">3M</button>
+                                <button class="pill-btn" data-min="4">4M</button>
+                                <button class="pill-btn" data-min="5">5M</button>
                             </div>
                         </div>
+                    </div>
 
-                        <h3 class="mt-10">AI DIFFICULTY</h3>
+                    <div class="ui-sub-box">
+                        <h3><span>AI SKILL LEVEL</span><small>BOT DIFFICULTY</small></h3>
                         <div class="segmented-row" id="tvs-diff-selector">
                             <button class="seg-btn" data-diff="easy">EASY</button>
                             <button class="seg-btn active" data-diff="normal">NORMAL</button>
                             <button class="seg-btn" data-diff="hard">HARD</button>
                         </div>
                     </div>
+                </div>
 
-                    <div>
-                        <h3>SELECT ARENA MAP</h3>
-                        <div class="segmented-row map-select-group">
+                <div class="config-card">
+                    <div class="ui-sub-box">
+                        <h3><span>SELECT ARENA MAP</span><small>LIVE PREVIEW</small></h3>
+                        <div class="segmented-row map-select-group map-grid-4">
                             <button class="seg-btn active" data-arena="expanded">FOOTBALL GROUND</button>
                             <button class="seg-btn" data-arena="park_ground">PARK GROUND</button>
+                            <button class="seg-btn" data-arena="desert_dunes">DESERT DUNES</button>
+                            <button class="seg-btn" data-arena="ice_rink">FROSTBITE ICE (ROUND)</button>
                         </div>
                         <div class="map-preview-wrap">
-                            <canvas class="map-preview-canvas" width="280" height="92"></canvas>
-                            <span class="map-preview-caption">FOOTBALL GROUND: Wide-Open Stadium Pitch</span>
+                            <canvas class="map-preview-canvas" width="300" height="104"></canvas>
+                            <span class="map-preview-caption">FOOTBALL GROUND: Open Stadium Pitch</span>
                         </div>
                     </div>
                 </div>
@@ -569,6 +667,300 @@
 
             <div class="panel-footer">
                 <button id="btn-start-teamvs" class="menu-btn start-match-btn">START SQUAD WAR &rarr;</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- SCREEN 6B: SINGLE PLAYER CAPTURE THE FLAG CONFIGURATION -->
+    <div id="screen-sp-ctf-config" class="menu-screen hidden">
+        <div class="menu-panel config-panel">
+            <div class="panel-header">
+                <button class="back-btn" data-target="screen-single-select">&larr; BACK</button>
+                <h2>CAPTURE THE FLAG (SOLO)</h2>
+                <span class="header-badge">TIMED FLAG WARFARE (1-5M)</span>
+            </div>
+
+            <div class="config-grid">
+                <div class="config-card p1-border">
+                    <div class="ui-sub-box">
+                        <h3><span>1. COMMANDER &amp; FLAG COLOR</span><small>LEFT BASE (BASE A)</small></h3>
+                        <div class="name-input-wrap mb-10">
+                            <label>NAME:</label>
+                            <input type="text" class="name-field input-p1-name" maxlength="14">
+                        </div>
+                        <div id="spctf-color-picker" class="color-swatch-row"></div>
+                        <div class="car-preview-wrap">
+                            <canvas id="spctf-car-preview" width="250" height="100"></canvas>
+                        </div>
+                    </div>
+
+                    <div class="ui-sub-box">
+                        <h3><span>2. ARENA MAP</span><small>LIVE PREVIEW</small></h3>
+                        <div class="segmented-row map-select-group map-grid-4">
+                            <button class="seg-btn active" data-arena="expanded">FOOTBALL GROUND</button>
+                            <button class="seg-btn" data-arena="park_ground">PARK GROUND</button>
+                            <button class="seg-btn" data-arena="desert_dunes">DESERT DUNES</button>
+                            <button class="seg-btn" data-arena="ice_rink">FROSTBITE ICE (ROUND)</button>
+                        </div>
+                        <div class="map-preview-wrap">
+                            <canvas class="map-preview-canvas" width="300" height="104"></canvas>
+                            <span class="map-preview-caption">FOOTBALL GROUND: Open Stadium Pitch</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="config-card">
+                    <div class="ui-sub-box">
+                        <h3><span>3. YOUR ALLIED SQUAD BOTS</span><strong style="color:#38bdf8"><span id="spctf-ally-label">3</span> ALLIES</strong></h3>
+                        <div class="quick-pills" id="spctf-ally-pills">
+                            <button class="pill-btn" data-count="1">1</button>
+                            <button class="pill-btn" data-count="2">2</button>
+                            <button class="pill-btn active" data-count="3">3</button>
+                            <button class="pill-btn" data-count="4">4</button>
+                            <button class="pill-btn" data-count="5">5</button>
+                        </div>
+
+                        <h3 class="mt-10"><span>4. ENEMY SQUAD BOTS (BASE B)</span><strong style="color:#ff4d6d"><span id="spctf-enemy-label">4</span> ENEMIES</strong></h3>
+                        <div class="quick-pills" id="spctf-enemy-pills">
+                            <button class="pill-btn" data-count="1">1</button>
+                            <button class="pill-btn" data-count="2">2</button>
+                            <button class="pill-btn" data-count="3">3</button>
+                            <button class="pill-btn active" data-count="4">4</button>
+                            <button class="pill-btn" data-count="5">5</button>
+                            <button class="pill-btn" data-count="6">6</button>
+                        </div>
+                    </div>
+
+                    <div class="ui-sub-box">
+                        <h3><span>5. AI SKILL LEVEL</span><small>DEFENSE &amp; ATTACK AI</small></h3>
+                        <div class="segmented-row" id="spctf-diff-selector">
+                            <button class="seg-btn" data-diff="easy">EASY</button>
+                            <button class="seg-btn active" data-diff="normal">NORMAL</button>
+                            <button class="seg-btn" data-diff="hard">HARD</button>
+                        </div>
+                    </div>
+
+                    <div class="ui-sub-box">
+                        <h3><span>CAPTURE THE FLAG RULES</span><strong style="color:#fbbf24">NO TIME LIMIT</strong></h3>
+                        <p class="helper-note">
+                            &bull; <b>Steal Flag:</b> Hold inside Enemy Flag Stand for <b>3.0s</b>.<br>
+                            &bull; <b>Auto Flag Pass:</b> Drive near a healthier ally to pass the flag.<br>
+                            &bull; <b>Dropped Flag:</b> Stays on ground for <b>3.0s</b> before returning to base.<br>
+                            &bull; <b>Score &amp; Win:</b> Hold Enemy Flag inside your Home Stand for <b>3.0s</b>!
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="panel-footer">
+                <button id="btn-start-sp-ctf" class="menu-btn start-match-btn">START SOLO CAPTURE THE FLAG &rarr;</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- SCREEN 6C: TWO-PLAYER CAPTURE THE FLAG CONFIGURATION -->
+    <div id="screen-mp-ctf-config" class="menu-screen hidden">
+        <div class="menu-panel config-panel">
+            <div class="panel-header">
+                <button class="back-btn" data-target="screen-multi-select">&larr; BACK</button>
+                <h2>CAPTURE THE FLAG (2 PLAYERS)</h2>
+                <span class="header-badge">BASE A VS BASE B</span>
+            </div>
+
+            <div class="config-grid">
+                <div class="config-card p1-border">
+                    <div class="name-input-wrap mb-10">
+                        <label>P1 (BASE A):</label>
+                        <input type="text" class="name-field input-p1-name" maxlength="14">
+                    </div>
+                    <div id="mpctf-p1-colors" class="color-swatch-row"></div>
+                    <div class="car-preview-wrap">
+                        <canvas id="mpctf-p1-preview" width="230" height="85"></canvas>
+                    </div>
+                    <div class="ui-sub-box">
+                        <h3><span>BASE A BOTS</span><strong style="color:#38bdf8"><span id="mpctf-p1-bots-label">2</span> BOTS</strong></h3>
+                        <div class="quick-pills" id="mpctf-p1-bot-pills">
+                            <button class="pill-btn" data-count="0">0</button>
+                            <button class="pill-btn" data-count="1">1</button>
+                            <button class="pill-btn active" data-count="2">2</button>
+                            <button class="pill-btn" data-count="3">3</button>
+                            <button class="pill-btn" data-count="4">4</button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="config-card p2-border">
+                    <div class="name-input-wrap mb-10">
+                        <label>P2 (BASE B):</label>
+                        <input type="text" class="name-field input-p2-name" maxlength="14">
+                    </div>
+                    <div id="mpctf-p2-colors" class="color-swatch-row"></div>
+                    <div class="car-preview-wrap">
+                        <canvas id="mpctf-p2-preview" width="230" height="85"></canvas>
+                    </div>
+                    <div class="ui-sub-box">
+                        <h3><span>BASE B BOTS</span><strong style="color:#4ade80"><span id="mpctf-p2-bots-label">2</span> BOTS</strong></h3>
+                        <div class="quick-pills" id="mpctf-p2-bot-pills">
+                            <button class="pill-btn" data-count="0">0</button>
+                            <button class="pill-btn" data-count="1">1</button>
+                            <button class="pill-btn active" data-count="2">2</button>
+                            <button class="pill-btn" data-count="3">3</button>
+                            <button class="pill-btn" data-count="4">4</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="config-grid mt-10">
+                <div class="config-card">
+                    <div class="ui-sub-box">
+                        <h3><span>TWO-PLAYER CTF FORMAT</span><small>CHOOSE TEAMS</small></h3>
+                        <div class="segmented-row" id="mpctf-type-selector">
+                            <button class="seg-btn active" data-ctftype="versus">P1 SQUAD VS P2 SQUAD</button>
+                            <button class="seg-btn" data-ctftype="coop">P1 + P2 CO-OP VS AI</button>
+                        </div>
+                    </div>
+                    <div class="ui-sub-box">
+                        <h3><span>MATCH DURATION (MOST FLAGS WINS!)</span><strong style="color:#fbbf24"><span id="mpctf-time-label">3</span> MINUTES</strong></h3>
+                        <div class="quick-pills" id="mpctf-time-pills">
+                            <button class="pill-btn" data-min="1">1M</button>
+                            <button class="pill-btn" data-min="2">2M</button>
+                            <button class="pill-btn active" data-min="3">3M</button>
+                            <button class="pill-btn" data-min="4">4M</button>
+                            <button class="pill-btn" data-min="5">5M</button>
+                        </div>
+                    </div>
+                    <div class="ui-sub-box">
+                        <h3><span>AI SKILL LEVEL</span><small>BOT DIFFICULTY</small></h3>
+                        <div class="segmented-row" id="mpctf-diff-selector">
+                            <button class="seg-btn" data-diff="easy">EASY</button>
+                            <button class="seg-btn active" data-diff="normal">NORMAL</button>
+                            <button class="seg-btn" data-diff="hard">HARD</button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="config-card">
+                    <div class="ui-sub-box">
+                        <h3><span>SELECT ARENA MAP</span><small>LIVE PREVIEW</small></h3>
+                        <div class="segmented-row map-select-group map-grid-4">
+                            <button class="seg-btn active" data-arena="expanded">FOOTBALL GROUND</button>
+                            <button class="seg-btn" data-arena="park_ground">PARK GROUND</button>
+                            <button class="seg-btn" data-arena="desert_dunes">DESERT DUNES</button>
+                            <button class="seg-btn" data-arena="ice_rink">FROSTBITE ICE (ROUND)</button>
+                        </div>
+                        <div class="map-preview-wrap">
+                            <canvas class="map-preview-canvas" width="300" height="104"></canvas>
+                            <span class="map-preview-caption">FOOTBALL GROUND: Open Stadium Pitch</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="panel-footer">
+                <button id="btn-start-mp-ctf" class="menu-btn start-match-btn">START 2P CAPTURE THE FLAG &rarr;</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- SCREEN 6D: HOW TO PLAY & ABILITIES GUIDE (For New Players!) -->
+    <div id="screen-guide" class="menu-screen hidden">
+        <div class="menu-panel config-panel">
+            <div class="panel-header">
+                <button class="back-btn" data-target="screen-main-menu">&larr; BACK</button>
+                <h2>HOW TO PLAY &amp; ABILITIES GUIDE</h2>
+                <span class="header-badge version-pill-text">v5.0.0</span>
+            </div>
+
+            <div class="ui-sub-box mb-10">
+                <h3><span>1. MYSTERY [?] SUPPLY DROPS (EVERY 30 SECONDS)</span><span class="guide-time-pill">SPAWNS EVERY 30S</span></h3>
+                <p class="helper-note">
+                    Every <b>30 seconds</b>, a glowing translucent <b>[?] Mystery Zone</b> drops into the arena. Driving into the <b>[?]</b> randomly unlocks one of <b>5 Powerful Abilities</b> OR one of <b>3 Short-Duration Disabilities (Traps)</b>! An icon pops up above your car to show what you unlocked:
+                </p>
+            </div>
+
+            <div class="guide-grid">
+                <div class="guide-ability-card">
+                    <canvas class="guide-icon-canvas" width="56" height="56" data-ability="mystery_orb"></canvas>
+                    <div class="guide-card-body">
+                        <h4>MYSTERY [?] ZONE <span class="guide-time-pill">EVERY 30S</span></h4>
+                        <p>Color-shifting question mark pad on the arena floor. Collect it to roll a random ability or trap!</p>
+                    </div>
+                </div>
+
+                <div class="guide-ability-card">
+                    <canvas class="guide-icon-canvas" width="56" height="56" data-ability="repair_partial"></canvas>
+                    <div class="guide-card-body">
+                        <h4>REPAIR KIT <span class="guide-time-pill" style="color:#00e676">INSTANT +65 HP</span></h4>
+                        <p>Single green plus emblem. Instantly restores <b>+65 HP</b> and buffs out 50% of chassis dents.</p>
+                    </div>
+                </div>
+
+                <div class="guide-ability-card">
+                    <canvas class="guide-icon-canvas" width="56" height="56" data-ability="repair_full"></canvas>
+                    <div class="guide-card-body">
+                        <h4>MEGA MEDKIT <span class="guide-time-pill" style="color:#38bdf8">100% FULL HEAL</span></h4>
+                        <p>Medkit with three green pluses. Restores <b>full 200 HP</b> and re-attaches all lost bumpers &amp; fenders!</p>
+                    </div>
+                </div>
+
+                <div class="guide-ability-card">
+                    <canvas class="guide-icon-canvas" width="56" height="56" data-ability="inferno_ram"></canvas>
+                    <div class="guide-card-body">
+                        <h4>INFERNO FIRE RAM <span class="guide-time-pill" style="color:#f97316">12 SECONDS</span></h4>
+                        <p>Engulfs your car in fire! Deals <b>1.8x ram damage</b> and ignites enemy cars for a 1-second burn.</p>
+                    </div>
+                </div>
+
+                <div class="guide-ability-card">
+                    <canvas class="guide-icon-canvas" width="56" height="56" data-ability="titan_shield"></canvas>
+                    <div class="guide-card-body">
+                        <h4>TITAN ARMOR SHIELD <span class="guide-time-pill" style="color:#c084fc">10 SECONDS</span></h4>
+                        <p>Purple energy barrier around your vehicle that blocks <b>70% of incoming collision damage</b>.</p>
+                    </div>
+                </div>
+
+                <div class="guide-ability-card">
+                    <canvas class="guide-icon-canvas" width="56" height="56" data-ability="hyper_nitro"></canvas>
+                    <div class="guide-card-body">
+                        <h4>TURBO SPEED BOOST <span class="guide-time-pill" style="color:#fde047">10 SECONDS</span></h4>
+                        <p>Supercharges engine with <b>+28% top speed</b>, <b>+45% acceleration</b>, and <b>1.35x impact damage</b>.</p>
+                    </div>
+                </div>
+
+                <div class="guide-ability-card trap-card">
+                    <canvas class="guide-icon-canvas" width="56" height="56" data-ability="tire_puncture"></canvas>
+                    <div class="guide-card-body">
+                        <h4>TRAP: TIRE PUNCTURE <span class="guide-time-pill" style="color:#ff4d6d">5.5 SECONDS</span></h4>
+                        <p>Disability! Deals <b>-15 HP</b> rim shock, reduces top speed to 58%, and pulls steering sideways.</p>
+                    </div>
+                </div>
+
+                <div class="guide-ability-card trap-card">
+                    <canvas class="guide-icon-canvas" width="56" height="56" data-ability="sabotage_bomb"></canvas>
+                    <div class="guide-card-body">
+                        <h4>TRAP: MINI-BOMB &amp; GLITCH <span class="guide-time-pill" style="color:#fbbf24">2.5S – 5.0S</span></h4>
+                        <p><b>Mini-Bomb</b> deals instant <b>-28 HP</b> recoil; <b>Steering Glitch</b> scrambles steering for <b>5 seconds</b>!</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="config-grid mt-10">
+                <div class="ui-sub-box">
+                    <h3><span>2. GAME MODES &amp; TIMER SETTINGS</span><small>1 TO 5 MINUTES</small></h3>
+                    <p class="helper-note">
+                        &bull; <b>Knockout Mode:</b> Last car or squad standing wins.<br>
+                        &bull; <b>Timed Respawn Blitz (1–5 Min):</b> Wrecked cars respawn inside their Rectangular Base after <b>2.5s</b>. Most Kills at 00:00 wins!<br>
+                        &bull; <b>Capture the Flag (Untimed):</b> Hold Enemy Stand for <b>3s</b> to steal flag, pass to healthier allies, and hold Home Stand for <b>3s</b> to win!
+                    </p>
+                </div>
+                <div class="ui-sub-box">
+                    <h3><span>3. FOUR ARENA MAPS &amp; DAMAGE ZONES</span><small>TACTICAL DRIVING</small></h3>
+                    <p class="helper-note">
+                        &bull; <b>4 Maps:</b> Football Ground (Open), Park Ground (Trees/Benches), Desert Dunes (Oasis/Cacti), and Frostbite Ice (Circular Crystal Dome).<br>
+                        &bull; <b>Directional Hits:</b> Rear hits deal <b>1.55x Rear Crush</b> damage, side T-bones deal <b>1.20x Side Smash</b>, and front hits deal <b>1.0x</b>.
+                    </p>
+                </div>
             </div>
         </div>
     </div>
@@ -653,6 +1045,14 @@
                         <button class="seg-btn active" data-gfx="high">HIGH DETAIL</button>
                     </div>
                 </div>
+
+                <div class="setting-row">
+                    <div>
+                        <strong>How to Play &amp; Abilities Encyclopedia</strong>
+                        <p>View all 8 Mystery [?] Abilities &amp; Traps, durations, maps, and Capture the Flag rules</p>
+                    </div>
+                    <button id="btn-settings-guide" class="menu-btn primary-btn" style="padding:9px 16px;font-size:12.5px;">OPEN GAME GUIDE &rarr;</button>
+                </div>
             </div>
         </div>
     </div>
@@ -663,7 +1063,7 @@
             <div class="panel-header">
                 <button class="back-btn" data-target="screen-main-menu">&larr; BACK</button>
                 <h2>GAME STATS &amp; MODE ANALYTICS</h2>
-                <span class="header-badge version-pill-text">v3.1.0</span>
+                <span class="header-badge version-pill-text">v5.0.0</span>
             </div>
 
             <div class="an-summary-grid">
@@ -700,7 +1100,7 @@
             <div class="panel-header">
                 <button class="back-btn" data-target="screen-main-menu">&larr; BACK</button>
                 <h2>GAME CREDITS</h2>
-                <span class="header-badge version-pill-text">v3.1.0</span>
+                <span class="header-badge version-pill-text">v5.0.0</span>
             </div>
 
             <div class="credits-hero">
@@ -855,6 +1255,7 @@
     <script src="js/modes/duel1v1.js"></script>
     <script src="js/modes/coopTeam.js"></script>
     <script src="js/modes/squadWar.js"></script>
+    <script src="js/modes/captureFlag.js"></script>
     <!-- Features & UI -->
     <script src="js/features/telemetry.js"></script>
     <script src="js/features/announcer.js"></script>

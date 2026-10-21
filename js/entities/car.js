@@ -24,10 +24,14 @@ class BattleCar {
         this.spawnX = opts.x || 500;
         this.spawnY = opts.y || 500;
         this.spawnAngle = opts.angle || 0;
-        this.reset();
+        this.baseRect = opts.baseRect || null;
+        this.kills = 0;
+        this.deaths = 0;
+        this.damageDealt = 0;
+        this.reset(true);
     }
 
-    reset() {
+    reset(resetScore = true) {
         this.x = this.spawnX;
         this.y = this.spawnY;
         this.vx = 0;
@@ -37,16 +41,27 @@ class BattleCar {
         this.wheelAngle = 0;
         this.hp = this.maxHp;
         this.dead = false;
+        this.respawnTimer = 0;
+        this.spawnShieldTimer = 0;
         this.isBraking = false;
         this.isAccelerating = false;
-        this.kills = 0;
-        this.damageDealt = 0;
+        if (resetScore) {
+            this.kills = 0;
+            this.deaths = 0;
+            this.damageDealt = 0;
+        }
         this.lastAttacker = null;
+        this.carryingFlag = null;
 
         this.activePowerup = null;
         this.powerupTimer = 0;
         this.powerupMaxTimer = 0;
         this.powerupMeta = null;
+
+        // 2.5-Second (150 frames) On-Car Visual Trap Animation State
+        this.trapAnimType = null;
+        this.trapAnimTimer = 0;
+        this.trapAnimMaxTimer = 150;
 
         this.burningTimer = 0;
         this.burnAttacker = null;
@@ -66,8 +81,73 @@ class BattleCar {
         }
     }
 
+    // Respawns car strictly inside its assigned Rectangular Base Section!
+    respawnAtBase(arena) {
+        let rx = this.spawnX;
+        let ry = this.spawnY;
+
+        if (typeof Game !== 'undefined' && Game.cars) {
+            if (this.baseRect) {
+                // Search candidate slots strictly INSIDE the team's Rectangular Base
+                const r = this.baseRect;
+                const candidateYOffsets = [0, -95, 95, -190, 190, -275, 275];
+                const candidateXOffsets = [0, -36, 36];
+                let foundSpot = false;
+
+                for (const xo of candidateXOffsets) {
+                    for (const yo of candidateYOffsets) {
+                        const testX = Math.max(r.xMin + 52, Math.min(r.xMax - 52, this.spawnX + xo));
+                        const testY = Math.max(r.yMin + 52, Math.min(r.yMax - 52, this.spawnY + yo));
+                        const clash = Game.cars.some(other => other !== this && !other.dead && Math.hypot(other.x - testX, other.y - testY) < this.radius * 2.15);
+                        if (!clash) {
+                            rx = testX;
+                            ry = testY;
+                            foundSpot = true;
+                            break;
+                        }
+                    }
+                    if (foundSpot) break;
+                }
+            } else {
+                // Individual Rectangular Pad for Solo FFA Timed Respawn
+                for (let attempt = 0; attempt < 6; attempt++) {
+                    const clash = Game.cars.some(other => other !== this && !other.dead && Math.hypot(other.x - rx, other.y - ry) < this.radius * 2.15);
+                    if (!clash) break;
+                    const offset = (attempt % 2 === 0 ? 1 : -1) * Math.ceil(attempt / 2) * 45;
+                    rx = Math.max(arena.wallPad + 110, Math.min(arena.width - arena.wallPad - 110, this.spawnX + offset));
+                }
+            }
+        }
+
+        this.reset(false);
+        this.x = rx;
+        this.y = ry;
+        this.angle = this.spawnAngle;
+        this.spawnShieldTimer = 120; // 2.0 seconds of spawn protection
+
+        if (typeof Game !== 'undefined') {
+            Game.shockwaves.push({ x: this.x, y: this.y, r: 10, maxR: 135, alpha: 0.95, color: this.lightColor });
+            Game.floatingTexts.push({
+                x: this.x, y: this.y - 36,
+                text: `${this.label} RESPAWNED IN BASE!`,
+                color: this.lightColor, life: 1.15
+            });
+        }
+        if (typeof SoundEngine !== 'undefined') {
+            SoundEngine.playPowerupPickup(true, false);
+        }
+    }
+
+    triggerTrapAnimation(trapId) {
+        this.trapAnimType = trapId;
+        this.trapAnimTimer = 150; // 2.5 seconds at 60fps
+        this.trapAnimMaxTimer = 150;
+    }
+
     applyDirectionalDamage(amount, zone, hitX, hitY, attacker) {
         if (this.dead) return;
+        if (this.spawnShieldTimer > 0) return; // Protected right after respawning at base
+
         this.hp = Math.max(0, this.hp - amount);
         if (attacker && attacker !== this) {
             this.lastAttacker = attacker;
@@ -112,12 +192,80 @@ class BattleCar {
 
         if (this.hp <= 0 && !this.dead) {
             this.dead = true;
+            this.deaths = (this.deaths || 0) + 1;
             this.activePowerup = null;
+            this.trapAnimTimer = 0;
             this.burningTimer = 0;
+            if (MatchConfig.timedMode || MatchConfig.mode === 'ctf') {
+                this.respawnTimer = 150; // 2.5 seconds until respawn at base!
+            }
+            if (MatchConfig.mode === 'ctf' && typeof CaptureFlagMode !== 'undefined') {
+                CaptureFlagMode.onCarDestroyed(this);
+            }
             if (attacker && attacker !== this) attacker.kills++;
             SoundEngine.playExplosion();
             Game.triggerExplosion(this);
         }
+    }
+
+    drawOnCarTrapEffect(ctx, L, W, now) {
+        if (this.trapAnimTimer <= 0 || !this.trapAnimType) return;
+        const progress = 1 - (this.trapAnimTimer / this.trapAnimMaxTimer);
+        const alpha = Math.min(1, (this.trapAnimTimer / 35));
+
+        ctx.save();
+        ctx.globalAlpha = alpha;
+
+        if (this.trapAnimType === 'tire_puncture') {
+            // 1. Expanding Air-Burst Rings & Flying Rubber Shrapnel around Front-Left Punctured Tire
+            const wx = L * 0.29, wy = -W * 0.49;
+            const burstR = 8 + ((now * 0.08) % 28);
+            ctx.strokeStyle = '#f87171';
+            ctx.lineWidth = 2.5;
+            ctx.setLineDash([4, 4]);
+            ctx.beginPath();
+            ctx.arc(wx, wy, burstR, 0, Math.PI * 2);
+            ctx.stroke();
+
+            // Jagged Rim Sparks & Deflation Air Lines
+            ctx.setLineDash([]);
+            ctx.strokeStyle = '#fde047';
+            ctx.lineWidth = 2;
+            for (let i = 0; i < 5; i++) {
+                const a = (now * 0.02) + (i * Math.PI * 0.4);
+                ctx.beginPath();
+                ctx.moveTo(wx + Math.cos(a) * 6, wy + Math.sin(a) * 6);
+                ctx.lineTo(wx + Math.cos(a) * 18, wy + Math.sin(a) * 18);
+                ctx.stroke();
+            }
+        } else if (this.trapAnimType === 'sabotage_bomb') {
+            // 2. Fiery Pulsing Scorch Ring & Shrapnel Arcs on Chassis
+            const blastR = 16 + Math.sin(now * 0.04) * 10 + progress * 18;
+            const grad = ctx.createRadialGradient(0, 0, 4, 0, 0, blastR);
+            grad.addColorStop(0, 'rgba(254, 240, 138, 0.85)');
+            grad.addColorStop(0.5, 'rgba(249, 115, 22, 0.65)');
+            grad.addColorStop(1, 'rgba(220, 38, 38, 0)');
+            ctx.fillStyle = grad;
+            ctx.beginPath();
+            ctx.arc(0, 0, blastR, 0, Math.PI * 2);
+            ctx.fill();
+        } else if (this.trapAnimType === 'steering_glitch') {
+            // 3. High-Voltage Electric Lightning Bolts Crackling Across Hood & Front Wheels
+            ctx.strokeStyle = (Math.floor(now / 50) % 2 === 0) ? '#38bdf8' : '#fde047';
+            ctx.lineWidth = 2.6;
+            ctx.shadowColor = '#38bdf8';
+            ctx.shadowBlur = 10;
+            for (let b = 0; b < 3; b++) {
+                ctx.beginPath();
+                ctx.moveTo(-L * 0.1, (b - 1) * 10);
+                ctx.lineTo(L * 0.1, (b - 1) * 10 + (Math.random() - 0.5) * 18);
+                ctx.lineTo(L * 0.28, (b - 1) * 12 + (Math.random() - 0.5) * 18);
+                ctx.lineTo(L * 0.40, (b - 1) * 8);
+                ctx.stroke();
+            }
+        }
+
+        ctx.restore();
     }
 
     draw(ctx, showIndicator = true) {
@@ -141,8 +289,22 @@ class BattleCar {
             ctx.restore();
         }
 
-        // Active Timed Power-Up Visual Aura around Car
-        if (!this.dead && this.activePowerup) {
+        // Spawn Protection Shield Ring right after Base Respawn
+        if (!this.dead && this.spawnShieldTimer > 0) {
+            ctx.save();
+            ctx.strokeStyle = '#38bdf8';
+            ctx.fillStyle = 'rgba(56, 189, 248, 0.16)';
+            ctx.lineWidth = 2.5;
+            ctx.setLineDash([8, 6]);
+            ctx.beginPath();
+            ctx.arc(0, 0, this.radius + 14, now * 0.008, now * 0.008 + Math.PI * 2);
+            ctx.fill();
+            ctx.stroke();
+            ctx.restore();
+        }
+
+        // Active Timed Power-Up or Trap Visual Aura around Car
+        if (!this.dead && (this.activePowerup || this.trapAnimTimer > 0)) {
             ctx.save();
             if (this.activePowerup === 'inferno_ram') {
                 const flameR = this.radius + 13 + Math.sin(now * 0.025) * 4;
@@ -168,6 +330,16 @@ class BattleCar {
                 ctx.setLineDash([10, 6]);
                 ctx.beginPath();
                 ctx.arc(0, 0, this.radius + 11, now * 0.01, now * 0.01 + Math.PI * 2);
+                ctx.stroke();
+            } else if (this.activePowerup === 'tire_puncture' || this.activePowerup === 'steering_glitch' || this.trapAnimTimer > 0) {
+                const pulseHazard = Math.sin(now * 0.03) * 3;
+                ctx.strokeStyle = '#ff1e42';
+                ctx.fillStyle = 'rgba(255, 30, 66, 0.14)';
+                ctx.lineWidth = 3;
+                ctx.setLineDash([7, 5]);
+                ctx.beginPath();
+                ctx.arc(0, 0, this.radius + 12 + pulseHazard, -now * 0.015, -now * 0.015 + Math.PI * 2);
+                ctx.fill();
                 ctx.stroke();
             }
             ctx.restore();
@@ -245,12 +417,15 @@ class BattleCar {
             ctx.save();
             ctx.translate(w.x, w.y);
             if (w.front) ctx.rotate(this.wheelAngle);
-            if (hpRatio < 0.30 && idx === 0) ctx.rotate(0.22);
-            ctx.fillStyle = '#090d16';
+            const isPuncturedWheel = (this.activePowerup === 'tire_puncture' && idx === 0);
+            if ((hpRatio < 0.30 || isPuncturedWheel) && idx === 0) {
+                ctx.rotate(0.36 * Math.sin(now * 0.055));
+            }
+            ctx.fillStyle = isPuncturedWheel ? '#7f1d1d' : '#090d16';
             ctx.beginPath();
             ctx.roundRect(-11, -6, 22, 12, 3.5);
             ctx.fill();
-            ctx.fillStyle = '#cbd5e1';
+            ctx.fillStyle = isPuncturedWheel ? '#f87171' : '#cbd5e1';
             ctx.fillRect(-6, -2.2, 12, 4.4);
             ctx.fillStyle = this.lightColor;
             ctx.fillRect(-1.5, -1.5, 3, 3);
@@ -375,9 +550,28 @@ class BattleCar {
             ctx.fillStyle = this.isBraking ? '#ff1744' : '#9f1239';
             ctx.fillRect(rX - 1, -W * 0.37, 4, 8);
             ctx.fillRect(rX - 1, W * 0.37 - 8, 4, 8);
+
+            // Render 2.5s On-Car Trap Visual Effects (Tire Puncture, Bomb Blast, or Electric Glitch)
+            this.drawOnCarTrapEffect(ctx, L, W, now);
         }
 
         ctx.restore();
+
+        // Respawn Countdown Indicator above Wrecked Car in Timed Respawn Mode
+        if (this.dead && (MatchConfig.timedMode || MatchConfig.mode === 'ctf') && this.respawnTimer > 0 && showIndicator) {
+            ctx.save();
+            ctx.translate(this.x, this.y - this.radius - 26);
+            const secLeft = (this.respawnTimer / 60).toFixed(1);
+            ctx.font = '900 13px "Segoe UI", sans-serif';
+            ctx.textAlign = 'center';
+            ctx.strokeStyle = 'rgba(0, 0, 0, 0.94)';
+            ctx.lineWidth = 4;
+            const txt = `RESPAWN IN ${secLeft}s`;
+            ctx.strokeText(txt, 0, 0);
+            ctx.fillStyle = '#fbbf24';
+            ctx.fillText(txt, 0, 0);
+            ctx.restore();
+        }
 
         if (showIndicator && !this.dead) {
             ctx.save();
@@ -385,6 +579,23 @@ class BattleCar {
             const isHuman = !this.isAI;
             const bw = isHuman ? 88 : 74;
             const bh = isHuman ? 11 : 9;
+
+            // Flashing 2.5s Trap Alert Tag right above the driver's name when hit by a Trap!
+            if (this.trapAnimTimer > 0 && Math.floor(now / 90) % 2 === 0) {
+                const alertMap = {
+                    tire_puncture: '⚠ FLAT TIRE!',
+                    sabotage_bomb: '💣 BOMB HIT!',
+                    steering_glitch: '⚡ STEERING JAM!'
+                };
+                const alertTxt = alertMap[this.trapAnimType] || '⚠ TRAP!';
+                ctx.font = '900 12px "Segoe UI", sans-serif';
+                ctx.textAlign = 'center';
+                ctx.strokeStyle = '#000000';
+                ctx.lineWidth = 3.5;
+                ctx.strokeText(alertTxt, 0, -21);
+                ctx.fillStyle = '#ff4d6d';
+                ctx.fillText(alertTxt, 0, -21);
+            }
 
             ctx.font = isHuman ? '900 14px "Segoe UI", sans-serif' : '800 12px "Segoe UI", sans-serif';
             ctx.textAlign = 'center';
@@ -422,7 +633,6 @@ class BattleCar {
                 ctx.stroke();
             }
 
-            // Active Timed Power-Up Duration Bar right under the HP Bar!
             if (this.activePowerup && this.powerupTimer > 0 && this.powerupMeta) {
                 const pRatio = Math.max(0, this.powerupTimer / (this.powerupMaxTimer || 600));
                 ctx.fillStyle = 'rgba(9, 13, 22, 0.9)';

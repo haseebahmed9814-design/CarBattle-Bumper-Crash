@@ -2,21 +2,20 @@ const SinglePlayerMode = {
     spawn(cars, spawns) {
         const cleanName = (MatchConfig.p1Name || 'PLAYER 1').trim().toUpperCase();
 
-        // MODE B: STADIUM SQUAD SIEGE (Solo Team Battle — Curved Stadium Ring Formation)
+        // MODE B: STADIUM SQUAD SIEGE (Solo Team Battle — Rectangular Left & Right Bases)
         if (MatchConfig.spSubMode === 'team') {
-            const ruleTag = MatchConfig.timedMode ? `TIMED SIEGE (${MatchConfig.timeLimitMinutes}M)` : 'KNOCKOUT';
+            const ruleTag = MatchConfig.timedMode ? `RESPAWN BLITZ (${MatchConfig.timeLimitMinutes}M)` : 'KNOCKOUT';
             document.getElementById('hud-mode-pill').textContent = `STADIUM SQUAD SIEGE • ${ruleTag}`;
 
             const totalAllies = 1 + MatchConfig.spAllyBots;
             const totalEnemies = MatchConfig.spEnemyBots;
             const { team1Spawns, team2Spawns } = PhysicsEngine.generateTeamSpawnPositions(totalAllies, totalEnemies, Game.arena);
 
-            // Player 1 Commander spawns at the lead slot of the Left Stadium Arc
             const p1Spawn = team1Spawns[0];
             cars.push(new BattleCar({
                 id: 1, label: cleanName, team: 'ALLIES',
                 isAI: false, playerSlot: 'p1', colorKey: MatchConfig.p1Color,
-                x: p1Spawn.x, y: p1Spawn.y, angle: p1Spawn.angle
+                x: p1Spawn.x, y: p1Spawn.y, angle: p1Spawn.angle, baseRect: p1Spawn.baseRect
             }));
 
             for (let i = 0; i < MatchConfig.spAllyBots; i++) {
@@ -24,7 +23,7 @@ const SinglePlayerMode = {
                 cars.push(new BattleCar({
                     id: 10 + i, label: `ALLY ${i + 1}`, team: 'ALLIES',
                     isAI: true, colorKey: MatchConfig.p1Color,
-                    x: bSpawn.x, y: bSpawn.y, angle: bSpawn.angle
+                    x: bSpawn.x, y: bSpawn.y, angle: bSpawn.angle, baseRect: bSpawn.baseRect
                 }));
             }
 
@@ -34,22 +33,30 @@ const SinglePlayerMode = {
                 cars.push(new BattleCar({
                     id: 30 + i, label: `ENEMY ${i + 1}`, team: 'ENEMIES',
                     isAI: true, colorKey: enemyColor,
-                    x: eSpawn.x, y: eSpawn.y, angle: eSpawn.angle
+                    x: eSpawn.x, y: eSpawn.y, angle: eSpawn.angle, baseRect: eSpawn.baseRect
                 }));
             }
             return;
         }
 
-        // MODE A: KING OF THE RING (Classic Full-Circle Free-For-All)
-        document.getElementById('hud-mode-pill').textContent =
-            `KING OF THE RING • ${AI_DIFFICULTY_PROFILES[MatchConfig.difficulty].label}`;
+        // MODE A: KING OF THE RING (Solo Free-For-All)
+        const ruleLabel = MatchConfig.timedMode ? `RESPAWN BLITZ (${MatchConfig.timeLimitMinutes}M)` : AI_DIFFICULTY_PROFILES[MatchConfig.difficulty].label;
+        document.getElementById('hud-mode-pill').textContent = `KING OF THE RING • ${ruleLabel}`;
 
         let sIdx = 0;
         const pSpawn = spawns[sIdx++];
+        const makeIndRect = (sp) => ({
+            cx: sp.x, cy: sp.y, w: 150, h: 110,
+            xMin: sp.x - 75, xMax: sp.x + 75,
+            yMin: sp.y - 55, yMax: sp.y + 55,
+            angle: sp.angle
+        });
+
         cars.push(new BattleCar({
             id: 1, label: cleanName, team: 'PLAYER_1',
             isAI: false, playerSlot: 'p1', colorKey: MatchConfig.p1Color,
-            x: pSpawn.x, y: pSpawn.y, angle: pSpawn.angle
+            x: pSpawn.x, y: pSpawn.y, angle: pSpawn.angle,
+            baseRect: MatchConfig.timedMode ? makeIndRect(pSpawn) : null
         }));
 
         const allKeys = Object.keys(CAR_COLOR_PALETTES).filter(k => k !== MatchConfig.p1Color);
@@ -58,7 +65,8 @@ const SinglePlayerMode = {
             cars.push(new BattleCar({
                 id: i + 2, label: `BOT ${i + 1}`, team: `BOT_FFA_${i + 1}`,
                 isAI: true, colorKey: allKeys[i % allKeys.length],
-                x: bSpawn.x, y: bSpawn.y, angle: bSpawn.angle
+                x: bSpawn.x, y: bSpawn.y, angle: bSpawn.angle,
+                baseRect: MatchConfig.timedMode ? makeIndRect(bSpawn) : null
             }));
         }
     },
@@ -73,6 +81,14 @@ const SinglePlayerMode = {
             const stats = TimedSiegeMode.computeTeamSummary(
                 cars, 'ALLIES', `${p1 ? p1.label : 'P1'} SQUAD`, p1Pal.light, 'ENEMIES', 'ENEMY AI SQUAD', '#ff4d6d'
             );
+
+            if (MatchConfig.timedMode) {
+                Game.setSpectating(false);
+                if (timeExpired) {
+                    return TimedSiegeMode.buildTimeUpResult(stats);
+                }
+                return null;
+            }
 
             if (stats.team2.alive === 0 && stats.team1.alive === 0) {
                 Game.setSpectating(false);
@@ -101,14 +117,25 @@ const SinglePlayerMode = {
                 KillAnnouncer.triggerFinalKnockout(winnerCar, Game.lastWreckedCar, outcome);
                 return null;
             }
-            if (timeExpired) {
-                Game.setSpectating(false);
-                return TimedSiegeMode.buildTimeUpDrawResult(stats);
-            }
-
             if (p1 && p1.dead) {
                 const remainingAlive = cars.filter(c => !c.dead).length;
                 Game.setSpectating(true, remainingAlive);
+            }
+            return null;
+        }
+
+        if (MatchConfig.timedMode) {
+            Game.setSpectating(false);
+            const timeExpired = TimedSiegeMode.tick(dt);
+            if (timeExpired) {
+                const sorted = [...cars].sort((a, b) => (b.kills - a.kills) || (b.damageDealt - a.damageDealt));
+                const winner = sorted[0];
+                return {
+                    badge: 'KING OF THE RING • TIMED RESPAWN BLITZ',
+                    title: `${winner.label} WINS!`,
+                    subtitle: `${winner.label} topped the leaderboard with ${winner.kills} Kills and ${winner.damageDealt} Damage!`,
+                    color: winner.isAI ? '#ff4d6d' : '#00e676'
+                };
             }
             return null;
         }

@@ -1,4 +1,4 @@
-﻿const CameraController = {
+const CameraController = {
     x: 1700,
     y: 1050,
     zoom: 0.65,
@@ -7,7 +7,8 @@
     resetToArena(arena, canvas) {
         this.x = arena.width / 2;
         this.y = arena.height / 2;
-        this.zoom = Math.min(canvas.width / arena.width, canvas.height / arena.height) * 1.35;
+        const refZoom = Math.min((canvas.width * 0.96) / 3400, (canvas.height * 0.94) / 2100);
+        this.zoom = refZoom * 1.45;
         this.spectateIndex = 0;
     },
 
@@ -39,11 +40,15 @@
             return;
         }
 
-        // Dynamic Follow Camera: Zooms in 1.75x closer than full stadium so vehicles and health bars are clearly visible!
-        const actionZoom = fullZoom * 1.75;
+        // Consistent Action Follow Zoom across ALL maps (uses standard 3400x2100 baseline so Circular Ice Map never zooms out too far!)
+        const baselineZoom = Math.min(
+            (canvas.width * 0.96) / 3400,
+            (canvas.height * 0.94) / 2100
+        );
+        const actionZoom = baselineZoom * 1.78;
+
         let focusCars = cars.filter(c => !c.isAI && !c.dead);
 
-        // If human player is wrecked and spectating remaining bots, follow the selected living bot
         if (focusCars.length === 0) {
             const aliveBots = cars.filter(c => !c.dead);
             if (aliveBots.length > 0) {
@@ -52,6 +57,13 @@
             } else {
                 focusCars = cars;
             }
+        }
+
+        if (focusCars.length === 0) {
+            this.x += (arena.width / 2 - this.x) * 0.12;
+            this.y += (arena.height / 2 - this.y) * 0.12;
+            this.zoom += (fullZoom - this.zoom) * 0.12;
+            return;
         }
 
         let minX = Infinity, maxX = -Infinity, minY = Infinity, maxY = -Infinity;
@@ -65,13 +77,12 @@
         let targetX = (minX + maxX) / 2;
         let targetY = (minY + maxY) / 2;
 
-        // If 2 human players are far apart, smoothly zoom out just enough to keep both on screen
         let targetZoom = actionZoom;
         if (focusCars.length > 1) {
-            const spanX = (maxX - minX) + 900;
-            const spanY = (maxY - minY) + 650;
+            const spanX = (maxX - minX) + 880;
+            const spanY = (maxY - minY) + 640;
             const fitZoom = Math.min(canvas.width / spanX, canvas.height / spanY);
-            targetZoom = Math.max(fullZoom * 1.05, Math.min(actionZoom, fitZoom));
+            targetZoom = Math.max(fullZoom * 1.02, Math.min(actionZoom, fitZoom));
         }
 
         const halfViewW = (canvas.width / 2) / targetZoom;

@@ -1,4 +1,4 @@
-const GAME_VERSION = 'v3.1.0';
+const GAME_VERSION = 'v5.0.0';
 const GAME_DEVELOPER = 'Muhammad Haseeb Ahmed';
 
 const CAR_COLOR_PALETTES = {
@@ -55,8 +55,10 @@ const AI_DIFFICULTY_PROFILES = {
 };
 
 const ARENA_PRESETS = {
-    expanded:    { id: 'expanded',    name: 'FOOTBALL GROUND', width: 3400, height: 2100, wallPad: 52, hasHazards: false },
-    park_ground: { id: 'park_ground', name: 'PARK GROUND',     width: 3400, height: 2100, wallPad: 52, hasHazards: true  }
+    expanded:     { id: 'expanded',     name: 'FOOTBALL GROUND', width: 3400, height: 2100, wallPad: 52, hasHazards: false, isCircular: false, theme: 'football' },
+    park_ground:  { id: 'park_ground',  name: 'PARK GROUND',     width: 3400, height: 2100, wallPad: 52, hasHazards: true,  isCircular: false, theme: 'park'     },
+    desert_dunes: { id: 'desert_dunes', name: 'DESERT DUNES',    width: 3400, height: 2100, wallPad: 52, hasHazards: true,  isCircular: false, theme: 'desert'   },
+    ice_rink:     { id: 'ice_rink',     name: 'FROSTBITE ICE',   width: 2400, height: 2400, radius: 1130, wallPad: 52, hasHazards: true, isCircular: true,  theme: 'ice'      }
 };
 
 const UserSettings = {
@@ -69,6 +71,7 @@ const UserSettings = {
 const MatchConfig = {
     mode: 'single',
     spSubMode: 'ffa',
+    ctfType: 'solo',       // 'solo' | 'coop' | 'versus'
     arenaKey: 'expanded',
     difficulty: 'normal',
     p1Name: localStorage.getItem('bc_p1_name') || 'PLAYER 1',
@@ -81,6 +84,10 @@ const MatchConfig = {
     spEnemyBots: 3,
     p1TeamBots: 2,
     p2TeamBots: 2,
-    timedMode: true,
+    ctfSpAllyBots: 3,
+    ctfSpEnemyBots: 4,
+    ctfMpP1Bots: 2,
+    ctfMpP2Bots: 2,
+    timedMode: false,
     timeLimitMinutes: 3
 };

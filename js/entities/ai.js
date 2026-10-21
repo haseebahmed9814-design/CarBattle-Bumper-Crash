@@ -71,11 +71,93 @@ class TacticalAIBrain {
             if (angleDiff < 0.8) score += 260;
             if (myCar.lastAttacker === candidate) score += 300;
             score += (1 - candidate.hp / candidate.maxHp) * 280;
+            // Massive priority bonus if enemy candidate is carrying our Flag in CTF!
+            if (candidate.carryingFlag) score += 5000;
             if (profile.id === 'hard' && !candidate.isAI) score += 220;
             score -= (targetCounts.get(candidate.id) || 0) * (profile.id === 'hard' ? 240 : 420);
             if (score > bestScore) { bestScore = score; bestTarget = candidate; }
         }
         return bestTarget;
+    }
+
+    updateCTFBehavior(allCars, arena, profile) {
+        const myCar = this.car;
+        const flags = CaptureFlagMode.flags;
+        if (!flags || flags.length < 2) return null;
+
+        const ourFlag = flags.find(f => f.ownerTeam === myCar.team);
+        const enemyFlag = flags.find(f => f.ownerTeam !== myCar.team);
+        if (!ourFlag || !enemyFlag) return null;
+
+        // 1. IF THIS AI BOT IS CARRYING THE ENEMY FLAG:
+        // Drive straight back to our Home Base Flag Stand and hold inside the zone for 3 seconds!
+        if (enemyFlag.carrier === myCar) {
+            const distHome = Math.hypot(ourFlag.homeX - myCar.x, ourFlag.homeY - myCar.y);
+            if (distHome < CaptureFlagMode.standRadius * 0.65) {
+                return { up: false, down: false, steer: 0, drift: true, throttle: 0 };
+            }
+            return this.steerTowardPoint(ourFlag.homeX, ourFlag.homeY, allCars, arena, profile);
+        }
+
+        // 2. EMERGENCY PRIORITY — ENEMY HAS STOLEN OUR FLAG!
+        // Every bot on our team immediately abandons normal fights to hunt down and wreck the enemy flag carrier!
+        if (ourFlag.state === 'CARRIED' && ourFlag.carrier && !ourFlag.carrier.dead) {
+            this.target = ourFlag.carrier;
+            const c = ourFlag.carrier;
+            return this.steerTowardPoint(
+                c.x + c.vx * profile.leadPrediction,
+                c.y + c.vy * profile.leadPrediction,
+                allCars, arena, profile
+            );
+        }
+
+        // 3. IF OUR FLAG IS DROPPED ON THE GROUND: Rush to touch and return it!
+        if (ourFlag.state === 'DROPPED') {
+            return this.steerTowardPoint(ourFlag.x, ourFlag.y, allCars, arena, profile);
+        }
+
+        // 4. IF ENEMY FLAG IS DROPPED ON THE GROUND: Rush to pick it up!
+        if (enemyFlag.state === 'DROPPED') {
+            return this.steerTowardPoint(enemyFlag.x, enemyFlag.y, allCars, arena, profile);
+        }
+
+        // 5. BASE DEFENDER ROLE (1-2 bots guard our Home Flag Stand when our flag is at base)
+        if (myCar.ctfRole === 'DEFENDER') {
+            // Look for any enemy intruder near our base
+            let nearestIntruder = null, minDist = 780;
+            for (const c of allCars) {
+                if (c.dead || PhysicsEngine.areTeammates(myCar, c)) continue;
+                const d = Math.hypot(c.x - ourFlag.homeX, c.y - ourFlag.homeY);
+                if (d < minDist) {
+                    minDist = d;
+                    nearestIntruder = c;
+                }
+            }
+            if (nearestIntruder) {
+                this.target = nearestIntruder;
+                return this.steerTowardPoint(
+                    nearestIntruder.x + nearestIntruder.vx * profile.leadPrediction,
+                    nearestIntruder.y + nearestIntruder.vy * profile.leadPrediction,
+                    allCars, arena, profile
+                );
+            }
+            // Patrol around our Home Flag Stand
+            const patrolAng = performance.now() * 0.0012 + myCar.id;
+            const px = ourFlag.homeX + Math.cos(patrolAng) * 145;
+            const py = ourFlag.homeY + Math.sin(patrolAng) * 145;
+            return this.steerTowardPoint(px, py, allCars, arena, profile);
+        }
+
+        // 6. ATTACKER ROLE: If enemy flag is at its base, drive into the Enemy Flag Stand and hold for 3 seconds!
+        if (enemyFlag.state === 'AT_BASE') {
+            const distEnemyStand = Math.hypot(enemyFlag.homeX - myCar.x, enemyFlag.homeY - myCar.y);
+            if (distEnemyStand < CaptureFlagMode.standRadius * 0.65) {
+                return { up: false, down: false, steer: 0, drift: true, throttle: 0 };
+            }
+            return this.steerTowardPoint(enemyFlag.homeX, enemyFlag.homeY, allCars, arena, profile);
+        }
+
+        return null;
     }
 
     update(allCars, arena, dt) {
@@ -99,12 +181,21 @@ class TacticalAIBrain {
 
         const noseX = myCar.x + Math.cos(myCar.angle) * 80, noseY = myCar.y + Math.sin(myCar.angle) * 80;
         const wallLimit = arena.wallPad + 38;
-        if ((noseX < wallLimit || noseX > arena.width - wallLimit || noseY < wallLimit || noseY > arena.height - wallLimit) && speed < 4.2) {
+        const nearWall = arena.isCircular
+            ? (Math.hypot(noseX - arena.width / 2, noseY - arena.height / 2) > (arena.radius || 1130) - 45)
+            : (noseX < wallLimit || noseX > arena.width - wallLimit || noseY < wallLimit || noseY > arena.height - wallLimit);
+        if (nearWall && speed < 4.2) {
             this.reverseTimer = Math.max(this.reverseTimer, 25);
         }
         if (this.reverseTimer > 0) {
             this.reverseTimer -= dt;
             return { up: false, down: true, steer: this.reverseSteer, drift: false, throttle: 1.0 };
+        }
+
+        // Execute Capture The Flag AI Logic when in CTF mode!
+        if (MatchConfig.mode === 'ctf' && typeof CaptureFlagMode !== 'undefined') {
+            const ctfOrder = this.updateCTFBehavior(allCars, arena, profile);
+            if (ctfOrder) return ctfOrder;
         }
 
         if (this.state === 'REPOSITION' && this.repositionWaypoint) {
@@ -123,7 +214,6 @@ class TacticalAIBrain {
             else if (Math.random() < 0.3) this.slotIndex = (this.slotIndex + 1) % ATTACK_SLOTS.length;
         }
 
-                // If a 3D Supply Drop Orb is nearby (or AI is low on HP and a heal orb dropped), race to pick it up!
         if (typeof ArenaHazards !== 'undefined' && ArenaHazards.powerups.length > 0 && profile.id !== 'easy') {
             let bestOrb = null, bestOrbDist = Infinity;
             for (const orb of ArenaHazards.powerups) {
@@ -195,9 +285,9 @@ class TacticalAIBrain {
             const dx = myCar.x - other.x, dy = myCar.y - other.y;
             const dist = Math.hypot(dx, dy) || 1;
             const isAlly = PhysicsEngine.areTeammates(myCar, other);
-            const sepRadius = isAlly ? 210 : 125;
+            const sepRadius = isAlly ? 185 : 120;
             if (dist < sepRadius && (isAlly || other !== this.target)) {
-                const pushStrength = ((sepRadius - dist) / sepRadius) * (isAlly ? 1.65 : 0.85);
+                const pushStrength = ((sepRadius - dist) / sepRadius) * (isAlly ? 1.35 : 0.85);
                 desiredVecX += (dx / dist) * pushStrength;
                 desiredVecY += (dy / dist) * pushStrength;
             }
