@@ -69,6 +69,14 @@
             </div>
 
             <div class="main-nav-buttons">
+                                <button id="btn-goto-story" class="menu-btn" style="background:linear-gradient(135deg,#059669,#047857);border:1px solid #34d399;box-shadow:0 8px 20px rgba(5,150,105,0.35);">
+                    <div class="online-row">
+                        <span class="btn-main-text">STORY MODE CAMPAIGN</span>
+                        <span class="beta-pill">BETA VERSION &bull; UNDER CONSTRUCTION</span>
+                    </div>
+                    <span class="btn-sub-text">Episode 1 (Rescue Viper) &amp; Episode 2 (Destroy Gunboat Armada) &bull; Early Access Beta</span>
+                </button>
+
                 <button id="btn-goto-single" class="menu-btn primary-btn">
                     <span class="btn-main-text">SINGLE PLAYER</span>
                     <span class="btn-sub-text">King of the Ring (Solo FFA) &bull; Stadium Squad Siege (Team vs AI)</span>
@@ -100,6 +108,95 @@
 
             <div class="menu-footer-tip">
                 <span>Developed by <strong>Muhammad Haseeb Ahmed</strong> &bull; Version <strong class="version-pill-text">v5.0.0</strong></span>
+            </div>
+        </div>
+    </div>
+
+            <!-- SCREEN STORY: EPISODE 1 & 2 CAMPAIGN SETUP -->
+    <div id="screen-story-config" class="menu-screen hidden">
+        <div class="menu-panel config-panel">
+            <div class="panel-header">
+                <button class="back-btn" data-target="screen-main-menu">&larr; BACK</button>
+                <h2>STORY MODE <span class="beta-pill" style="vertical-align:middle;margin-left:6px;">BETA &bull; UNDER CONSTRUCTION</span></h2>
+                <span class="header-badge" style="color:#4ade80;border-color:#4ade80;">EPISODE 1 &amp; EPISODE 2</span>
+            </div>
+
+            <div class="config-grid">
+                <div class="config-card p1-border">
+                    <div class="ui-sub-box">
+                        <h3><span>1. SELECT STORY EPISODE</span><small>5 STAGES EACH</small></h3>
+                        <div class="segmented-row" id="story-episode-selector">
+                            <button class="seg-btn active" data-ep="1">EP1: RESCUE VIPER (LOCKAGE)</button>
+                            <button class="seg-btn" data-ep="2">EP2: VIPER + DESTROY BOATS</button>
+                        </div>
+                    </div>
+
+                    <div class="ui-sub-box">
+                        <h3><span>2. CAMPAIGN PLAYERS</span><small>SOLO + COMPANION OR 2P CO-OP</small></h3>
+                        <div class="segmented-row" id="story-players-selector">
+                            <button class="seg-btn active" data-coop="false">1P + COMPANION BOT</button>
+                            <button class="seg-btn" data-coop="true">2 PLAYERS CO-OP</button>
+                        </div>
+                    </div>
+
+                    <div class="ui-sub-box">
+                        <h3><span>3. PLAYER 1 DRIVER &amp; COLOR</span><small>WASD + SPACE</small></h3>
+                        <div class="name-input-wrap mb-10">
+                            <label>P1 NAME:</label>
+                            <input type="text" class="name-field input-p1-name" maxlength="14">
+                        </div>
+                        <div id="story-p1-colors" class="color-swatch-row"></div>
+                        <div class="car-preview-wrap">
+                            <canvas id="story-p1-preview" width="250" height="95"></canvas>
+                        </div>
+                    </div>
+
+                    <div id="story-p2-box" class="ui-sub-box hidden">
+                        <h3><span>PLAYER 2 CO-OP PARTNER</span><small>ARROWS + R-SHIFT</small></h3>
+                        <div class="name-input-wrap mb-10">
+                            <label>P2 NAME:</label>
+                            <input type="text" class="name-field input-p2-name" maxlength="14">
+                        </div>
+                        <div id="story-p2-colors" class="color-swatch-row"></div>
+                    </div>
+                </div>
+
+                <div class="config-card">
+                    <div class="ui-sub-box">
+                        <h3><span>4. P1 CHARGED ABILITY (FAST 9S CHARGE)</span><strong style="color:#38bdf8">KEY: E &bull; PATTERN: Q</strong></h3>
+                        <div class="segmented-row map-grid-4" id="story-p1-ability">
+                            <button class="seg-btn active" data-ab="summon_guard">SUMMON SUPPORT BOT</button>
+                            <button class="seg-btn" data-ab="inferno_ram">INFERNO FIRE RAM</button>
+                            <button class="seg-btn" data-ab="hyper_nitro">TURBO SPEED</button>
+                            <button class="seg-btn" data-ab="titan_shield">TITAN SHIELD</button>
+                            <button class="seg-btn" data-ab="group_heal">SQUAD HEAL (+85)</button>
+                        </div>
+                    </div>
+
+                    <div class="ui-sub-box">
+                        <h3><span>5. SOLO COMPANION BOT / P2 ABILITY</span><strong style="color:#4ade80">AUTO (1P) / ENTER (2P)</strong></h3>
+                        <div class="segmented-row map-grid-4" id="story-p2-ability">
+                            <button class="seg-btn active" data-ab="group_heal">SQUAD HEAL (+85)</button>
+                            <button class="seg-btn" data-ab="inferno_ram">INFERNO FIRE RAM</button>
+                            <button class="seg-btn" data-ab="titan_shield">TITAN SHIELD</button>
+                            <button class="seg-btn" data-ab="hyper_nitro">TURBO SPEED</button>
+                            <button class="seg-btn" data-ab="summon_guard">SUMMON SUPPORT BOT</button>
+                        </div>
+                    </div>
+
+                    <div class="ui-sub-box">
+                        <h3><span>6. COMMANDO FORMATIONS &amp; RULES</span><strong style="color:#fbbf24">Q (P1) &bull; PGUP/PGDN (P2)</strong></h3>
+                        <p class="helper-note">
+                            &bull; <b>Commando Support Bots:</b> Press <b>Q</b> (P1) or <b>PageUp / PageDown</b> (P2) to switch between <b>1. 360&deg; Cover (Front/Back/Sides)</b>, <b>2. Front Spearhead</b>, or <b>3. Rear Column Line</b>.<br>
+                            &bull; <b>Standby &amp; Patrol Signal:</b> Your bots stand still with you when safe, and automatically patrol around you when an enemy is nearby!<br>
+                            &bull; <b>Health &amp; Extra Lives:</b> Enemies drop <b>+75 HP Crates</b>; earn <b>+1 Life</b> every 4 kills and after clearing each Stage!
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="panel-footer">
+                <button id="btn-start-story" class="menu-btn start-match-btn">LAUNCH STORY CAMPAIGN &rarr;</button>
             </div>
         </div>
     </div>
@@ -863,20 +960,79 @@
         </div>
     </div>
 
-    <!-- SCREEN 6D: HOW TO PLAY & ABILITIES GUIDE (For New Players!) -->
+            <!-- SCREEN 6D: HOW TO PLAY & MODE ABILITIES GUIDE -->
     <div id="screen-guide" class="menu-screen hidden">
         <div class="menu-panel config-panel">
             <div class="panel-header">
                 <button class="back-btn" data-target="screen-main-menu">&larr; BACK</button>
-                <h2>HOW TO PLAY &amp; ABILITIES GUIDE</h2>
-                <span class="header-badge version-pill-text">v5.0.0</span>
+                <h2>HOW TO PLAY &amp; ABILITIES BY MODE</h2>
+                <span class="header-badge version-pill-text">v5.8.0</span>
             </div>
 
-            <div class="ui-sub-box mb-10">
-                <h3><span>1. MYSTERY [?] SUPPLY DROPS (EVERY 30 SECONDS)</span><span class="guide-time-pill">SPAWNS EVERY 30S</span></h3>
-                <p class="helper-note">
-                    Every <b>30 seconds</b>, a glowing translucent <b>[?] Mystery Zone</b> drops into the arena. Driving into the <b>[?]</b> randomly unlocks one of <b>5 Powerful Abilities</b> OR one of <b>3 Short-Duration Disabilities (Traps)</b>! An icon pops up above your car to show what you unlocked:
-                </p>
+            <div class="guide-section-header">
+                <span>PART 1: ABILITIES &amp; RULES FOR EACH GAME MODE</span>
+                <small style="color:#cbd5e1;">EASY QUICK-START CARDS</small>
+            </div>
+
+            <div class="guide-modes-grid">
+                <div class="guide-mode-card" style="border-color:rgba(52, 211, 153, 0.5);">
+                    <h4><span>STORY MODE</span><span class="beta-pill">BETA</span></h4>
+                    <div class="guide-mode-ability-box">
+                        <strong>MODE ABILITIES (200% DUAL CHARGE):</strong>
+                        Pick 1 Charged Ability (Summon Bot, Fire Ram, Turbo, Shield, or Squad Heal). Charges up to 200% (2 uses)!
+                    </div>
+                    <div class="guide-mode-keys">P1: <b>E</b> (Ability) &bull; <b>Q</b> (3 Bot Patterns)<br>P2: <b>Enter</b> (Ability) &bull; <b>PgUp/PgDn</b> (Patterns)</div>
+                </div>
+
+                <div class="guide-mode-card">
+                    <h4><span>KING OF THE RING</span><span class="guide-time-pill">SOLO FFA</span></h4>
+                    <div class="guide-mode-ability-box" style="border-left-color:#38bdf8;">
+                        <strong style="color:#38bdf8;">MODE ABILITIES (30S [?] DROPS):</strong>
+                        Drive into glowing <b>[?] Mystery Zones</b> every 30s to unlock 1 of 5 Buffs or 3 Traps!
+                    </div>
+                    <div class="guide-mode-keys">Goal: Last Car Standing or Most Kills<br>Controls: <b>WASD</b> + <b>Space</b> (Drift)</div>
+                </div>
+
+                <div class="guide-mode-card" style="border-color:rgba(251, 191, 36, 0.45);">
+                    <h4><span>CAPTURE THE FLAG</span><span class="guide-time-pill" style="color:#fbbf24;">SOLO &amp; 2P</span></h4>
+                    <div class="guide-mode-ability-box" style="border-left-color:#fbbf24;">
+                        <strong style="color:#fbbf24;">MODE ABILITIES (FLAG PASS + [?] DROPS):</strong>
+                        Hold Enemy Stand <b>3s</b> to steal flag. Drive near healthier allies to <b>Auto-Pass Flag</b>!
+                    </div>
+                    <div class="guide-mode-keys">Respawn: <b>9 Seconds</b> at Base<br>Score: Hold Home Stand for <b>2.5s</b></div>
+                </div>
+
+                <div class="guide-mode-card">
+                    <h4><span>STADIUM SQUAD SIEGE</span><span class="guide-time-pill">SOLO TEAM</span></h4>
+                    <div class="guide-mode-ability-box" style="border-left-color:#38bdf8;">
+                        <strong style="color:#38bdf8;">MODE ABILITIES (SPAWN SHIELD + [?]):</strong>
+                        2.0s Invincible Spawn Shield on base respawn + 30s Mystery <b>[?]</b> Ability Drops.
+                    </div>
+                    <div class="guide-mode-keys">Team: You + Allied Bots vs AI Squad<br>Rules: Timed Blitz or Knockout</div>
+                </div>
+
+                <div class="guide-mode-card" style="border-color:rgba(244, 63, 94, 0.45);">
+                    <h4><span>1V1 DUEL &amp; SQUAD WAR</span><span class="guide-time-pill" style="color:#fb7185;">2 PLAYERS</span></h4>
+                    <div class="guide-mode-ability-box" style="border-left-color:#fb7185;">
+                        <strong style="color:#fb7185;">MODE ABILITIES (DIRECTIONAL CRUSH + [?]):</strong>
+                        Rear hits deal <b>1.55x</b> damage, Side T-bones deal <b>1.20x</b> + 30s Mystery <b>[?]</b> Drops.
+                    </div>
+                    <div class="guide-mode-keys">P1: <b>WASD + Space</b><br>P2: <b>Arrows + R-Shift / Numpad 0</b></div>
+                </div>
+
+                <div class="guide-mode-card" style="border-color:rgba(74, 222, 128, 0.45);">
+                    <h4><span>CO-OP ALLIANCE</span><span class="guide-time-pill" style="color:#4ade80;">P1 + P2 TEAM</span></h4>
+                    <div class="guide-mode-ability-box">
+                        <strong>MODE ABILITIES (FRIENDLY SHIELD + [?]):</strong>
+                        Zero friendly-fire damage between P1 &amp; P2 + shared 30s Mystery <b>[?]</b> Ability Drops.
+                    </div>
+                    <div class="guide-mode-keys">Team: P1 + P2 + Allies vs AI Team<br>Maps: All 4 Stadium &amp; Ice Maps</div>
+                </div>
+            </div>
+
+            <div class="guide-section-header">
+                <span>PART 2: VISUAL ABILITY &amp; TRAP ICONS</span>
+                <small style="color:#cbd5e1;">5 POSITIVE ABILITIES &amp; 3 TRAPS</small>
             </div>
 
             <div class="guide-grid">
@@ -884,47 +1040,47 @@
                     <canvas class="guide-icon-canvas" width="56" height="56" data-ability="mystery_orb"></canvas>
                     <div class="guide-card-body">
                         <h4>MYSTERY [?] ZONE <span class="guide-time-pill">EVERY 30S</span></h4>
-                        <p>Color-shifting question mark pad on the arena floor. Collect it to roll a random ability or trap!</p>
+                        <p>Spawns in Stadium Arenas every 30s. Drive into it to unlock a random ability!</p>
                     </div>
                 </div>
 
                 <div class="guide-ability-card">
                     <canvas class="guide-icon-canvas" width="56" height="56" data-ability="repair_partial"></canvas>
                     <div class="guide-card-body">
-                        <h4>REPAIR KIT <span class="guide-time-pill" style="color:#00e676">INSTANT +65 HP</span></h4>
-                        <p>Single green plus emblem. Instantly restores <b>+65 HP</b> and buffs out 50% of chassis dents.</p>
+                        <h4>REPAIR KIT &amp; CRATE <span class="guide-time-pill" style="color:#00e676">+65 TO +85 HP</span></h4>
+                        <p>Instantly restores health and buffs out 50% of car dents.</p>
                     </div>
                 </div>
 
                 <div class="guide-ability-card">
                     <canvas class="guide-icon-canvas" width="56" height="56" data-ability="repair_full"></canvas>
                     <div class="guide-card-body">
-                        <h4>MEGA MEDKIT <span class="guide-time-pill" style="color:#38bdf8">100% FULL HEAL</span></h4>
-                        <p>Medkit with three green pluses. Restores <b>full 200 HP</b> and re-attaches all lost bumpers &amp; fenders!</p>
+                        <h4>MEGA MEDKIT <span class="guide-time-pill" style="color:#38bdf8">100% FULL HP</span></h4>
+                        <p>Restores full 200 HP and re-attaches all lost bumpers &amp; fenders!</p>
                     </div>
                 </div>
 
                 <div class="guide-ability-card">
                     <canvas class="guide-icon-canvas" width="56" height="56" data-ability="inferno_ram"></canvas>
                     <div class="guide-card-body">
-                        <h4>INFERNO FIRE RAM <span class="guide-time-pill" style="color:#f97316">12 SECONDS</span></h4>
-                        <p>Engulfs your car in fire! Deals <b>1.8x ram damage</b> and ignites enemy cars for a 1-second burn.</p>
+                        <h4>INFERNO FIRE RAM <span class="guide-time-pill" style="color:#f97316">1.8X DAMAGE</span></h4>
+                        <p>Engulfs your car in flames! Deals 1.8x ram damage and burns enemies.</p>
                     </div>
                 </div>
 
                 <div class="guide-ability-card">
                     <canvas class="guide-icon-canvas" width="56" height="56" data-ability="titan_shield"></canvas>
                     <div class="guide-card-body">
-                        <h4>TITAN ARMOR SHIELD <span class="guide-time-pill" style="color:#c084fc">10 SECONDS</span></h4>
-                        <p>Purple energy barrier around your vehicle that blocks <b>70% of incoming collision damage</b>.</p>
+                        <h4>TITAN ARMOR SHIELD <span class="guide-time-pill" style="color:#c084fc">70% BLOCK</span></h4>
+                        <p>Purple energy barrier that blocks 70% of incoming collision damage.</p>
                     </div>
                 </div>
 
                 <div class="guide-ability-card">
                     <canvas class="guide-icon-canvas" width="56" height="56" data-ability="hyper_nitro"></canvas>
                     <div class="guide-card-body">
-                        <h4>TURBO SPEED BOOST <span class="guide-time-pill" style="color:#fde047">10 SECONDS</span></h4>
-                        <p>Supercharges engine with <b>+28% top speed</b>, <b>+45% acceleration</b>, and <b>1.35x impact damage</b>.</p>
+                        <h4>TURBO SPEED BOOST <span class="guide-time-pill" style="color:#fde047">+28% SPEED</span></h4>
+                        <p>Boosts top speed by +28%, acceleration by +45%, and impact by 1.35x.</p>
                     </div>
                 </div>
 
@@ -932,126 +1088,174 @@
                     <canvas class="guide-icon-canvas" width="56" height="56" data-ability="tire_puncture"></canvas>
                     <div class="guide-card-body">
                         <h4>TRAP: TIRE PUNCTURE <span class="guide-time-pill" style="color:#ff4d6d">5.5 SECONDS</span></h4>
-                        <p>Disability! Deals <b>-15 HP</b> rim shock, reduces top speed to 58%, and pulls steering sideways.</p>
+                        <p>Deals -15 HP rim shock, slows top speed to 58%, and pulls steering.</p>
                     </div>
                 </div>
 
                 <div class="guide-ability-card trap-card">
                     <canvas class="guide-icon-canvas" width="56" height="56" data-ability="sabotage_bomb"></canvas>
                     <div class="guide-card-body">
-                        <h4>TRAP: MINI-BOMB &amp; GLITCH <span class="guide-time-pill" style="color:#fbbf24">2.5S – 5.0S</span></h4>
-                        <p><b>Mini-Bomb</b> deals instant <b>-28 HP</b> recoil; <b>Steering Glitch</b> scrambles steering for <b>5 seconds</b>!</p>
+                        <h4>TRAP: BOMB &amp; GLITCH <span class="guide-time-pill" style="color:#fbbf24">2.5S - 5.0S</span></h4>
+                        <p>Mini-Bomb deals -28 HP blast; Steering Glitch reverses steering for 5s!</p>
                     </div>
-                </div>
-            </div>
-
-            <div class="config-grid mt-10">
-                <div class="ui-sub-box">
-                    <h3><span>2. GAME MODES &amp; TIMER SETTINGS</span><small>1 TO 5 MINUTES</small></h3>
-                    <p class="helper-note">
-                        &bull; <b>Knockout Mode:</b> Last car or squad standing wins.<br>
-                        &bull; <b>Timed Respawn Blitz (1–5 Min):</b> Wrecked cars respawn inside their Rectangular Base after <b>2.5s</b>. Most Kills at 00:00 wins!<br>
-                        &bull; <b>Capture the Flag (Untimed):</b> Hold Enemy Stand for <b>3s</b> to steal flag, pass to healthier allies, and hold Home Stand for <b>3s</b> to win!
-                    </p>
-                </div>
-                <div class="ui-sub-box">
-                    <h3><span>3. FOUR ARENA MAPS &amp; DAMAGE ZONES</span><small>TACTICAL DRIVING</small></h3>
-                    <p class="helper-note">
-                        &bull; <b>4 Maps:</b> Football Ground (Open), Park Ground (Trees/Benches), Desert Dunes (Oasis/Cacti), and Frostbite Ice (Circular Crystal Dome).<br>
-                        &bull; <b>Directional Hits:</b> Rear hits deal <b>1.55x Rear Crush</b> damage, side T-bones deal <b>1.20x Side Smash</b>, and front hits deal <b>1.0x</b>.
-                    </p>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- SCREEN 7: CONTROLS -->
+        <!-- SCREEN 7: CONTROLS (2 ORGANIZED TABS: 1. PC KEYBOARD VS 2. MOBILE JOYSTICK) -->
     <div id="screen-controls" class="menu-screen hidden">
         <div class="menu-panel config-panel">
             <div class="panel-header">
                 <button class="back-btn" data-target="screen-main-menu">&larr; BACK</button>
-                <h2>CONTROLS</h2>
+                <h2>CONTROLS (PC &amp; MOBILE)</h2>
                 <button id="btn-reset-keys" class="small-action-btn">RESET DEFAULTS</button>
             </div>
 
-            <p class="helper-note mb-10">
-                <b>Player 1 Drift:</b> Hold <b>SPACE</b> &nbsp;|&nbsp; <b>Player 2 Drift:</b> Hold <b>Right Shift</b>, <b>Right Ctrl</b>, or <b>Numpad 0</b> &nbsp;|&nbsp; <b>Camera View:</b> Press <b>C</b>.
-            </p>
+            <!-- TOP 2-OPTION SELECTOR: KEYBOARD (PC) VS JOYSTICK (MOBILE) -->
+            <div class="ctrl-main-tabs">
+                <button type="button" class="ctrl-tab-btn active" data-ctrl-tab="keyboard">
+                    <span>1. KEYBOARD CONTROLS (PC PLAYER)</span>
+                    <small>Customize Player 1 (WASD) &amp; Player 2 (Arrows) Keys</small>
+                </button>
+                <button type="button" class="ctrl-tab-btn" data-ctrl-tab="joystick">
+                    <span>2. JOYSTICK CONTROLS (MOBILE PLAYER)</span>
+                    <small>360&deg; Instant-Snap Touch Joystick &amp; Screen Placement</small>
+                </button>
+            </div>
 
-            <div class="config-grid">
-                <div class="config-card p1-border">
-                    <h3>PLAYER 1 CONTROLS</h3>
-                    <div id="p1-keybind-list" class="keybind-list"></div>
+            <!-- TAB 1: PC KEYBOARD CONTROLS -->
+            <div id="controls-tab-keyboard">
+                <p class="helper-note mb-10">
+                    <b>Player 1 Drift:</b> Hold <b>SPACE</b> &nbsp;|&nbsp; <b>Player 2 Drift:</b> Hold <b>Right Shift</b>, <b>Right Ctrl</b>, or <b>Numpad 0</b> &nbsp;|&nbsp; <b>Camera View:</b> Press <b>C</b>.
+                </p>
+                <div class="config-grid">
+                    <div class="config-card p1-border">
+                        <h3>PLAYER 1 KEYBOARD BINDS</h3>
+                        <div id="p1-keybind-list" class="keybind-list"></div>
+                    </div>
+                    <div class="config-card p2-border">
+                        <h3>PLAYER 2 KEYBOARD BINDS</h3>
+                        <div id="p2-keybind-list" class="keybind-list"></div>
+                    </div>
                 </div>
+            </div>
 
-                <div class="config-card p2-border">
-                    <h3>PLAYER 2 CONTROLS</h3>
-                    <div id="p2-keybind-list" class="keybind-list"></div>
+            <!-- TAB 2: MOBILE JOYSTICK CONTROLS -->
+            <div id="controls-tab-joystick" class="hidden">
+                <div class="config-grid">
+                    <div class="config-card p1-border">
+                        <div class="ui-sub-box">
+                            <h3><span>1. ACTIVE CONTROL DEVICE</span><small id="ctrl-detect-badge" style="color:#4ade80;">AUTO</small></h3>
+                            <p class="helper-note mb-10">Choose whether to auto-detect mobile screens or lock Joystick / Keyboard mode:</p>
+                            <div class="segmented-row">
+                                <button type="button" class="seg-btn active" data-ctrl="auto">AUTO-DETECT</button>
+                                <button type="button" class="seg-btn" data-ctrl="touch">JOYSTICK ON</button>
+                                <button type="button" class="seg-btn" data-ctrl="keyboard">KEYBOARD ONLY</button>
+                            </div>
+                        </div>
+
+                        <div class="ui-sub-box">
+                            <h3><span>2. SINGLE-PLAYER STICK PLACEMENT</span><small>1P MODE</small></h3>
+                            <p class="helper-note mb-10">In 1-Player mode, spawn the stick wherever you tap or lock it (2-Player mode automatically locks P1 Left &amp; P2 Right):</p>
+                            <div class="segmented-row">
+                                <button type="button" class="seg-btn active" data-jpos="dynamic">TAP ANYWHERE</button>
+                                <button type="button" class="seg-btn" data-jpos="left">LEFT CORNER</button>
+                                <button type="button" class="seg-btn" data-jpos="center">CENTER MIDDLE</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="config-card p2-border">
+                        <div class="ui-sub-box">
+                            <h3><span>3. JOYSTICK VISIBILITY</span><small>CLEAR MAP VIEW</small></h3>
+                            <p class="helper-note mb-10">Hide the joystick ring for an unobstructed arena view while still steering normally by touch:</p>
+                            <div class="segmented-row">
+                                <button type="button" class="seg-btn active" data-jvis="show">SHOW JOYSTICK</button>
+                                <button type="button" class="seg-btn" data-jvis="hide">HIDE JOYSTICK</button>
+                            </div>
+                        </div>
+
+                        <div class="ui-sub-box">
+                            <h3><span>4. SUPER-FAST 180&deg; SNAP-TURN ENGINE</span><strong style="color:#fbbf24">v6.1.0</strong></h3>
+                            <p class="helper-note">
+                                &bull; <b>Instant Reversal:</b> Flicking the joystick from Right to Left (or any opposite direction) whips your car around immediately without wide loops.<br>
+                                &bull; <b>Auto-Drift &amp; Story Ability:</b> Sharp turns drift automatically; double-tap the joystick in Story Mode to trigger your Charged Ability!
+                            </p>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- SCREEN 8: SETTINGS -->
+    <!-- SCREEN 8: SETTINGS (CLEANLY ORGANIZED BY CATEGORY) -->
     <div id="screen-settings" class="menu-screen hidden">
         <div class="menu-panel config-panel">
             <div class="panel-header">
                 <button class="back-btn" data-target="screen-main-menu">&larr; BACK</button>
-                <h2>SETTINGS</h2>
-                <span class="header-badge">AUDIO &amp; CAMERA</span>
+                <h2>GAME SETTINGS</h2>
+                <button id="btn-reset-settings" class="small-action-btn">RESET DEFAULTS</button>
             </div>
 
-            <div class="settings-list">
-                <div class="setting-row">
-                    <div>
-                        <strong>Camera View Mode (Shortcut: C)</strong>
-                        <p>Follow Zoom tracks your car closely so vehicles and health bars are easy to see</p>
+            <div class="config-grid">
+                <!-- Left Column: Control Device & Camera/Graphics -->
+                <div class="config-card p1-border">
+                    <div class="ui-sub-box">
+                        <h3><span>1. PLAYER CONTROL DEVICE</span><small>PC OR MOBILE</small></h3>
+                        <p class="helper-note mb-10">Switch between Auto-Detection, PC Keyboard, or Mobile 360&deg; Touch Joystick:</p>
+                        <div class="segmented-row mb-10">
+                            <button type="button" class="seg-btn active" data-ctrl="auto">AUTO-DETECT</button>
+                            <button type="button" class="seg-btn" data-ctrl="keyboard">PC KEYBOARD</button>
+                            <button type="button" class="seg-btn" data-ctrl="touch">MOBILE JOYSTICK</button>
+                        </div>
+                        <h3><span>JOYSTICK RING VISIBILITY</span><small>ON-SCREEN</small></h3>
+                        <div class="segmented-row">
+                            <button type="button" class="seg-btn active" data-jvis="show">SHOW JOYSTICK</button>
+                            <button type="button" class="seg-btn" data-jvis="hide">HIDE JOYSTICK (STEALTH)</button>
+                        </div>
                     </div>
-                    <div class="segmented-row" id="set-camera-mode" style="min-width: 320px;">
-                        <button class="seg-btn active" data-cam="moving_wide">FOLLOW ZOOM</button>
-                        <button class="seg-btn" data-cam="fixed_full">FULL STADIUM</button>
+
+                    <div class="ui-sub-box">
+                        <h3><span>2. CAMERA &amp; VISUAL DETAIL</span><small>SHORTCUT: C</small></h3>
+                        <p class="helper-note mb-10">Follow Zoom tracks your car closely; Full Stadium shows the entire pitch:</p>
+                        <div class="segmented-row mb-10" id="set-camera-mode">
+                            <button type="button" class="seg-btn active" data-cam="moving_wide">FOLLOW ZOOM</button>
+                            <button type="button" class="seg-btn" data-cam="fixed_full">FULL STADIUM</button>
+                        </div>
+                        <h3><span>GRAPHICS PARTICLE DETAIL</span><small>60 FPS</small></h3>
+                        <div class="segmented-row" id="set-gfx-quality">
+                            <button type="button" class="seg-btn" data-gfx="low">PERFORMANCE</button>
+                            <button type="button" class="seg-btn active" data-gfx="high">HIGH DETAIL</button>
+                        </div>
                     </div>
                 </div>
 
-                <div class="setting-row">
-                    <div>
-                        <strong>Master Volume</strong>
-                        <p>Overall game sound volume</p>
+                <!-- Right Column: Audio Mixer -->
+                <div class="config-card">
+                    <div class="ui-sub-box">
+                        <h3><span>3. MASTER SOUND VOLUME</span><strong style="color:#38bdf8" id="lbl-master-vol">80%</strong></h3>
+                        <p class="helper-note mb-10">Controls overall synthesized game audio volume:</p>
+                        <div class="slider-wrap" style="width:100%;">
+                            <input type="range" id="set-master-vol" min="0" max="100" value="80">
+                        </div>
                     </div>
-                    <div class="slider-wrap">
-                        <input type="range" id="set-master-vol" min="0" max="100" value="80">
-                        <span id="lbl-master-vol">80%</span>
-                    </div>
-                </div>
 
-                <div class="setting-row">
-                    <div>
-                        <strong>Effects Volume</strong>
-                        <p>Crash impacts, explosions &amp; countdown tones</p>
+                    <div class="ui-sub-box">
+                        <h3><span>4. COMBAT EFFECTS VOLUME</span><strong style="color:#4ade80" id="lbl-sfx-vol">90%</strong></h3>
+                        <p class="helper-note mb-10">Controls crash impacts, explosions, ability chimes &amp; countdown tones:</p>
+                        <div class="slider-wrap" style="width:100%;">
+                            <input type="range" id="set-sfx-vol" min="0" max="100" value="90">
+                        </div>
                     </div>
-                    <div class="slider-wrap">
-                        <input type="range" id="set-sfx-vol" min="0" max="100" value="90">
-                        <span id="lbl-sfx-vol">90%</span>
-                    </div>
-                </div>
 
-                <div class="setting-row">
-                    <div>
-                        <strong>Visual Detail</strong>
-                        <p>Controls tire tracks, sparks, smoke &amp; debris</p>
+                    <div class="ui-sub-box">
+                        <h3><span>5. QUICK TIPS</span><small>PC &amp; MOBILE</small></h3>
+                        <p class="helper-note">
+                            &bull; <b>Minimap Radar:</b> Positioned in the upper-right corner so bottom joysticks never block your view.<br>
+                            &bull; <b>Reset Defaults:</b> Click <b>RESET DEFAULTS</b> in the top-right to restore all original Audio, Camera, Keyboard, and Joystick settings.
+                        </p>
                     </div>
-                    <div class="segmented-row" id="set-gfx-quality">
-                        <button class="seg-btn" data-gfx="low">PERFORMANCE</button>
-                        <button class="seg-btn active" data-gfx="high">HIGH DETAIL</button>
-                    </div>
-                </div>
-
-                <div class="setting-row">
-                    <div>
-                        <strong>How to Play &amp; Abilities Encyclopedia</strong>
-                        <p>View all 8 Mystery [?] Abilities &amp; Traps, durations, maps, and Capture the Flag rules</p>
-                    </div>
-                    <button id="btn-settings-guide" class="menu-btn primary-btn" style="padding:9px 16px;font-size:12.5px;">OPEN GAME GUIDE &rarr;</button>
                 </div>
             </div>
         </div>
@@ -1094,37 +1298,133 @@
         </div>
     </div>
 
-    <!-- SCREEN 10: CREDITS (Muhammad Haseeb Ahmed) -->
+            <!-- SCREEN 10: CREDITS & AUTO-SCROLLING PROJECTS SHOWCASE (Muhammad Haseeb Ahmed) -->
     <div id="screen-credits" class="menu-screen hidden">
-        <div class="menu-panel">
+        <div class="menu-panel config-panel">
             <div class="panel-header">
                 <button class="back-btn" data-target="screen-main-menu">&larr; BACK</button>
-                <h2>GAME CREDITS</h2>
-                <span class="header-badge version-pill-text">v5.0.0</span>
+                <h2>CREDITS &amp; ENGINEERED PROJECTS</h2>
+                <span class="header-badge version-pill-text">v6.1.0</span>
             </div>
 
             <div class="credits-hero">
-                <span class="brand-tag">CREATED &amp; ENGINEERED BY</span>
+                <span class="brand-tag">ALL ENGINES, VERSIONS &amp; ASSETS WRITTEN BY</span>
                 <h1 class="credits-author">MUHAMMAD HASEEB AHMED</h1>
-                <p class="credits-role">Lead Game Developer &bull; Gameplay Programmer &bull; AI &amp; UI Architect</p>
+                <p class="credits-role">Lead Game Developer &bull; Physics &amp; AI Architect &bull; Custom Vector Asset Designer &bull; Mobile &amp; PC UI Engineer</p>
             </div>
 
-            <div class="credits-grid mt-14">
-                <div class="credits-item">
-                    <strong>Game Design &amp; Direction</strong>
-                    <span>Muhammad Haseeb Ahmed</span>
-                </div>
-                <div class="credits-item">
-                    <strong>2D Physics &amp; Deformation Engine</strong>
-                    <span>Muhammad Haseeb Ahmed</span>
-                </div>
-                <div class="credits-item">
-                    <strong>Tactical Combat AI System</strong>
-                    <span>Muhammad Haseeb Ahmed</span>
-                </div>
-                <div class="credits-item">
-                    <strong>UI/UX &amp; Procedural Web Audio</strong>
-                    <span>Muhammad Haseeb Ahmed</span>
+            <div class="guide-section-header">
+                <span>DYNAMIC PROJECT MODULES, VERSIONS &amp; CUSTOM ASSETS</span>
+                <small style="color:#fbbf24;">AUTO-SCROLLING SHOWCASE (HOVER TO PAUSE)</small>
+            </div>
+
+            <div class="projects-marquee-viewport">
+                <div class="projects-marquee-track">
+                    <!-- Pass 1 of Engineered Projects & Versions -->
+                    <div class="project-card-row">
+                        <div class="project-feature-card">
+                            <span class="proj-tag">PROJECT MODULE 01 &bull; v6.1.0 NEW</span>
+                            <h4>Instant-Snap 360&deg; Mobile Reflex Joystick Engine</h4>
+                            <p>Engineered rapid 180-degree snap-turn and velocity redirection for mobile touch joysticks, allowing instant right-to-left reversals, auto-drifting, and split 2-player multi-touch.</p>
+                        </div>
+                        <div class="project-feature-card">
+                            <span class="proj-tag">PROJECT MODULE 02 &bull; v6.1.0 NEW</span>
+                            <h4>Dual-Tab PC Keyboard &amp; Mobile Control Architecture</h4>
+                            <p>Organized Controls &amp; Settings architecture featuring dedicated PC Keyboard vs. Mobile Joystick tabs, Stealth Hide-Stick mode, Upper-Right Radar Minimap, and unified Reset Defaults.</p>
+                        </div>
+                    </div>
+
+                    <div class="project-card-row">
+                        <div class="project-feature-card">
+                            <span class="proj-tag">PROJECT MODULE 03 &bull; CORE ENGINE</span>
+                            <h4>60 FPS Delta-Time 2D Physics &amp; Drift Engine</h4>
+                            <p>Custom momentum, angular impulse, directional hit-zone math (1.55x Rear / 1.2x Side), and circular ice boundary reflection written from scratch by Muhammad Haseeb Ahmed.</p>
+                        </div>
+                        <div class="project-feature-card">
+                            <span class="proj-tag">PROJECT MODULE 04 &bull; CUSTOM ASSETS</span>
+                            <h4>Progressive Car Deformation &amp; Detachable Parts</h4>
+                            <p>100% procedural HTML5 Canvas vector vehicles: Apex GT, 6-Wheel Zombie Hauler Semi-Trucks, 8-Wheel Siege Rigs, Naval Gunboats, and flying bumpers/spoilers.</p>
+                        </div>
+                    </div>
+
+                    <div class="project-card-row">
+                        <div class="project-feature-card">
+                            <span class="proj-tag">PROJECT MODULE 05 &bull; ARTIFICIAL INTELLIGENCE</span>
+                            <h4>Tactical FSM AI &amp; Commando Formation Brain</h4>
+                            <p>Multi-role AI featuring 5-slot flanking, CTF Evasive Juking &amp; Relay Passing, Standby vs Enemy-Near Radar Patrol, and 3 live Commando Bot Formations.</p>
+                        </div>
+                        <div class="project-feature-card">
+                            <span class="proj-tag">PROJECT MODULE 06 &bull; BETA CAMPAIGN</span>
+                            <h4>Story Mode Overland Engine (Episodes 1 &amp; 2)</h4>
+                            <p>19,000-unit scrollable 5-stage overland highway with Opening &amp; Extraction Cutscenes, Gate Key Flags, 200% Dual-Charge Ability Bank, and Viper Cage Rescue.</p>
+                        </div>
+                    </div>
+
+                    <div class="project-card-row">
+                        <div class="project-feature-card">
+                            <span class="proj-tag">PROJECT MODULE 07 &bull; OBJECTIVE WARFARE</span>
+                            <h4>Capture the Flag &amp; Timed Respawn Siege Engine</h4>
+                            <p>Animated waving cloth flag physics, 3s steal &amp; 2.5s capture rings, automatic flag handoffs to healthier allies, and 9-second rectangular base respawns.</p>
+                        </div>
+                        <div class="project-feature-card">
+                            <span class="proj-tag">PROJECT MODULE 08 &bull; SOUND, MAPS &amp; CLOUD</span>
+                            <h4>Procedural Web Audio, 4 Arenas &amp; Career Telemetry</h4>
+                            <p>Zero-dependency Web Audio synthesizer, 4 multi-biome arenas (Football, Park, Desert, Ice), GoatCounter analytics, and Web3Forms player feedback.</p>
+                        </div>
+                    </div>
+
+                    <!-- Pass 2 (Seamless Loop Duplicate) -->
+                    <div class="project-card-row">
+                        <div class="project-feature-card">
+                            <span class="proj-tag">PROJECT MODULE 01 &bull; v6.1.0 NEW</span>
+                            <h4>Instant-Snap 360&deg; Mobile Reflex Joystick Engine</h4>
+                            <p>Engineered rapid 180-degree snap-turn and velocity redirection for mobile touch joysticks, allowing instant right-to-left reversals, auto-drifting, and split 2-player multi-touch.</p>
+                        </div>
+                        <div class="project-feature-card">
+                            <span class="proj-tag">PROJECT MODULE 02 &bull; v6.1.0 NEW</span>
+                            <h4>Dual-Tab PC Keyboard &amp; Mobile Control Architecture</h4>
+                            <p>Organized Controls &amp; Settings architecture featuring dedicated PC Keyboard vs. Mobile Joystick tabs, Stealth Hide-Stick mode, Upper-Right Radar Minimap, and unified Reset Defaults.</p>
+                        </div>
+                    </div>
+
+                    <div class="project-card-row">
+                        <div class="project-feature-card">
+                            <span class="proj-tag">PROJECT MODULE 03 &bull; CORE ENGINE</span>
+                            <h4>60 FPS Delta-Time 2D Physics &amp; Drift Engine</h4>
+                            <p>Custom momentum, angular impulse, directional hit-zone math (1.55x Rear / 1.2x Side), and circular ice boundary reflection written from scratch by Muhammad Haseeb Ahmed.</p>
+                        </div>
+                        <div class="project-feature-card">
+                            <span class="proj-tag">PROJECT MODULE 04 &bull; CUSTOM ASSETS</span>
+                            <h4>Progressive Car Deformation &amp; Detachable Parts</h4>
+                            <p>100% procedural HTML5 Canvas vector vehicles: Apex GT, 6-Wheel Zombie Hauler Semi-Trucks, 8-Wheel Siege Rigs, Naval Gunboats, and flying bumpers/spoilers.</p>
+                        </div>
+                    </div>
+
+                    <div class="project-card-row">
+                        <div class="project-feature-card">
+                            <span class="proj-tag">PROJECT MODULE 05 &bull; ARTIFICIAL INTELLIGENCE</span>
+                            <h4>Tactical FSM AI &amp; Commando Formation Brain</h4>
+                            <p>Multi-role AI featuring 5-slot flanking, CTF Evasive Juking &amp; Relay Passing, Standby vs Enemy-Near Radar Patrol, and 3 live Commando Bot Formations.</p>
+                        </div>
+                        <div class="project-feature-card">
+                            <span class="proj-tag">PROJECT MODULE 06 &bull; BETA CAMPAIGN</span>
+                            <h4>Story Mode Overland Engine (Episodes 1 &amp; 2)</h4>
+                            <p>19,000-unit scrollable 5-stage overland highway with Opening &amp; Extraction Cutscenes, Gate Key Flags, 200% Dual-Charge Ability Bank, and Viper Cage Rescue.</p>
+                        </div>
+                    </div>
+
+                    <div class="project-card-row">
+                        <div class="project-feature-card">
+                            <span class="proj-tag">PROJECT MODULE 07 &bull; OBJECTIVE WARFARE</span>
+                            <h4>Capture the Flag &amp; Timed Respawn Siege Engine</h4>
+                            <p>Animated waving cloth flag physics, 3s steal &amp; 2.5s capture rings, automatic flag handoffs to healthier allies, and 9-second rectangular base respawns.</p>
+                        </div>
+                        <div class="project-feature-card">
+                            <span class="proj-tag">PROJECT MODULE 08 &bull; SOUND, MAPS &amp; CLOUD</span>
+                            <h4>Procedural Web Audio, 4 Arenas &amp; Career Telemetry</h4>
+                            <p>Zero-dependency Web Audio synthesizer, 4 multi-biome arenas (Football, Park, Desert, Ice), GoatCounter analytics, and Web3Forms player feedback.</p>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -1244,6 +1544,7 @@
     <script src="js/core/config.js"></script>
     <script src="js/core/audio.js"></script>
     <script src="js/core/input.js"></script>
+    <script src="js/core/mobileControls.js"></script>
     <script src="js/core/camera.js"></script>
     <!-- Entities & Physics -->
     <script src="js/entities/car.js"></script>
@@ -1256,6 +1557,7 @@
     <script src="js/modes/coopTeam.js"></script>
     <script src="js/modes/squadWar.js"></script>
     <script src="js/modes/captureFlag.js"></script>
+    <script src="js/modes/storyMode.js"></script>
     <!-- Features & UI -->
     <script src="js/features/telemetry.js"></script>
     <script src="js/features/announcer.js"></script>

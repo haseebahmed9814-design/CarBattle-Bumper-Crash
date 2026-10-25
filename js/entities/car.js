@@ -1,8 +1,8 @@
 class BattleCar {
     constructor(opts) {
         this.id = opts.id;
-        this.label = opts.label || 'CAR';
-        this.team = opts.team || 'FFA';
+        this.label = opts.label || "CAR";
+        this.team = opts.team || "FFA";
         this.isAI = !!opts.isAI;
         this.playerSlot = opts.playerSlot || null;
         this.spec = VEHICLE_ARCHETYPES.classic;
@@ -58,7 +58,6 @@ class BattleCar {
         this.powerupMaxTimer = 0;
         this.powerupMeta = null;
 
-        // 2.5-Second (150 frames) On-Car Visual Trap Animation State
         this.trapAnimType = null;
         this.trapAnimTimer = 0;
         this.trapAnimMaxTimer = 150;
@@ -76,19 +75,17 @@ class BattleCar {
             leftFender: true, rightFender: true, hood: true
         };
 
-        if (this.isAI && typeof TacticalAIBrain !== 'undefined') {
+        if (this.isAI && typeof TacticalAIBrain !== "undefined") {
             this.aiBrain = new TacticalAIBrain(this);
         }
     }
 
-    // Respawns car strictly inside its assigned Rectangular Base Section!
     respawnAtBase(arena) {
         let rx = this.spawnX;
         let ry = this.spawnY;
 
-        if (typeof Game !== 'undefined' && Game.cars) {
+        if (typeof Game !== "undefined" && Game.cars) {
             if (this.baseRect) {
-                // Search candidate slots strictly INSIDE the team's Rectangular Base
                 const r = this.baseRect;
                 const candidateYOffsets = [0, -95, 95, -190, 190, -275, 275];
                 const candidateXOffsets = [0, -36, 36];
@@ -109,7 +106,6 @@ class BattleCar {
                     if (foundSpot) break;
                 }
             } else {
-                // Individual Rectangular Pad for Solo FFA Timed Respawn
                 for (let attempt = 0; attempt < 6; attempt++) {
                     const clash = Game.cars.some(other => other !== this && !other.dead && Math.hypot(other.x - rx, other.y - ry) < this.radius * 2.15);
                     if (!clash) break;
@@ -123,9 +119,9 @@ class BattleCar {
         this.x = rx;
         this.y = ry;
         this.angle = this.spawnAngle;
-        this.spawnShieldTimer = 120; // 2.0 seconds of spawn protection
+        this.spawnShieldTimer = 120;
 
-        if (typeof Game !== 'undefined') {
+        if (typeof Game !== "undefined") {
             Game.shockwaves.push({ x: this.x, y: this.y, r: 10, maxR: 135, alpha: 0.95, color: this.lightColor });
             Game.floatingTexts.push({
                 x: this.x, y: this.y - 36,
@@ -133,20 +129,20 @@ class BattleCar {
                 color: this.lightColor, life: 1.15
             });
         }
-        if (typeof SoundEngine !== 'undefined') {
+        if (typeof SoundEngine !== "undefined") {
             SoundEngine.playPowerupPickup(true, false);
         }
     }
 
     triggerTrapAnimation(trapId) {
         this.trapAnimType = trapId;
-        this.trapAnimTimer = 150; // 2.5 seconds at 60fps
+        this.trapAnimTimer = 150;
         this.trapAnimMaxTimer = 150;
     }
 
     applyDirectionalDamage(amount, zone, hitX, hitY, attacker) {
         if (this.dead) return;
-        if (this.spawnShieldTimer > 0) return; // Protected right after respawning at base
+        if (this.spawnShieldTimer > 0) return;
 
         this.hp = Math.max(0, this.hp - amount);
         if (attacker && attacker !== this) {
@@ -154,23 +150,23 @@ class BattleCar {
             attacker.damageDealt += Math.round(amount);
         }
 
-        if (zone === 'REAR') {
+        if (zone === "REAR") {
             this.dentRear = Math.min(16, this.dentRear + amount * 0.24);
             if (this.dentRear > 4.5 && this.parts.rearSpoiler) {
                 this.parts.rearSpoiler = false;
-                Game.spawnDetachedPart(hitX, hitY, this.angle + Math.PI / 2, 36, 6, '#0f172a');
+                Game.spawnDetachedPart(hitX, hitY, this.angle + Math.PI / 2, 36, 6, "#0f172a");
             }
             if (this.dentRear > 8.5 && this.parts.rearBumper) {
                 this.parts.rearBumper = false;
-                Game.spawnDetachedPart(hitX, hitY, this.angle + Math.PI / 2, 32, 7, '#1e293b');
+                Game.spawnDetachedPart(hitX, hitY, this.angle + Math.PI / 2, 32, 7, "#1e293b");
             }
-        } else if (zone === 'LEFT') {
+        } else if (zone === "LEFT") {
             this.dentLeft = Math.min(12, this.dentLeft + amount * 0.22);
             if (this.dentLeft > 5.5 && this.parts.leftFender) {
                 this.parts.leftFender = false;
                 Game.spawnDetachedPart(hitX, hitY, this.angle, 34, 6, this.mainColor);
             }
-        } else if (zone === 'RIGHT') {
+        } else if (zone === "RIGHT") {
             this.dentRight = Math.min(12, this.dentRight + amount * 0.22);
             if (this.dentRight > 5.5 && this.parts.rightFender) {
                 this.parts.rightFender = false;
@@ -180,7 +176,7 @@ class BattleCar {
             this.dentFront = Math.min(15, this.dentFront + amount * 0.21);
             if (this.dentFront > 6.5 && this.parts.frontBumper) {
                 this.parts.frontBumper = false;
-                Game.spawnDetachedPart(hitX, hitY, this.angle + Math.PI / 2, 32, 7, '#1e293b');
+                Game.spawnDetachedPart(hitX, hitY, this.angle + Math.PI / 2, 32, 7, "#1e293b");
             }
             if (this.hp < this.maxHp * 0.40 && this.parts.hood) {
                 this.parts.hood = false;
@@ -196,10 +192,12 @@ class BattleCar {
             this.activePowerup = null;
             this.trapAnimTimer = 0;
             this.burningTimer = 0;
-            if (MatchConfig.timedMode || MatchConfig.mode === 'ctf') {
-                this.respawnTimer = 150; // 2.5 seconds until respawn at base!
+            if (MatchConfig.mode === "ctf") {
+                this.respawnTimer = 540;
+            } else if (MatchConfig.timedMode) {
+                this.respawnTimer = 150;
             }
-            if (MatchConfig.mode === 'ctf' && typeof CaptureFlagMode !== 'undefined') {
+            if (MatchConfig.mode === "ctf" && typeof CaptureFlagMode !== "undefined") {
                 CaptureFlagMode.onCarDestroyed(this);
             }
             if (attacker && attacker !== this) attacker.kills++;
@@ -216,20 +214,18 @@ class BattleCar {
         ctx.save();
         ctx.globalAlpha = alpha;
 
-        if (this.trapAnimType === 'tire_puncture') {
-            // 1. Expanding Air-Burst Rings & Flying Rubber Shrapnel around Front-Left Punctured Tire
+        if (this.trapAnimType === "tire_puncture") {
             const wx = L * 0.29, wy = -W * 0.49;
             const burstR = 8 + ((now * 0.08) % 28);
-            ctx.strokeStyle = '#f87171';
+            ctx.strokeStyle = "#f87171";
             ctx.lineWidth = 2.5;
             ctx.setLineDash([4, 4]);
             ctx.beginPath();
             ctx.arc(wx, wy, burstR, 0, Math.PI * 2);
             ctx.stroke();
 
-            // Jagged Rim Sparks & Deflation Air Lines
             ctx.setLineDash([]);
-            ctx.strokeStyle = '#fde047';
+            ctx.strokeStyle = "#fde047";
             ctx.lineWidth = 2;
             for (let i = 0; i < 5; i++) {
                 const a = (now * 0.02) + (i * Math.PI * 0.4);
@@ -238,22 +234,20 @@ class BattleCar {
                 ctx.lineTo(wx + Math.cos(a) * 18, wy + Math.sin(a) * 18);
                 ctx.stroke();
             }
-        } else if (this.trapAnimType === 'sabotage_bomb') {
-            // 2. Fiery Pulsing Scorch Ring & Shrapnel Arcs on Chassis
+        } else if (this.trapAnimType === "sabotage_bomb") {
             const blastR = 16 + Math.sin(now * 0.04) * 10 + progress * 18;
             const grad = ctx.createRadialGradient(0, 0, 4, 0, 0, blastR);
-            grad.addColorStop(0, 'rgba(254, 240, 138, 0.85)');
-            grad.addColorStop(0.5, 'rgba(249, 115, 22, 0.65)');
-            grad.addColorStop(1, 'rgba(220, 38, 38, 0)');
+            grad.addColorStop(0, "rgba(254, 240, 138, 0.85)");
+            grad.addColorStop(0.5, "rgba(249, 115, 22, 0.65)");
+            grad.addColorStop(1, "rgba(220, 38, 38, 0)");
             ctx.fillStyle = grad;
             ctx.beginPath();
             ctx.arc(0, 0, blastR, 0, Math.PI * 2);
             ctx.fill();
-        } else if (this.trapAnimType === 'steering_glitch') {
-            // 3. High-Voltage Electric Lightning Bolts Crackling Across Hood & Front Wheels
-            ctx.strokeStyle = (Math.floor(now / 50) % 2 === 0) ? '#38bdf8' : '#fde047';
+        } else if (this.trapAnimType === "steering_glitch") {
+            ctx.strokeStyle = (Math.floor(now / 50) % 2 === 0) ? "#38bdf8" : "#fde047";
             ctx.lineWidth = 2.6;
-            ctx.shadowColor = '#38bdf8';
+            ctx.shadowColor = "#38bdf8";
             ctx.shadowBlur = 10;
             for (let b = 0; b < 3; b++) {
                 ctx.beginPath();
@@ -277,7 +271,6 @@ class BattleCar {
         const hpRatio = Math.max(0, this.hp / this.maxHp);
         const now = performance.now();
 
-        // Ring is strictly drawn ONLY under human-controlled cars (!this.isAI)
         if (!this.dead && showIndicator && !this.isAI) {
             ctx.save();
             ctx.strokeStyle = this.teamRingColor;
@@ -289,11 +282,10 @@ class BattleCar {
             ctx.restore();
         }
 
-        // Spawn Protection Shield Ring right after Base Respawn
         if (!this.dead && this.spawnShieldTimer > 0) {
             ctx.save();
-            ctx.strokeStyle = '#38bdf8';
-            ctx.fillStyle = 'rgba(56, 189, 248, 0.16)';
+            ctx.strokeStyle = "#38bdf8";
+            ctx.fillStyle = "rgba(56, 189, 248, 0.16)";
             ctx.lineWidth = 2.5;
             ctx.setLineDash([8, 6]);
             ctx.beginPath();
@@ -303,38 +295,37 @@ class BattleCar {
             ctx.restore();
         }
 
-        // Active Timed Power-Up or Trap Visual Aura around Car
         if (!this.dead && (this.activePowerup || this.trapAnimTimer > 0)) {
             ctx.save();
-            if (this.activePowerup === 'inferno_ram') {
+            if (this.activePowerup === "inferno_ram") {
                 const flameR = this.radius + 13 + Math.sin(now * 0.025) * 4;
                 const fGrad = ctx.createRadialGradient(0, 0, this.radius * 0.4, 0, 0, flameR);
-                fGrad.addColorStop(0, 'rgba(251, 191, 36, 0.15)');
-                fGrad.addColorStop(0.65, 'rgba(249, 115, 22, 0.55)');
-                fGrad.addColorStop(1, 'rgba(239, 68, 68, 0)');
+                fGrad.addColorStop(0, "rgba(251, 191, 36, 0.15)");
+                fGrad.addColorStop(0.65, "rgba(249, 115, 22, 0.55)");
+                fGrad.addColorStop(1, "rgba(239, 68, 68, 0)");
                 ctx.fillStyle = fGrad;
                 ctx.beginPath();
                 ctx.arc(0, 0, flameR, 0, Math.PI * 2);
                 ctx.fill();
-            } else if (this.activePowerup === 'titan_shield') {
-                ctx.strokeStyle = '#c084fc';
-                ctx.fillStyle = 'rgba(139, 92, 246, 0.22)';
+            } else if (this.activePowerup === "titan_shield") {
+                ctx.strokeStyle = "#c084fc";
+                ctx.fillStyle = "rgba(139, 92, 246, 0.22)";
                 ctx.lineWidth = 3;
                 ctx.beginPath();
                 ctx.arc(0, 0, this.radius + 12, 0, Math.PI * 2);
                 ctx.fill();
                 ctx.stroke();
-            } else if (this.activePowerup === 'hyper_nitro') {
-                ctx.strokeStyle = '#fde047';
+            } else if (this.activePowerup === "hyper_nitro") {
+                ctx.strokeStyle = "#fde047";
                 ctx.lineWidth = 2.5;
                 ctx.setLineDash([10, 6]);
                 ctx.beginPath();
                 ctx.arc(0, 0, this.radius + 11, now * 0.01, now * 0.01 + Math.PI * 2);
                 ctx.stroke();
-            } else if (this.activePowerup === 'tire_puncture' || this.activePowerup === 'steering_glitch' || this.trapAnimTimer > 0) {
+            } else if (this.activePowerup === "tire_puncture" || this.activePowerup === "steering_glitch" || this.trapAnimTimer > 0) {
                 const pulseHazard = Math.sin(now * 0.03) * 3;
-                ctx.strokeStyle = '#ff1e42';
-                ctx.fillStyle = 'rgba(255, 30, 66, 0.14)';
+                ctx.strokeStyle = "#ff1e42";
+                ctx.fillStyle = "rgba(255, 30, 66, 0.14)";
                 ctx.lineWidth = 3;
                 ctx.setLineDash([7, 5]);
                 ctx.beginPath();
@@ -353,18 +344,18 @@ class BattleCar {
         const botY = W / 2 - this.dentRight;
 
         if (!this.dead) {
-            ctx.fillStyle = '#64748b';
+            ctx.fillStyle = "#64748b";
             ctx.fillRect(rX - 5, -W * 0.25, 5, 4.5);
             ctx.fillRect(rX - 5, W * 0.25 - 4.5, 5, 4.5);
 
             if (this.isAccelerating) {
-                const boostMult = this.activePowerup === 'hyper_nitro' ? 1.75 : (this.activePowerup === 'inferno_ram' ? 1.55 : 1.0);
+                const boostMult = this.activePowerup === "hyper_nitro" ? 1.75 : (this.activePowerup === "inferno_ram" ? 1.55 : 1.0);
                 const pulse = (10 + Math.sin(now * 0.035 + this.id) * 3.5) * boostMult;
                 ctx.save();
-                ctx.shadowColor = this.activePowerup === 'inferno_ram' ? '#f97316' : this.glowColor;
+                ctx.shadowColor = this.activePowerup === "inferno_ram" ? "#f97316" : this.glowColor;
                 ctx.shadowBlur = 10;
 
-                ctx.fillStyle = this.activePowerup === 'inferno_ram' ? '#f97316' : this.mainColor;
+                ctx.fillStyle = this.activePowerup === "inferno_ram" ? "#f97316" : this.mainColor;
                 ctx.beginPath();
                 ctx.moveTo(rX - 5, -W * 0.25 - 0.5);
                 ctx.lineTo(rX - 5 - pulse, -W * 0.25 + 2.2);
@@ -374,7 +365,7 @@ class BattleCar {
                 ctx.lineTo(rX - 5, W * 0.25 + 0.5);
                 ctx.fill();
 
-                ctx.fillStyle = this.activePowerup === 'inferno_ram' ? '#fef08a' : this.lightColor;
+                ctx.fillStyle = this.activePowerup === "inferno_ram" ? "#fef08a" : this.lightColor;
                 ctx.beginPath();
                 ctx.moveTo(rX - 5, -W * 0.25 + 0.8);
                 ctx.lineTo(rX - 5 - pulse * 0.55, -W * 0.25 + 2.2);
@@ -387,8 +378,8 @@ class BattleCar {
             }
 
             const beamGrad = ctx.createLinearGradient(L * 0.4, 0, L * 2.4, 0);
-            beamGrad.addColorStop(0, 'rgba(224, 242, 254, 0.24)');
-            beamGrad.addColorStop(1, 'rgba(224, 242, 254, 0)');
+            beamGrad.addColorStop(0, "rgba(224, 242, 254, 0.24)");
+            beamGrad.addColorStop(1, "rgba(224, 242, 254, 0)");
             ctx.fillStyle = beamGrad;
             ctx.beginPath();
             ctx.moveTo(fX, -W * 0.36);
@@ -399,8 +390,8 @@ class BattleCar {
             ctx.fill();
         }
 
-        ctx.fillStyle = 'rgba(0, 0, 0, 0.48)';
-        ctx.shadowColor = this.dead ? 'transparent' : this.glowColor;
+        ctx.fillStyle = "rgba(0, 0, 0, 0.48)";
+        ctx.shadowColor = this.dead ? "transparent" : this.glowColor;
         ctx.shadowBlur = this.dead ? 0 : 14;
         ctx.beginPath();
         ctx.roundRect(-L / 2 - 2, -W / 2 + 3, L + 4, W - 2, 14);
@@ -417,28 +408,28 @@ class BattleCar {
             ctx.save();
             ctx.translate(w.x, w.y);
             if (w.front) ctx.rotate(this.wheelAngle);
-            const isPuncturedWheel = (this.activePowerup === 'tire_puncture' && idx === 0);
+            const isPuncturedWheel = (this.activePowerup === "tire_puncture" && idx === 0);
             if ((hpRatio < 0.30 || isPuncturedWheel) && idx === 0) {
                 ctx.rotate(0.36 * Math.sin(now * 0.055));
             }
-            ctx.fillStyle = isPuncturedWheel ? '#7f1d1d' : '#090d16';
+            ctx.fillStyle = isPuncturedWheel ? "#7f1d1d" : "#090d16";
             ctx.beginPath();
             ctx.roundRect(-11, -6, 22, 12, 3.5);
             ctx.fill();
-            ctx.fillStyle = isPuncturedWheel ? '#f87171' : '#cbd5e1';
+            ctx.fillStyle = isPuncturedWheel ? "#f87171" : "#cbd5e1";
             ctx.fillRect(-6, -2.2, 12, 4.4);
             ctx.fillStyle = this.lightColor;
             ctx.fillRect(-1.5, -1.5, 3, 3);
             ctx.restore();
         });
 
-        ctx.fillStyle = '#111827';
+        ctx.fillStyle = "#111827";
         ctx.fillRect(0, -W * 0.34, L * 0.38, W * 0.68);
-        ctx.fillStyle = '#94a3b8';
+        ctx.fillStyle = "#94a3b8";
         ctx.fillRect(L * 0.08, -W * 0.22, 15, W * 0.44);
 
         if (this.dead) {
-            ctx.fillStyle = '#27272a';
+            ctx.fillStyle = "#27272a";
         } else {
             const bodyGrad = ctx.createLinearGradient(rX, topY, fX, botY);
             bodyGrad.addColorStop(0, this.darkColor);
@@ -448,7 +439,7 @@ class BattleCar {
             ctx.fillStyle = bodyGrad;
         }
 
-        ctx.strokeStyle = '#090d16';
+        ctx.strokeStyle = "#090d16";
         ctx.lineWidth = 2.5;
         ctx.beginPath();
         ctx.moveTo(rX, topY + 6);
@@ -469,23 +460,23 @@ class BattleCar {
 
         if (!this.dead) {
             ctx.fillStyle = this.mainColor;
-            ctx.strokeStyle = '#090d16';
+            ctx.strokeStyle = "#090d16";
             ctx.lineWidth = 1.2;
             ctx.beginPath(); ctx.roundRect(L * 0.04, topY - 4, 7, 4, 2); ctx.fill(); ctx.stroke();
             ctx.beginPath(); ctx.roundRect(L * 0.04, botY, 7, 4, 2); ctx.fill(); ctx.stroke();
         }
 
         if (!this.dead && this.parts.hood) {
-            ctx.fillStyle = 'rgba(255, 255, 255, 0.88)';
+            ctx.fillStyle = "rgba(255, 255, 255, 0.88)";
             ctx.fillRect(rX + 6, -4.5, (fX - rX) - 12, 3);
             ctx.fillRect(rX + 6, 1.5, (fX - rX) - 12, 3);
 
-            ctx.fillStyle = 'rgba(9, 13, 22, 0.8)';
+            ctx.fillStyle = "rgba(9, 13, 22, 0.8)";
             ctx.fillRect(L * 0.15, -W * 0.27, 10, 5);
             ctx.fillRect(L * 0.15, W * 0.27 - 5, 10, 5);
 
-            ctx.fillStyle = '#fbbf24';
-            ctx.strokeStyle = '#090d16';
+            ctx.fillStyle = "#fbbf24";
+            ctx.strokeStyle = "#090d16";
             ctx.lineWidth = 1;
             ctx.beginPath();
             ctx.moveTo(L * 0.34, 0);
@@ -498,27 +489,27 @@ class BattleCar {
         }
 
         if (this.parts.frontBumper && !this.dead) {
-            ctx.fillStyle = this.activePowerup === 'inferno_ram' ? '#f97316' : '#0f172a';
-            ctx.strokeStyle = this.activePowerup === 'inferno_ram' ? '#fef08a' : '#e2e8f0';
+            ctx.fillStyle = this.activePowerup === "inferno_ram" ? "#f97316" : "#0f172a";
+            ctx.strokeStyle = this.activePowerup === "inferno_ram" ? "#fef08a" : "#e2e8f0";
             ctx.lineWidth = 1.4;
             ctx.beginPath(); ctx.roundRect(fX - 1, -W * 0.44, 6, W * 0.88, 3); ctx.fill(); ctx.stroke();
         }
         if (this.parts.rearBumper && !this.dead) {
-            ctx.fillStyle = '#0f172a'; ctx.strokeStyle = '#ff4d6d'; ctx.lineWidth = 1.4;
+            ctx.fillStyle = "#0f172a"; ctx.strokeStyle = "#ff4d6d"; ctx.lineWidth = 1.4;
             ctx.beginPath(); ctx.roundRect(rX - 4, -W * 0.44, 6, W * 0.88, 3); ctx.fill(); ctx.stroke();
         }
         if (this.parts.rearSpoiler && !this.dead) {
-            ctx.fillStyle = '#090d16'; ctx.strokeStyle = this.lightColor; ctx.lineWidth = 1.3;
+            ctx.fillStyle = "#090d16"; ctx.strokeStyle = this.lightColor; ctx.lineWidth = 1.3;
             ctx.beginPath(); ctx.roundRect(rX + 2, -W * 0.46, 8, W * 0.92, 2); ctx.fill(); ctx.stroke();
         }
 
-        ctx.fillStyle = '#090d16';
+        ctx.fillStyle = "#090d16";
         ctx.beginPath();
         ctx.roundRect(-L * 0.24, topY * 0.72, L * 0.46, (botY - topY) * 0.72, 8);
         ctx.fill();
 
         if (!this.dead) {
-            ctx.fillStyle = 'rgba(255, 255, 255, 0.20)';
+            ctx.fillStyle = "rgba(255, 255, 255, 0.20)";
             ctx.beginPath();
             ctx.moveTo(L * 0.06, -W * 0.24);
             ctx.lineTo(L * 0.19, -W * 0.18);
@@ -534,7 +525,7 @@ class BattleCar {
         }
 
         if (hpRatio < 0.75) {
-            ctx.strokeStyle = 'rgba(241, 245, 249, 0.85)';
+            ctx.strokeStyle = "rgba(241, 245, 249, 0.85)";
             ctx.lineWidth = 1.4;
             ctx.beginPath();
             ctx.moveTo(2, -6); ctx.lineTo(13, 0); ctx.lineTo(6, 7);
@@ -543,32 +534,30 @@ class BattleCar {
         }
 
         if (!this.dead) {
-            ctx.fillStyle = '#e0f2fe';
+            ctx.fillStyle = "#e0f2fe";
             ctx.fillRect(fX - 2, -W * 0.37, 4, 8);
             ctx.fillRect(fX - 2, W * 0.37 - 8, 4, 8);
 
-            ctx.fillStyle = this.isBraking ? '#ff1744' : '#9f1239';
+            ctx.fillStyle = this.isBraking ? "#ff1744" : "#9f1239";
             ctx.fillRect(rX - 1, -W * 0.37, 4, 8);
             ctx.fillRect(rX - 1, W * 0.37 - 8, 4, 8);
 
-            // Render 2.5s On-Car Trap Visual Effects (Tire Puncture, Bomb Blast, or Electric Glitch)
             this.drawOnCarTrapEffect(ctx, L, W, now);
         }
 
         ctx.restore();
 
-        // Respawn Countdown Indicator above Wrecked Car in Timed Respawn Mode
-        if (this.dead && (MatchConfig.timedMode || MatchConfig.mode === 'ctf') && this.respawnTimer > 0 && showIndicator) {
+        if (this.dead && (MatchConfig.timedMode || MatchConfig.mode === "ctf") && this.respawnTimer > 0 && showIndicator) {
             ctx.save();
             ctx.translate(this.x, this.y - this.radius - 26);
             const secLeft = (this.respawnTimer / 60).toFixed(1);
-            ctx.font = '900 13px "Segoe UI", sans-serif';
-            ctx.textAlign = 'center';
-            ctx.strokeStyle = 'rgba(0, 0, 0, 0.94)';
+            ctx.font = "900 13px \"Segoe UI\", sans-serif";
+            ctx.textAlign = "center";
+            ctx.strokeStyle = "rgba(0, 0, 0, 0.94)";
             ctx.lineWidth = 4;
             const txt = `RESPAWN IN ${secLeft}s`;
             ctx.strokeText(txt, 0, 0);
-            ctx.fillStyle = '#fbbf24';
+            ctx.fillStyle = "#fbbf24";
             ctx.fillText(txt, 0, 0);
             ctx.restore();
         }
@@ -580,41 +569,40 @@ class BattleCar {
             const bw = isHuman ? 88 : 74;
             const bh = isHuman ? 11 : 9;
 
-            // Flashing 2.5s Trap Alert Tag right above the driver's name when hit by a Trap!
             if (this.trapAnimTimer > 0 && Math.floor(now / 90) % 2 === 0) {
                 const alertMap = {
-                    tire_puncture: '⚠ FLAT TIRE!',
-                    sabotage_bomb: '💣 BOMB HIT!',
-                    steering_glitch: '⚡ STEERING JAM!'
+                    tire_puncture: "\u26A0 FLAT TIRE!",
+                    sabotage_bomb: "\uD83D\uDCA3 BOMB HIT!",
+                    steering_glitch: "\u26A1 STEERING JAM!"
                 };
-                const alertTxt = alertMap[this.trapAnimType] || '⚠ TRAP!';
-                ctx.font = '900 12px "Segoe UI", sans-serif';
-                ctx.textAlign = 'center';
-                ctx.strokeStyle = '#000000';
+                const alertTxt = alertMap[this.trapAnimType] || "\u26A0 TRAP!";
+                ctx.font = "900 12px \"Segoe UI\", sans-serif";
+                ctx.textAlign = "center";
+                ctx.strokeStyle = "#000000";
                 ctx.lineWidth = 3.5;
                 ctx.strokeText(alertTxt, 0, -21);
-                ctx.fillStyle = '#ff4d6d';
+                ctx.fillStyle = "#ff4d6d";
                 ctx.fillText(alertTxt, 0, -21);
             }
 
-            ctx.font = isHuman ? '900 14px "Segoe UI", sans-serif' : '800 12px "Segoe UI", sans-serif';
-            ctx.textAlign = 'center';
-            ctx.strokeStyle = 'rgba(0, 0, 0, 0.92)';
+            ctx.font = isHuman ? "900 14px \"Segoe UI\", sans-serif" : "800 12px \"Segoe UI\", sans-serif";
+            ctx.textAlign = "center";
+            ctx.strokeStyle = "rgba(0, 0, 0, 0.92)";
             ctx.lineWidth = 4;
             const labelText = `${this.label} (${Math.ceil(this.hp)})`;
             ctx.strokeText(labelText, 0, -5);
-            ctx.fillStyle = isHuman ? this.lightColor : '#ffffff';
+            ctx.fillStyle = isHuman ? this.lightColor : "#ffffff";
             ctx.fillText(labelText, 0, -5);
 
-            ctx.fillStyle = 'rgba(9, 13, 22, 0.92)';
-            ctx.strokeStyle = isHuman ? '#ffffff' : this.lightColor;
+            ctx.fillStyle = "rgba(9, 13, 22, 0.92)";
+            ctx.strokeStyle = isHuman ? "#ffffff" : this.lightColor;
             ctx.lineWidth = isHuman ? 1.8 : 1.3;
             ctx.beginPath();
             ctx.roundRect(-bw / 2, 1, bw, bh, 4);
             ctx.fill();
             ctx.stroke();
 
-            const fillColor = hpRatio > 0.55 ? '#00e676' : (hpRatio > 0.28 ? '#ffb703' : '#ff1e42');
+            const fillColor = hpRatio > 0.55 ? "#00e676" : (hpRatio > 0.28 ? "#ffb703" : "#ff1e42");
             ctx.fillStyle = fillColor;
             const fillW = Math.max(0, (bw - 4) * hpRatio);
             if (fillW > 0) {
@@ -623,7 +611,7 @@ class BattleCar {
                 ctx.fill();
             }
 
-            ctx.strokeStyle = 'rgba(9, 13, 22, 0.65)';
+            ctx.strokeStyle = "rgba(9, 13, 22, 0.65)";
             ctx.lineWidth = 1;
             for (let s = 1; s <= 3; s++) {
                 const tx = -bw / 2 + (bw * s) / 4;
@@ -635,9 +623,9 @@ class BattleCar {
 
             if (this.activePowerup && this.powerupTimer > 0 && this.powerupMeta) {
                 const pRatio = Math.max(0, this.powerupTimer / (this.powerupMaxTimer || 600));
-                ctx.fillStyle = 'rgba(9, 13, 22, 0.9)';
+                ctx.fillStyle = "rgba(9, 13, 22, 0.9)";
                 ctx.fillRect(-bw / 2, bh + 3, bw, 4);
-                ctx.fillStyle = this.powerupMeta.ringColor || '#fde047';
+                ctx.fillStyle = this.powerupMeta.ringColor || "#fde047";
                 ctx.fillRect(-bw / 2 + 1, bh + 3.5, (bw - 2) * pRatio, 3);
             }
 
@@ -649,13 +637,13 @@ class BattleCar {
 function renderCarPreviewCanvas(canvasId, colorKey) {
     const c = document.getElementById(canvasId);
     if (!c) return;
-    const pCtx = c.getContext('2d');
+    const pCtx = c.getContext("2d");
     pCtx.clearRect(0, 0, c.width, c.height);
-    pCtx.fillStyle = '#1f6f38'; pCtx.fillRect(0, 0, c.width, c.height);
-    pCtx.fillStyle = '#247a3f'; pCtx.fillRect(c.width * 0.25, 0, c.width * 0.5, c.height);
+    pCtx.fillStyle = "#1f6f38"; pCtx.fillRect(0, 0, c.width, c.height);
+    pCtx.fillStyle = "#247a3f"; pCtx.fillRect(c.width * 0.25, 0, c.width * 0.5, c.height);
 
     const dummy = new BattleCar({
-        id: 'preview', colorKey: colorKey || 'blue',
+        id: "preview", colorKey: colorKey || "blue",
         x: c.width / 2, y: c.height / 2, angle: -0.20
     });
     dummy.wheelAngle = 0.26;

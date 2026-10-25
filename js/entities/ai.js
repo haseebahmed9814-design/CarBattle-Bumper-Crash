@@ -1,15 +1,15 @@
 const ATTACK_SLOTS = [
-    { name: 'REAR_CRUSH',  angleOffset:  Math.PI,        dist: 115 },
-    { name: 'LEFT_TBONE',  angleOffset:  Math.PI * 0.55, dist: 135 },
-    { name: 'RIGHT_TBONE', angleOffset: -Math.PI * 0.55, dist: 135 },
-    { name: 'REAR_LEFT',   angleOffset:  Math.PI * 0.82, dist: 120 },
-    { name: 'REAR_RIGHT',  angleOffset: -Math.PI * 0.82, dist: 120 }
+    { name: "REAR_CRUSH",  angleOffset:  Math.PI,        dist: 115 },
+    { name: "LEFT_TBONE",  angleOffset:  Math.PI * 0.55, dist: 135 },
+    { name: "RIGHT_TBONE", angleOffset: -Math.PI * 0.55, dist: 135 },
+    { name: "REAR_LEFT",   angleOffset:  Math.PI * 0.82, dist: 120 },
+    { name: "REAR_RIGHT",  angleOffset: -Math.PI * 0.82, dist: 120 }
 ];
 
 class TacticalAIBrain {
     constructor(car) {
         this.car = car;
-        this.state = 'FLANK_APPROACH';
+        this.state = "FLANK_APPROACH";
         this.target = null;
         this.slotIndex = Math.floor(Math.random() * ATTACK_SLOTS.length);
         this.decisionTimer = Math.floor(Math.random() * 12);
@@ -22,23 +22,26 @@ class TacticalAIBrain {
         this.reverseTimer = 0;
         this.reverseSteer = 1;
         this.hesitating = false;
+        this.jukeSide = Math.random() < 0.5 ? 1 : -1;
+        this.jukeSwitchTimer = 60 + Math.floor(Math.random() * 60);
     }
 
     onTakeDamage(attacker, zone) {
         const profile = AI_DIFFICULTY_PROFILES[MatchConfig.difficulty] || AI_DIFFICULTY_PROFILES.normal;
         if (attacker && !PhysicsEngine.areTeammates(this.car, attacker) && !attacker.dead) {
-            if (Math.random() < (profile.id === 'hard' ? 0.92 : (profile.id === 'normal' ? 0.55 : 0.20))) {
+            if (Math.random() < (profile.id === "hard" ? 0.92 : (profile.id === "normal" ? 0.55 : 0.20))) {
                 this.target = attacker;
             }
         }
-        if (zone === 'REAR' || zone === 'LEFT' || zone === 'RIGHT') {
+        if (zone === "REAR" || zone === "LEFT" || zone === "RIGHT") {
             this.slotIndex = (this.slotIndex + 1) % ATTACK_SLOTS.length;
+            this.jukeSide *= -1;
             if (profile.evadeIncoming && Math.random() < 0.75) this.triggerReposition(Game.arena);
         }
     }
 
     triggerReposition(arena) {
-        this.state = 'REPOSITION';
+        this.state = "REPOSITION";
         this.repositionTimer = 45 + Math.floor(Math.random() * 35);
         this.chaseFrames = 0;
         this.cumulativeTurn = 0;
@@ -71,13 +74,125 @@ class TacticalAIBrain {
             if (angleDiff < 0.8) score += 260;
             if (myCar.lastAttacker === candidate) score += 300;
             score += (1 - candidate.hp / candidate.maxHp) * 280;
-            // Massive priority bonus if enemy candidate is carrying our Flag in CTF!
             if (candidate.carryingFlag) score += 5000;
-            if (profile.id === 'hard' && !candidate.isAI) score += 220;
-            score -= (targetCounts.get(candidate.id) || 0) * (profile.id === 'hard' ? 240 : 420);
+            if (profile.id === "hard" && !candidate.isAI) score += 220;
+            score -= (targetCounts.get(candidate.id) || 0) * (profile.id === "hard" ? 240 : 420);
             if (score > bestScore) { bestScore = score; bestTarget = candidate; }
         }
         return bestTarget;
+    }
+
+    computeEvasiveCarrierRoute(goalX, goalY, allCars, arena, profile) {
+        const myCar = this.car;
+        const hpRatio = myCar.hp / myCar.maxHp;
+
+        this.jukeSwitchTimer -= 1;
+        if (this.jukeSwitchTimer <= 0) {
+            this.jukeSwitchTimer = 55 + Math.floor(Math.random() * 55);
+            if (Math.random() < 0.35) this.jukeSide *= -1;
+        }
+
+        let nearbyEnemies = 0;
+        for (const c of allCars) {
+            if (c.dead || PhysicsEngine.areTeammates(myCar, c)) continue;
+            if (Math.hypot(c.x - myCar.x, c.y - myCar.y) < 420) nearbyEnemies++;
+        }
+
+        if (hpRatio < 0.65 || (nearbyEnemies >= 2 && hpRatio < 0.85)) {
+            let bestAlly = null, bestAllyScore = -Infinity;
+            for (const ally of allCars) {
+                if (ally === myCar || ally.dead || !PhysicsEngine.areTeammates(myCar, ally)) continue;
+                if (ally.hp <= myCar.hp + 20) continue;
+                const dAlly = Math.hypot(ally.x - myCar.x, ally.y - myCar.y);
+                const dAllyToBase = Math.hypot(ally.x - goalX, ally.y - goalY);
+                const myDistToBase = Math.hypot(myCar.x - goalX, myCar.y - goalY);
+                if (dAlly < 680 && dAllyToBase < myDistToBase + 260) {
+                    const s = (ally.hp - myCar.hp) * 3 - dAlly;
+                    if (s > bestAllyScore) {
+                        bestAllyScore = s;
+                        bestAlly = ally;
+                    }
+                }
+            }
+            if (bestAlly) {
+                goalX = bestAlly.x + bestAlly.vx * 4;
+                goalY = bestAlly.y + bestAlly.vy * 4;
+            }
+        }
+
+        if (hpRatio < 0.55 && typeof ArenaHazards !== "undefined" && ArenaHazards.powerups.length > 0) {
+            for (const orb of ArenaHazards.powerups) {
+                if (orb.dropProgress < 0.85) continue;
+                const dOrb = Math.hypot(orb.x - myCar.x, orb.y - myCar.y);
+                if (dOrb < 460) {
+                    goalX = orb.x;
+                    goalY = orb.y;
+                    break;
+                }
+            }
+        }
+
+        const toGoalX = goalX - myCar.x;
+        const toGoalY = goalY - myCar.y;
+        const distToGoal = Math.hypot(toGoalX, toGoalY) || 1;
+        let dirX = toGoalX / distToGoal;
+        let dirY = toGoalY / distToGoal;
+
+        if (distToGoal > 185) {
+            let dodgeX = 0, dodgeY = 0;
+            for (const enemy of allCars) {
+                if (enemy.dead || PhysicsEngine.areTeammates(myCar, enemy)) continue;
+                const predEx = enemy.x + enemy.vx * 10;
+                const predEy = enemy.y + enemy.vy * 10;
+                const rx = predEx - myCar.x;
+                const ry = predEy - myCar.y;
+                const dist = Math.hypot(rx, ry) || 1;
+
+                if (dist < 560) {
+                    const nx = rx / dist, ny = ry / dist;
+                    const aheadDot = nx * dirX + ny * dirY;
+                    const urgency = Math.pow((560 - dist) / 560, 1.35);
+
+                    if (aheadDot > 0.15) {
+                        const perpX = -ny, perpY = nx;
+                        const cross = dirX * ny - dirY * nx;
+                        let side = cross >= 0 ? -1 : 1;
+
+                        const testX = myCar.x + perpX * side * 220;
+                        const testY = myCar.y + perpY * side * 220;
+                        const pad = arena.wallPad + 150;
+                        if (arena.isCircular) {
+                            if (Math.hypot(testX - arena.width / 2, testY - arena.height / 2) > (arena.radius || 1130) - 140) {
+                                side *= -1;
+                            }
+                        } else {
+                            if (testX < pad || testX > arena.width - pad || testY < pad || testY > arena.height - pad) {
+                                side *= -1;
+                            }
+                        }
+
+                        const swerveWeight = (2.1 + (1 - hpRatio) * 1.1) * urgency;
+                        dodgeX += perpX * side * swerveWeight - nx * urgency * 1.05;
+                        dodgeY += perpY * side * swerveWeight - ny * urgency * 1.05;
+                    } else if (dist < 250) {
+                        dodgeX -= nx * urgency * 1.45;
+                        dodgeY -= ny * urgency * 1.45;
+                    }
+                }
+            }
+
+            dirX += dodgeX;
+            dirY += dodgeY;
+            const finalLen = Math.hypot(dirX, dirY) || 1;
+            dirX /= finalLen;
+            dirY /= finalLen;
+
+            const lookAhead = Math.min(distToGoal, 380);
+            goalX = myCar.x + dirX * lookAhead;
+            goalY = myCar.y + dirY * lookAhead;
+        }
+
+        return this.steerTowardPoint(goalX, goalY, allCars, arena, profile);
     }
 
     updateCTFBehavior(allCars, arena, profile) {
@@ -89,19 +204,31 @@ class TacticalAIBrain {
         const enemyFlag = flags.find(f => f.ownerTeam !== myCar.team);
         if (!ourFlag || !enemyFlag) return null;
 
-        // 1. IF THIS AI BOT IS CARRYING THE ENEMY FLAG:
-        // Drive straight back to our Home Base Flag Stand and hold inside the zone for 3 seconds!
         if (enemyFlag.carrier === myCar) {
             const distHome = Math.hypot(ourFlag.homeX - myCar.x, ourFlag.homeY - myCar.y);
             if (distHome < CaptureFlagMode.standRadius * 0.65) {
+                let imminentDanger = null, minDangerDist = 230;
+                for (const c of allCars) {
+                    if (c.dead || PhysicsEngine.areTeammates(myCar, c)) continue;
+                    const d = Math.hypot(c.x - myCar.x, c.y - myCar.y);
+                    const spd = Math.hypot(c.vx, c.vy);
+                    if (d < minDangerDist && spd > 4.8 && myCar.hp < 85) {
+                        minDangerDist = d;
+                        imminentDanger = c;
+                    }
+                }
+                if (imminentDanger) {
+                    const jukeAng = Math.atan2(imminentDanger.y - myCar.y, imminentDanger.x - myCar.x) + (Math.PI * 0.55 * this.jukeSide);
+                    const jx = ourFlag.homeX + Math.cos(jukeAng) * (CaptureFlagMode.standRadius * 0.72);
+                    const jy = ourFlag.homeY + Math.sin(jukeAng) * (CaptureFlagMode.standRadius * 0.72);
+                    return this.steerTowardPoint(jx, jy, allCars, arena, profile);
+                }
                 return { up: false, down: false, steer: 0, drift: true, throttle: 0 };
             }
-            return this.steerTowardPoint(ourFlag.homeX, ourFlag.homeY, allCars, arena, profile);
+            return this.computeEvasiveCarrierRoute(ourFlag.homeX, ourFlag.homeY, allCars, arena, profile);
         }
 
-        // 2. EMERGENCY PRIORITY — ENEMY HAS STOLEN OUR FLAG!
-        // Every bot on our team immediately abandons normal fights to hunt down and wreck the enemy flag carrier!
-        if (ourFlag.state === 'CARRIED' && ourFlag.carrier && !ourFlag.carrier.dead) {
+        if (ourFlag.state === "CARRIED" && ourFlag.carrier && !ourFlag.carrier.dead) {
             this.target = ourFlag.carrier;
             const c = ourFlag.carrier;
             return this.steerTowardPoint(
@@ -111,19 +238,15 @@ class TacticalAIBrain {
             );
         }
 
-        // 3. IF OUR FLAG IS DROPPED ON THE GROUND: Rush to touch and return it!
-        if (ourFlag.state === 'DROPPED') {
+        if (ourFlag.state === "DROPPED") {
             return this.steerTowardPoint(ourFlag.x, ourFlag.y, allCars, arena, profile);
         }
 
-        // 4. IF ENEMY FLAG IS DROPPED ON THE GROUND: Rush to pick it up!
-        if (enemyFlag.state === 'DROPPED') {
+        if (enemyFlag.state === "DROPPED") {
             return this.steerTowardPoint(enemyFlag.x, enemyFlag.y, allCars, arena, profile);
         }
 
-        // 5. BASE DEFENDER ROLE (1-2 bots guard our Home Flag Stand when our flag is at base)
-        if (myCar.ctfRole === 'DEFENDER') {
-            // Look for any enemy intruder near our base
+        if (myCar.ctfRole === "DEFENDER") {
             let nearestIntruder = null, minDist = 780;
             for (const c of allCars) {
                 if (c.dead || PhysicsEngine.areTeammates(myCar, c)) continue;
@@ -141,20 +264,18 @@ class TacticalAIBrain {
                     allCars, arena, profile
                 );
             }
-            // Patrol around our Home Flag Stand
             const patrolAng = performance.now() * 0.0012 + myCar.id;
             const px = ourFlag.homeX + Math.cos(patrolAng) * 145;
             const py = ourFlag.homeY + Math.sin(patrolAng) * 145;
             return this.steerTowardPoint(px, py, allCars, arena, profile);
         }
 
-        // 6. ATTACKER ROLE: If enemy flag is at its base, drive into the Enemy Flag Stand and hold for 3 seconds!
-        if (enemyFlag.state === 'AT_BASE') {
+        if (enemyFlag.state === "AT_BASE") {
             const distEnemyStand = Math.hypot(enemyFlag.homeX - myCar.x, enemyFlag.homeY - myCar.y);
             if (distEnemyStand < CaptureFlagMode.standRadius * 0.65) {
                 return { up: false, down: false, steer: 0, drift: true, throttle: 0 };
             }
-            return this.steerTowardPoint(enemyFlag.homeX, enemyFlag.homeY, allCars, arena, profile);
+            return this.computeEvasiveCarrierRoute(enemyFlag.homeX, enemyFlag.homeY, allCars, arena, profile);
         }
 
         return null;
@@ -171,7 +292,7 @@ class TacticalAIBrain {
 
         if (speed < 1.3) {
             this.stuckFrames += dt;
-            if (this.stuckFrames > (profile.id === 'easy' ? 42 : 24)) {
+            if (this.stuckFrames > (profile.id === "easy" ? 42 : 24)) {
                 this.reverseTimer = 34; this.stuckFrames = 0;
                 this.reverseSteer = Math.random() < 0.5 ? -1 : 1;
             }
@@ -192,16 +313,15 @@ class TacticalAIBrain {
             return { up: false, down: true, steer: this.reverseSteer, drift: false, throttle: 1.0 };
         }
 
-        // Execute Capture The Flag AI Logic when in CTF mode!
-        if (MatchConfig.mode === 'ctf' && typeof CaptureFlagMode !== 'undefined') {
+        if (MatchConfig.mode === "ctf" && typeof CaptureFlagMode !== "undefined") {
             const ctfOrder = this.updateCTFBehavior(allCars, arena, profile);
             if (ctfOrder) return ctfOrder;
         }
 
-        if (this.state === 'REPOSITION' && this.repositionWaypoint) {
+        if (this.state === "REPOSITION" && this.repositionWaypoint) {
             this.repositionTimer -= dt;
             const distToWp = Math.hypot(this.repositionWaypoint.x - myCar.x, this.repositionWaypoint.y - myCar.y);
-            if (this.repositionTimer <= 0 || distToWp < 120) this.state = 'FLANK_APPROACH';
+            if (this.repositionTimer <= 0 || distToWp < 120) this.state = "FLANK_APPROACH";
             else return this.steerTowardPoint(this.repositionWaypoint.x, this.repositionWaypoint.y, allCars, arena, profile);
         }
 
@@ -210,11 +330,11 @@ class TacticalAIBrain {
             this.decisionTimer = profile.decisionInterval;
             this.target = this.selectBestTarget(allCars, profile);
             this.hesitating = Math.random() < profile.hesitationChance;
-            if (profile.id === 'hard') this.slotIndex = Math.random() < 0.55 ? 0 : (1 + Math.floor(Math.random() * 2));
+            if (profile.id === "hard") this.slotIndex = Math.random() < 0.55 ? 0 : (1 + Math.floor(Math.random() * 2));
             else if (Math.random() < 0.3) this.slotIndex = (this.slotIndex + 1) % ATTACK_SLOTS.length;
         }
 
-        if (typeof ArenaHazards !== 'undefined' && ArenaHazards.powerups.length > 0 && profile.id !== 'easy') {
+        if (typeof ArenaHazards !== "undefined" && ArenaHazards.powerups.length > 0 && profile.id !== "easy") {
             let bestOrb = null, bestOrbDist = Infinity;
             for (const orb of ArenaHazards.powerups) {
                 if (orb.dropProgress < 0.85) continue;
@@ -251,11 +371,11 @@ class TacticalAIBrain {
         let aimX = t.x, aimY = t.y;
 
         if (distToTarget < 250 && alignment < 0.58) {
-            this.state = 'RAM_STRIKE';
+            this.state = "RAM_STRIKE";
             aimX = t.x + t.vx * profile.leadPrediction;
             aimY = t.y + t.vy * profile.leadPrediction;
         } else {
-            this.state = 'FLANK_APPROACH';
+            this.state = "FLANK_APPROACH";
             const slotWorldAngle = t.angle + slot.angleOffset;
             const offsetDist = Math.min(distToTarget * 0.65, profile.flankDistance);
             aimX = t.x + Math.cos(slotWorldAngle) * offsetDist + t.vx * (profile.leadPrediction * 0.5);
@@ -285,9 +405,9 @@ class TacticalAIBrain {
             const dx = myCar.x - other.x, dy = myCar.y - other.y;
             const dist = Math.hypot(dx, dy) || 1;
             const isAlly = PhysicsEngine.areTeammates(myCar, other);
-            const sepRadius = isAlly ? 185 : 120;
-            if (dist < sepRadius && (isAlly || other !== this.target)) {
-                const pushStrength = ((sepRadius - dist) / sepRadius) * (isAlly ? 1.35 : 0.85);
+            const sepRadius = isAlly ? 185 : (myCar.carryingFlag ? 245 : 120);
+            if (dist < sepRadius && (isAlly || other !== this.target || myCar.carryingFlag)) {
+                const pushStrength = ((sepRadius - dist) / sepRadius) * (isAlly ? 1.35 : (myCar.carryingFlag ? 1.75 : 0.85));
                 desiredVecX += (dx / dist) * pushStrength;
                 desiredVecY += (dy / dist) * pushStrength;
             }
@@ -300,7 +420,7 @@ class TacticalAIBrain {
         if (myCar.y > arena.height - wDist) desiredVecY -= ((myCar.y - (arena.height - wDist)) / wDist) * 1.4;
 
         const angleDiff = this.normalizeAngle(Math.atan2(desiredVecY, desiredVecX) - myCar.angle);
-        const steerResponsiveness = profile.id === 'easy' ? 1.35 : (profile.id === 'hard' ? 3.2 : 2.5);
+        const steerResponsiveness = profile.id === "easy" ? 1.35 : (profile.id === "hard" ? 3.2 : 2.5);
         const steer = Math.max(-1, Math.min(1, angleDiff * steerResponsiveness));
         const speed = Math.hypot(myCar.vx, myCar.vy);
         const shouldDrift = profile.useDriftTurn && Math.abs(angleDiff) > 0.72 && speed > 5.5;

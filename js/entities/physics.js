@@ -1,7 +1,7 @@
 const PhysicsEngine = {
     areTeammates(c1, c2) {
         if (!c1 || !c2) return false;
-        if (!c1.team || !c2.team || c1.team === 'FFA' || c2.team === 'FFA') return false;
+        if (!c1.team || !c2.team || c1.team === "FFA" || c2.team === "FFA") return false;
         return c1.team === c2.team;
     },
 
@@ -14,7 +14,7 @@ const PhysicsEngine = {
             if (Math.random() < 0.35) {
                 Game.spawnSmoke(car.x + (Math.random() - 0.5) * 20, car.y + (Math.random() - 0.5) * 20, true);
             }
-            if ((MatchConfig.timedMode || MatchConfig.mode === 'ctf') && Game.state === 'PLAYING' && car.respawnTimer > 0) {
+            if ((MatchConfig.timedMode || MatchConfig.mode === "ctf") && Game.state === "PLAYING" && car.respawnTimer > 0) {
                 car.respawnTimer -= dt;
                 if (car.respawnTimer <= 0) {
                     car.respawnAtBase(arena);
@@ -31,7 +31,7 @@ const PhysicsEngine = {
 
         if (car.trapAnimTimer > 0) {
             car.trapAnimTimer = Math.max(0, car.trapAnimTimer - dt);
-            if (car.trapAnimType === 'tire_puncture' && Math.random() < 0.65) {
+            if (car.trapAnimType === "tire_puncture" && Math.random() < 0.65) {
                 const fx = Math.cos(car.angle), fy = Math.sin(car.angle);
                 const rx = -fy, ry = fx;
                 const wx = car.x + fx * (car.length * 0.29) - rx * (car.width * 0.49);
@@ -40,18 +40,18 @@ const PhysicsEngine = {
                     x: wx, y: wy,
                     vx: (Math.random() - 0.5) * 3.2, vy: (Math.random() - 0.5) * 3.2,
                     size: 3 + Math.random() * 3,
-                    color: Math.random() < 0.5 ? '#1e293b' : '#f87171',
+                    color: Math.random() < 0.5 ? "#1e293b" : "#f87171",
                     alpha: 0.95, decay: 0.035
                 });
-            } else if (car.trapAnimType === 'sabotage_bomb' && Math.random() < 0.70) {
+            } else if (car.trapAnimType === "sabotage_bomb" && Math.random() < 0.70) {
                 Game.spawnSmoke(car.x + (Math.random() - 0.5) * 28, car.y + (Math.random() - 0.5) * 28, true);
-            } else if (car.trapAnimType === 'steering_glitch' && Math.random() < 0.55) {
+            } else if (car.trapAnimType === "steering_glitch" && Math.random() < 0.55) {
                 Game.particles.push({
                     x: car.x + (Math.random() - 0.5) * 34,
                     y: car.y + (Math.random() - 0.5) * 34,
                     vx: (Math.random() - 0.5) * 4, vy: (Math.random() - 0.5) * 4,
                     size: 2.8,
-                    color: Math.random() < 0.5 ? '#38bdf8' : '#fde047',
+                    color: Math.random() < 0.5 ? "#38bdf8" : "#fde047",
                     alpha: 1, decay: 0.05
                 });
             }
@@ -59,9 +59,9 @@ const PhysicsEngine = {
 
         if (car.activePowerup && car.powerupTimer > 0) {
             car.powerupTimer -= dt;
-            if (car.activePowerup === 'inferno_ram' && Math.random() < 0.55) {
+            if (car.activePowerup === "inferno_ram" && Math.random() < 0.55) {
                 Game.spawnSmoke(car.x + (Math.random() - 0.5) * 32, car.y + (Math.random() - 0.5) * 32, true);
-            } else if (car.activePowerup === 'tire_puncture' && Math.hypot(car.vx, car.vy) > 2.0 && Math.random() < 0.45) {
+            } else if (car.activePowerup === "tire_puncture" && Math.hypot(car.vx, car.vy) > 2.0 && Math.random() < 0.45) {
                 Game.spawnSparks(car.x, car.y, 1);
             }
             if (car.powerupTimer <= 0) {
@@ -86,8 +86,9 @@ const PhysicsEngine = {
                 car.deaths = (car.deaths || 0) + 1;
                 car.activePowerup = null;
                 car.burningTimer = 0;
-                if (MatchConfig.timedMode || MatchConfig.mode === 'ctf') car.respawnTimer = 150;
-                if (MatchConfig.mode === 'ctf' && typeof CaptureFlagMode !== 'undefined') CaptureFlagMode.onCarDestroyed(car);
+                if (MatchConfig.mode === "ctf") car.respawnTimer = 540;
+                else if (MatchConfig.timedMode) car.respawnTimer = 150;
+                if (MatchConfig.mode === "ctf" && typeof CaptureFlagMode !== "undefined") CaptureFlagMode.onCarDestroyed(car);
                 if (car.burnAttacker && car.burnAttacker !== car) car.burnAttacker.kills++;
                 SoundEngine.playExplosion();
                 Game.triggerExplosion(car);
@@ -97,8 +98,8 @@ const PhysicsEngine = {
 
         const spec = car.spec;
         const hpRatio = car.hp / car.maxHp;
-        const hasPuncture = car.activePowerup === 'tire_puncture';
-        const hasGlitch = car.activePowerup === 'steering_glitch';
+        const hasPuncture = car.activePowerup === "tire_puncture";
+        const hasGlitch = car.activePowerup === "steering_glitch";
         car.isBraking = !!(input.down || input.drift);
         car.isAccelerating = !!input.up;
 
@@ -112,10 +113,10 @@ const PhysicsEngine = {
         let lateralVel = car.vx * rx + car.vy * ry;
 
         const throttle = Math.min(1.0, Math.max(0.55, (input.throttle !== undefined) ? input.throttle : 1.0));
-        const isHyper = car.activePowerup === 'hyper_nitro';
+        const isHyper = car.activePowerup === "hyper_nitro";
 
-        let accelMult = isHyper ? 1.45 : (car.activePowerup === 'inferno_ram' ? 1.15 : 1.0);
-        let topSpeedMult = isHyper ? 1.28 : (car.activePowerup === 'inferno_ram' ? 1.08 : 1.0);
+        let accelMult = isHyper ? 1.45 : (car.activePowerup === "inferno_ram" ? 1.15 : 1.0);
+        let topSpeedMult = isHyper ? 1.28 : (car.activePowerup === "inferno_ram" ? 1.08 : 1.0);
         if (hasPuncture) {
             accelMult = 0.62;
             topSpeedMult = 0.58;
@@ -165,7 +166,6 @@ const PhysicsEngine = {
         const pad = arena.wallPad + car.radius * 0.45;
         let hitWall = false;
 
-        // TRUE CIRCULAR BOUNDARY COLLISION FOR FROSTBITE ICE ARENA!
         if (arena.isCircular) {
             const cx = arena.width / 2, cy = arena.height / 2;
             const maxR = (arena.radius || (arena.width / 2 - 40)) - car.radius * 0.55;
@@ -197,26 +197,25 @@ const PhysicsEngine = {
             Game.addTireTrack(car, fx, fy, rx, ry);
         }
 
-        // Sand Dust in Desert & Snow Mist in Ice
-        if (speedMag > 4.2 && Game.state === 'PLAYING' && Math.random() < 0.42) {
+        if (speedMag > 4.2 && Game.state === "PLAYING" && Math.random() < 0.42) {
             const rearX = car.x - fx * (car.length * 0.42) + (Math.random() - 0.5) * 20;
             const rearY = car.y - fy * (car.length * 0.42) + (Math.random() - 0.5) * 20;
-            if (arena.id === 'desert_dunes') {
+            if (arena.id === "desert_dunes") {
                 Game.particles.push({
                     x: rearX, y: rearY,
                     vx: -fx * 1.1 + (Math.random() - 0.5) * 1.4,
                     vy: -fy * 1.1 + (Math.random() - 0.5) * 1.4,
                     size: 6 + Math.random() * 6,
-                    color: Math.random() < 0.5 ? 'rgba(217, 119, 6, 0.55)' : 'rgba(245, 158, 11, 0.45)',
+                    color: Math.random() < 0.5 ? "rgba(217, 119, 6, 0.55)" : "rgba(245, 158, 11, 0.45)",
                     alpha: 0.60, decay: 0.024
                 });
-            } else if (arena.id === 'ice_rink') {
+            } else if (arena.id === "ice_rink") {
                 Game.particles.push({
                     x: rearX, y: rearY,
                     vx: -fx * 1.1 + (Math.random() - 0.5) * 1.4,
                     vy: -fy * 1.1 + (Math.random() - 0.5) * 1.4,
                     size: 5.5 + Math.random() * 5.5,
-                    color: Math.random() < 0.5 ? 'rgba(56, 189, 248, 0.55)' : 'rgba(186, 230, 253, 0.75)',
+                    color: Math.random() < 0.5 ? "rgba(56, 189, 248, 0.55)" : "rgba(186, 230, 253, 0.75)",
                     alpha: 0.65, decay: 0.026
                 });
             }
@@ -278,7 +277,7 @@ const PhysicsEngine = {
                 SoundEngine.playCrash(Math.min(1, impactSpeed / 12));
                 Game.screenShake = Math.min(16, impactSpeed * 1.25);
                 Game.spawnSparks(hitX, hitY, Math.floor(7 + impactSpeed * 1.8));
-                Game.shockwaves.push({ x: hitX, y: hitY, r: 8, maxR: 52 + impactSpeed * 4, alpha: 0.85, color: '#fde047' });
+                Game.shockwaves.push({ x: hitX, y: hitY, r: 8, maxR: 52 + impactSpeed * 4, alpha: 0.85, color: "#fde047" });
             }
         }
     },
@@ -296,42 +295,50 @@ const PhysicsEngine = {
         const forwardDot = hx * vFx + hy * vFy;
         const sideDot = hx * vRx + hy * vRy;
 
-        let multiplier = 1.0, zone = 'FRONT', badgeText = '1.0x FRONT HIT', badgeColor = '#e2e8f0';
+        let multiplier = 1.0, zone = "FRONT", badgeText = "1.0x FRONT HIT", badgeColor = "#e2e8f0";
 
         if (forwardDot < -0.45) {
             multiplier = victim.spec.rearDamagePenalty || 1.55;
-            zone = 'REAR'; badgeText = `${multiplier}x REAR CRUSH!`; badgeColor = '#ff4d6d';
+            zone = "REAR"; badgeText = `${multiplier}x REAR CRUSH!`; badgeColor = "#ff4d6d";
         } else if (Math.abs(sideDot) >= 0.45) {
             multiplier = 1.20;
-            zone = sideDot < 0 ? 'LEFT' : 'RIGHT'; badgeText = '1.2x SIDE SMASH!'; badgeColor = '#fbbf24';
+            zone = sideDot < 0 ? "LEFT" : "RIGHT"; badgeText = "1.2x SIDE SMASH!"; badgeColor = "#fbbf24";
             victim.angVel += (sideDot < 0 ? 1 : -1) * (ramPower * 0.025);
         }
 
         let powerupDamageMult = 1.0;
-        if (attacker.activePowerup === 'inferno_ram') {
+        if (attacker.activePowerup === "inferno_ram") {
             powerupDamageMult = 1.80;
             victim.burningTimer = 60;
             victim.burnAttacker = attacker;
-            badgeText = '🔥 1.8x INFERNO FIRE HIT!';
-            badgeColor = '#f97316';
+            badgeText = "\uD83D\uDD25 1.8x INFERNO FIRE HIT!";
+            badgeColor = "#f97316";
             Game.spawnSparks(hitX, hitY, 22);
-        } else if (attacker.activePowerup === 'hyper_nitro') {
+        } else if (attacker.activePowerup === "hyper_nitro") {
             powerupDamageMult = 1.35;
-            badgeText = '⚡ TURBO SPEED HIT!';
-            badgeColor = '#fde047';
+            badgeText = "\u26A1 TURBO SPEED HIT!";
+            badgeColor = "#fde047";
         }
 
         let victimShieldMult = 1.0;
-        if (victim.activePowerup === 'titan_shield') {
+        if (victim.activePowerup === "titan_shield") {
             victimShieldMult = 0.30;
-            badgeText = '🛡️ SHIELD BLOCKED!';
-            badgeColor = '#c084fc';
+            badgeText = "\uD83D\uDEE1\uFE0F SHIELD BLOCKED!";
+            badgeColor = "#c084fc";
         }
 
         let aiDiffMult = 1.0;
         if (attacker.isAI && !victim.isAI) {
-            if (MatchConfig.difficulty === 'easy') aiDiffMult = 0.65;
-            if (MatchConfig.difficulty === 'hard') aiDiffMult = 1.25;
+            if (MatchConfig.difficulty === "easy") aiDiffMult = 0.65;
+            if (MatchConfig.difficulty === "hard") aiDiffMult = 1.25;
+        }
+        if (MatchConfig.mode === "story") {
+            if (attacker.team === "ENEMIES") {
+                aiDiffMult = attacker.isFinalBoss ? 1.65 : (attacker.isStoryBoss ? 1.40 : 1.18);
+                if (victim.isBodyguard && !victim.isViperCompanion) aiDiffMult *= 1.25;
+            } else if (attacker.isBodyguard && !attacker.isViperCompanion) {
+                aiDiffMult = 0.72;
+            }
         }
 
         if (Game.isSpectating && attacker.isAI && victim.isAI) {
@@ -341,7 +348,7 @@ const PhysicsEngine = {
         const finalDamage = ramPower * 1.95 * aiDiffMult * multiplier * powerupDamageMult * victimShieldMult;
         victim.applyDirectionalDamage(finalDamage, zone, hitX, hitY, attacker);
 
-        if (finalDamage > 4.5 || victim.activePowerup === 'titan_shield') {
+        if (finalDamage > 4.5 || victim.activePowerup === "titan_shield") {
             Game.floatingTexts.push({ x: hitX, y: hitY - 18, text: badgeText, color: badgeColor, life: 0.95 });
         }
     },
