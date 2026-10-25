@@ -2,18 +2,19 @@
 
 <h1>🏎️ BUMPER CRASH</h1>
 
-<p><strong>2D Top-Down Car Combat Arena · Demolition Derby · Tactical AI Battle · Capture the Flag</strong></p>
+<p><strong>2D Top-Down Car Combat Arena · Demolition Derby · Story Campaign · Capture the Flag · Tactical AI Battle</strong></p>
 
 <img src="screenshots/Screenshot 2026-10-18 222812.png" alt="Bumper Crash Main Menu" width="850"/>
 
 <br/>
 
-[![Version](https://img.shields.io/badge/Version-v5.0.0-orange?style=for-the-badge)](https://github.com)
+[![Version](https://img.shields.io/badge/Version-v6.1.0-orange?style=for-the-badge)](https://github.com)
 [![Language](https://img.shields.io/badge/Built%20With-Vanilla%20JS%20%2B%20HTML5%20Canvas-blue?style=for-the-badge)](https://github.com)
 [![License](https://img.shields.io/badge/License-MIT-green?style=for-the-badge)](LICENSE)
 [![Status](https://img.shields.io/badge/Status-Active%20Development-brightgreen?style=for-the-badge)](https://github.com)
+[![Mobile](https://img.shields.io/badge/Mobile-Touch%20Joystick%20Ready-purple?style=for-the-badge)](https://github.com)
 
-> **High-Impact Demolition Derby, Tactical Arena Combat & Capture the Flag** — a fully browser-based 2D top-down car battle game with tactical AI, real-time physics, multi-mode multiplayer, procedurally generated combat effects, a live Power-Up Supply Drop system, and a full **Capture the Flag** objective mode. No dependencies. No frameworks. Pure HTML5 Canvas + Vanilla JavaScript.
+> **High-Impact Demolition Derby, Tactical Arena Combat, Capture the Flag & Full Story Campaign** — a fully browser-based 2D top-down car battle game with tactical AI, real-time physics, multi-mode multiplayer, procedurally generated combat effects, a live Power-Up Supply Drop system, a full **Capture the Flag** objective mode, and now a complete **Story Campaign** with 2 episodes, boss fights, ability systems, and bot formations. No dependencies. No frameworks. Pure HTML5 Canvas + Vanilla JavaScript.
 
 </div>
 
@@ -25,9 +26,11 @@
 - [✨ Features](#-features)
 - [📸 Screenshots](#-screenshots)
 - [🕹️ Game Modes](#️-game-modes)
+- [📖 Story Mode (Episodes 1 & 2)](#-story-mode-episodes-1--2)
 - [🚩 Capture the Flag Mode](#-capture-the-flag-mode)
 - [⚡ Power-Up Supply Drop System](#-power-up-supply-drop-system)
 - [🎯 Controls](#-controls)
+- [📱 Mobile Touch Controls](#-mobile-touch-controls)
 - [⚙️ Settings & Customisation](#️-settings--customisation)
 - [🧠 AI System](#-ai-system)
 - [🗺️ Arena Maps](#️-arena-maps)
@@ -44,11 +47,11 @@
 
 **Bumper Crash** is a browser-based **2D top-down demolition derby** game built entirely from scratch with **Vanilla JavaScript and HTML5 Canvas** — no game engine, no external libraries, no build tools required.
 
-Players choose from multiple game modes: Solo Free-For-All (King of the Ring) against AI, Solo Team Battle (Stadium Squad Siege), head-to-head 1v1 duels, cooperative team battles, full squad vs squad wars, or the all-new **Capture the Flag** objective mode. Each car features a detailed damage model, real-time physics, and tactical AI opponents that flank, drift, and ram with intent.
+Players choose from multiple game modes: Solo Free-For-All (King of the Ring) against AI, Solo Team Battle (Stadium Squad Siege), head-to-head 1v1 duels, cooperative team battles, full squad vs squad wars, the **Capture the Flag** objective mode, or the all-new **Story Campaign** with a narrative, boss battles, and ability-driven squad commands.
 
 Starting at v3.1.0, every arena features a live **Power-Up Supply Drop System** — glowing 3D orbs drop from above every 30 seconds carrying Repair Kits, Mega Medkits, Inferno Fire RAM, Titan Armor Shield, or Turbo Speed Boost abilities.
 
-**New in v5.0.0:** A full **Capture the Flag** game mode with animated flag graphics, flag stands, steal/capture progress bars, flag passing between allies, auto-return mechanics — plus **2 brand-new arenas**: Desert Dunes and Frostbite Ice Rink (circular).
+**New in v6.1.0:** A full **Story Mode** campaign with 2 complete episodes (10 stages total), diverse enemy chassis types (Buggy, Zombie Truck, War-Rig, Gunboat, Boss), player **Ability System** (Summon Bodyguard / Group Heal / Timed Abilities), 3 deployable **Bot Formation Patterns**, Co-op Story support (2 human players + Wingman + Bodyguards), and a full **Mobile Touch Joystick** controller with 360° reflex steering.
 
 The game runs entirely in the browser at 60 FPS and requires no installation.
 
@@ -70,7 +73,30 @@ The game runs entirely in the browser at 60 FPS and requires no installation.
 - **Floating damage text** — "WRECKED!", "1.2x SIDE SMASH!", "🔥 1.8x INFERNO FIRE HIT!", "🛡️ SHIELD BLOCKED!" and more
 - **Shockwave explosions** on car destruction and on supply drop landing
 
-### 🚩 Capture the Flag *(New in v5.0.0)*
+### 📖 Story Mode *(New in v6.1.0)*
+- **2 full episodes**, each with **5 stages** for a total of **10 unique campaign stages**
+- **Narrative campaign** — radio comms, opening cutscenes, stage briefings from VIPER, HQ, and bosses
+- **5 enemy chassis types** — Buggy, Zombie Truck, War-Rig, Gunboat, and Boss (each with unique scale, mass, and HP)
+- **Mini-bosses** at stages 2–4, **Final Bosses** at stage 5 of each episode (up to 2,400 HP)
+- **Key Flag mechanic** — capture the stage's Key Flag and bring it to the Gate Terminal to unlock the next stage
+- **Repair Crates** dropped by defeated enemies — drive over them to recover HP mid-campaign
+- **Permanent Aggro AI** — enemies patrol their post and activate when you enter range, then pursue you across the entire sector
+- **Viper Companion** — in Episode 2, rescued ally VIPER follows you as a persistent escort with 520 HP
+- **Wingman Bot** — AI companion with its own ability slot in solo Story Mode
+- **Player Ability System** (charge up to 200% for 2 stacked activations):
+  - 🛡️ **Summon Guard** (P1 default) — deploys a Support Bot into formation (up to 4 active at once)
+  - 💚 **Group Heal** (Wingman / P2 default) — instantly repairs all living ally cars by +85 HP
+  - ⚡ Optionally equip any arena power-up ability (Inferno RAM, Titan Shield, Turbo Boost)
+- **3 Bot Formation Patterns** — cycle with `Q` (P1) / `Page Up / Page Down` (P2):
+  1. 🔵 **COMMANDO COVER** — Front / Back / Sides
+  2. 🔺 **VANGUARD SPEARHEAD** — Front Shield wall
+  3. 🟢 **REAR ORDERED COLUMN** — Line behind you
+- **Bodyguard bots** follow formation, orbit defensively when enemies are nearby, and charge into combat when enemies close in
+- **Story Co-op** — P1 + P2 both control their own cars with independent abilities through all 10 stages
+- **3 Lives system** — lose a life on car destruction; restore a life every 6 kills; game over at 0 lives
+- **Cage unlock mechanic** (Episode 1, Stage 5) — hold inside the VIPER Cage Zone for 6 seconds to free him
+
+### 🚩 Capture the Flag *(Added in v5.0.0)*
 - **Full CTF objective mode** with 3 play styles: Solo (1P + allies vs AI), Co-op (2P + allies vs AI), Versus (P1 Squad vs P2 Squad)
 - **Animated flag graphics** with waving cloth simulation, gold finial, team-colored fabric
 - **Flag stands** — glowing team-colored base circles with steal/capture progress arcs
@@ -101,11 +127,13 @@ The game runs entirely in the browser at 60 FPS and requires no installation.
 - **Smoke plumes** — dark or fiery depending on speed and active power-up
 - **Flying detached parts** with angular velocity and friction
 - **Expanding shockwave rings** on destruction and supply drop impact
-- **Floating text** for kill events, power-up pickups, CTF flag events, and announcements
+- **Floating text** for kill events, power-up pickups, CTF flag events, Story comms, and ability activations
 - **Screen shake** scaled to impact force
 - **Headlight beam gradients** — per car
 - **Slow-motion kill replay** via KillAnnouncer system
 - **Power-up visual aura** — flame halo (Inferno), shield bubble (Titan), spinning dashes (Turbo)
+- **Ability charge bar** — dual-segment bar above the player car (blue for 0–100%, gold for 100–200%)
+- **Boss enrage effects** — pulsing aura and heightened pursuit when Final Boss HP drops below 50%
 
 ### 🎵 Audio (Procedural Web Audio API)
 - **No audio files required** — all sounds synthesized at runtime using the Web Audio API
@@ -127,6 +155,17 @@ The game runs entirely in the browser at 60 FPS and requires no installation.
 - **Spectator Mode** — if your car is wrecked, keep watching remaining bots fight it out
 - **Stadium Squad Siege** setup screen with ally/enemy bot count pickers, match rule selector, and time limit pills
 - **CTF setup screen** with ally/enemy bot count pickers, CTF type selector, and time limit pills
+- **Story Mode setup screen** — Episode selector, P1 / P2 car color & name, Ability picker (Summon Guard / Group Heal), Co-op toggle
+
+### 📱 Mobile Touch Controls *(New in v6.1.0)*
+- **Dynamic 360° joystick** — tap anywhere on screen; joystick spawns under your finger
+- **Instant 180° snap-turn** — flick the stick to the opposite direction for immediate reflex reversal
+- **Split-screen joysticks** for 2-player matches (left half / right half)
+- **Fixed or Dynamic placement** — choose Tap Anywhere, Left-anchored, or Center-anchored
+- **Hide / Show stick visual** — stealth mode to remove the UI circle without disabling input
+- **Double-tap to fire ability** in Story Mode — double-tap your joystick zone to activate your player ability
+- **Auto device detection** — joystick activates automatically on touch screens; keyboard on PC
+- Control Mode: **AUTO / KEYBOARD / JOYSTICK** toggle in Settings & Controls
 
 ### 📡 Analytics
 - Session telemetry tracked locally in `localStorage`
@@ -139,9 +178,9 @@ The game runs entirely in the browser at 60 FPS and requires no installation.
 ## 📸 Screenshots
 
 ### 🏠 Main Menu
-<img src="screenshots/Screenshot 2026-10-18 222812.png" alt="Main Menu — Bumper Crash v5.0.0" width="100%"/>
+<img src="screenshots/Screenshot 2026-10-18 222812.png" alt="Main Menu — Bumper Crash v6.1.0" width="100%"/>
 
-> The main menu features animated background AI cars driving and crashing on the Park Ground arena while you browse. Buttons lead to Single Player (King of the Ring & Stadium Squad Siege), Two Players (with 3 sub-modes), Capture the Flag (Solo / Co-op / Versus), a Coming Soon Online Multiplayer mode, Controls, Settings, Game Stats, Credits, and a Feedback form.
+> The main menu features animated background AI cars driving and crashing on the Park Ground arena while you browse. Buttons lead to Single Player (King of the Ring & Stadium Squad Siege), Two Players (with 3 sub-modes), Capture the Flag (Solo / Co-op / Versus), Story Mode (Episodes 1 & 2, Solo / Co-op), a Coming Soon Online Multiplayer mode, Controls, Settings, Game Stats, Credits, and a Feedback form.
 
 ---
 
@@ -219,7 +258,7 @@ Player 1 commands Squad 1. Player 2 commands Squad 2. Each squad has 1–5 AI bo
 
 ---
 
-### 4. 🚩 Capture the Flag *(New in v5.0.0)*
+### 4. 🚩 Capture the Flag *(Added in v5.0.0)*
 
 A full objective-based mode where teams steal the enemy's flag and bring it back to their base. See the full [Capture the Flag section](#-capture-the-flag-mode) below.
 
@@ -230,8 +269,87 @@ Three sub-modes:
 
 ---
 
-### 5. 🌐 Online Multiplayer *(Coming Soon)*
+### 5. 📖 Story Mode *(New in v6.1.0)*
+
+A full narrative campaign across 2 episodes and 10 stages. See the full [Story Mode section](#-story-mode-episodes-1--2) below.
+
+- **Episode 1: Overland Campaign** — Rescue VIPER from Kraken's Cage across 5 stages
+- **Episode 2: Glacier Coast** — Escort rescued VIPER to Allied Extraction across 5 new stages
+- Solo or **Co-op** (P1 + P2 together)
+
+---
+
+### 6. 🌐 Online Multiplayer *(Coming Soon)*
 Real-time online rooms, friend invite codes, and global demolition derby leaderboards — currently in development.
+
+---
+
+## 📖 Story Mode (Episodes 1 & 2)
+
+A complete narrative campaign added in **v6.1.0**. Players battle through a 19,000-unit scrolling map divided into 5 stages per episode, with enemy patrols, gate key flags, repair crates, mini-boss encounters, and final boss showdowns.
+
+### Episode 1 — Overland Campaign
+> *"Viper is locked inside Kraken Cage in Sector 5! Roll in, seize the Gate Key Flags, and rescue our friend!"*
+
+| Stage | Name | Boss |
+|---|---|---|
+| 1 | **DEADMAN CANYON** | — |
+| 2 | **TOXIC REFINERY** | Mini-Boss: Refinery Behemoth (920 HP) |
+| 3 | **LAVA CHASM BRIDGE** | Mini-Boss: Bridge Colossus (1,120 HP) |
+| 4 | **DREAD COURTYARD** | Mini-Boss: Fortress Goliath (1,350 HP) |
+| 5 | **THE IRON LOCKAGE** | **Final Boss: Warlord Kraken (2,200 HP)** |
+
+### Episode 2 — Glacier Coast
+> *"Escort rescued Viper to Sector 5 where the Allied Extraction Convoy is waiting!"*
+
+| Stage | Name | Boss |
+|---|---|---|
+| 1 | **GLACIER COAST HIGHWAY** | — |
+| 2 | **FROZEN HARBOR PIERS** | Mini-Boss: Ironclad Destroyer (1,050 HP) |
+| 3 | **SEA CHANNEL CAUSEWAY** | Mini-Boss: Frigate Commander (1,220 HP) |
+| 4 | **MILITARY CONVOY RUNWAY** | Mini-Boss: Zombie Juggernaut (1,450 HP) |
+| 5 | **EXTRACTION RENDEZVOUS** | **Final Boss: Admiral Leviathan Boat (2,400 HP)** |
+
+### Enemy Chassis Types
+
+| Chassis | Scale | Mass | Role |
+|---|---|---|---|
+| 🏎️ **Buggy** | 0.94× | 1.0 | Fast scout, low HP (190–210) |
+| 🚛 **Zombie Truck** | 1.20× | 1.35 | Heavy hauler, mid-high HP (290–410) |
+| ⚙️ **War-Rig** | 1.25× | 1.50 | Heavy siege, high HP (360–430) |
+| 🚢 **Gunboat** | 1.28× | 1.55 | Naval assault, high HP (330–430) |
+| 💀 **Boss** | 1.36–1.66× | 2.15 | Mini / Final Boss, 920–2,400 HP |
+
+### Player Ability System
+
+Each player car is equipped with one **Primary Ability** that charges during combat:
+
+| Ability | Key | Effect |
+|---|---|---|
+| 🛡️ **Summon Guard** | `E` (P1) / `Enter` (P2) | Deploys a Support Bot into your active formation (up to 4 bots) |
+| 💚 **Group Heal** | `E` (P1) / `Enter` (P2) | Heals all living allies +85 HP + reduces dents |
+| 🔥 / 🛡️ / ⚡ **Arena Ability** | Same keys | Equip any power-up ability (Inferno RAM, Titan Shield, Turbo Boost) |
+
+- **Charge bar** fills passively during combat (shown above your car)
+- Max charge: **200%** — two full stacks; press twice to fire two bots or two heal pulses back-to-back
+- AI Companion (Wingman/VIPER) also independently fires its own ability on a cooldown
+
+### Bot Formation System
+
+Cycle formations with `Q` (P1) / `Page Up` `Page Down` (P2):
+
+| # | Formation | Description |
+|---|---|---|
+| 1 | 🔵 **COMMANDO COVER** | Front + Back + Left + Right escort |
+| 2 | 🔺 **VANGUARD SPEARHEAD** | 4-bot front wall shield |
+| 3 | 🟢 **REAR ORDERED COLUMN** | Column line behind you |
+
+Bots orbit defensively when enemies are within 840 units, switch to combat mode within 440 units, and return to formation slot otherwise — **zero teleporting**.
+
+### Story Win Conditions
+- **Stage cleared** when all enemies defeated + Key Flag delivered to Gate Terminal
+- **Stage 5** cleared when the Final Boss is destroyed + (Episode 1) Viper Cage unlocked
+- **Lives:** 3 lives total; lose one when your car is destroyed; gain one every 6 kills; 0 lives = Game Over
 
 ---
 
@@ -285,7 +403,7 @@ Every **30 seconds** during a match, a glowing 3D orb drops from the sky into a 
 - The **Kill Announcer** banner alerts all players when a supply drop lands with the drop's name.
 - Active power-up orbs appear on the **minimap** as pulsing colored dots for quick navigation.
 - A **duration bar** appears under your HP bar while a timed ability is active, depleting in real-time.
-- All 4 arenas support supply drops.
+- All 4 arena maps support supply drops.
 
 ---
 
@@ -300,8 +418,32 @@ Every **30 seconds** during a match, a glowing 3D orb drops from the sky into a 
 | **Drift / Handbrake** | `Space` | `Right Shift` / `Enter` / `Numpad 0` |
 | **Pause / Resume** | `Escape` / `P` | — |
 | **Cycle Camera View** | `C` | `C` |
+| **Fire Ability** *(Story Mode)* | `E` | `Enter` / `Numpad Enter` |
+| **Cycle Formation** *(Story Mode)* | `Q` | `Page Up` / `Page Down` |
 
 > 💡 All Player 1 and Player 2 keybinds are **fully remappable** in the **Controls** screen from the main menu. Press `RESET DEFAULTS` to restore original keys.
+
+---
+
+## 📱 Mobile Touch Controls
+
+Full touch joystick support — works on any smartphone or tablet browser.
+
+| Feature | Detail |
+|---|---|
+| **Dynamic Joystick** | Tap anywhere to spawn the joystick at your finger |
+| **360° Reflex Steering** | Instant directional tracking with angular dead-zone correction |
+| **180° Snap-Turn** | Flick the stick opposite direction → car instantly whips around |
+| **Drift on sharp turns** | Auto-drift triggers when stick angle deviation exceeds 24° at speed |
+| **2-Player Split** | Left half (P1) / Right half (P2) — full two-player on one screen |
+| **Ability Activation** | Double-tap your joystick zone in Story Mode to fire your ability |
+| **Fixed Placement** | Settings → Left / Center / Dynamic anchor |
+| **Hide Stick Visual** | Toggle the joystick ring off while keeping touch input active |
+
+**Control Mode toggle** (Settings or Controls screen):
+- `AUTO` — joystick on touch devices, keyboard on PC
+- `KEYBOARD` — always keyboard
+- `JOYSTICK` — always joystick (even on PC with mouse simulation)
 
 ---
 
@@ -313,6 +455,9 @@ Every **30 seconds** during a match, a glowing 3D orb drops from the sky into a 
 | **Master Volume** | 0–100% | 80% |
 | **Effects Volume** | 0–100% | 90% |
 | **Visual Detail** | Performance / High Detail | High Detail |
+| **Control Mode** | Auto / Keyboard / Joystick | Auto |
+| **Joystick Placement** | Dynamic / Left / Center | Dynamic |
+| **Joystick Visual** | Show / Hide | Show |
 
 **High Detail mode** enables:
 - Up to 650 persistent tire tracks
@@ -344,7 +489,7 @@ The game uses a custom `TacticalAIBrain` class (`js/entities/ai.js`) with three 
 - **`RAM_STRIKE`** — switches to direct ramming when aligned within ~250 units with velocity lead prediction
 - **`REPOSITION`** — triggered after getting stuck or taking flank damage; retreats to a random waypoint before re-engaging
 
-### CTF AI Roles *(New in v5.0.0)*
+### CTF AI Roles *(Added in v5.0.0)*
 In Capture the Flag mode, AI bots are automatically assigned squad roles:
 - **ATTACKER** — targets the enemy flag stand; tries to steal and run it back to base
 - **DEFENDER** — stays near the friendly flag stand; intercepts enemies who enter the steal zone
@@ -354,6 +499,13 @@ In Capture the Flag mode, AI bots are automatically assigned squad roles:
 | 1–2 bots | 0 defenders |
 | 3–4 bots | 1 defender |
 | 5+ bots | 2 defenders |
+
+### Story Mode AI Behaviors *(New in v6.1.0)*
+- **Patrol AI** — enemies guard a home position until an ally enters their activation range (`actRange`)
+- **Permanent Aggro** — once triggered, enemies chase you across the entire 19,000-unit sector
+- **Squad Alert** — any activated enemy alerts its squad (all enemies within 460 units immediately aggro)
+- **Commando Escort Brain** — bodyguard bots switch between: Formation Hold → Orbit Patrol → Combat Charge
+- **Wingman/VIPER escort** — follows the player's arc position; attacks enemies within 440 units; catches up at 1.15× speed when >480 units behind
 
 ### Target Selection Scoring
 AI evaluates every opponent and scores by:
@@ -390,7 +542,7 @@ A realistic park setting with:
 - **Power-Up Supply Drops** every 30 seconds
 - Arena size: **3400 × 2100 units**
 
-### 🏜️ Desert Dunes *(New in v5.0.0)*
+### 🏜️ Desert Dunes *(Added in v5.0.0)*
 A scorching desert combat zone with:
 - Sandy dune terrain with warm amber and ochre ground tones
 - Scattered rock and cactus obstacles
@@ -398,13 +550,22 @@ A scorching desert combat zone with:
 - **Power-Up Supply Drops** every 30 seconds
 - Arena size: **3400 × 2100 units**
 
-### ❄️ Frostbite Ice Rink *(New in v5.0.0)*
+### ❄️ Frostbite Ice Rink *(Added in v5.0.0)*
 A circular frozen arena with:
 - Circular boundary wall (radius 1130 units) — replaces the standard rectangle
 - Icy blue-white ground with reduced grip simulation
 - Compact arena size for intense close-range combat
 - **Power-Up Supply Drops** every 30 seconds
 - Arena size: **2400 × 2400 units (circular)**
+
+### 🗺️ Overland Campaign *(Story Mode — Added in v6.1.0)*
+A massive scrolling story map:
+- **19,000 × 3000 unit** horizontal scrolling sector
+- 5 stages separated by locked gate barriers
+- Episode-specific terrain: Canyon rocks / Fuel tanks / Stone pillars / Iron braziers (Ep 1) or Ice spires (Ep 2)
+- Dedicated road corridor (Y: 520–2480) with hard boundaries
+- Gates unlock progressively as Key Flags are captured and delivered
+- Camera follows the player in Follow Zoom mode across the full map width
 
 ---
 
@@ -427,16 +588,21 @@ MyGame_CarBattle_V2/
 │   │   ├── audio.js         # Procedural Web Audio API sound engine
 │   │   ├── input.js         # Keyboard input manager + keybind remapper
 │   │   ├── camera.js        # Follow-zoom & full-stadium camera controllers
+│   │   ├── mobileControls.js   # 360° dynamic touch joystick — single & 2-player split,
+│   │   │                    #   snap-turn reflex engine, double-tap ability trigger,
+│   │   │                    #   placement modes, stealth hide, auto device detection
 │   │   ├── secrets.js       # API keys — gitignored, copy from secrets.example.js
 │   │   └── secrets.example.js  # Template for secrets.js
 │   │
 │   ├── entities/
 │   │   ├── car.js           # BattleCar class — drawing, physics properties, damage model,
-│   │   │                    #   deformation, detached parts, health bar, power-up auras
+│   │   │                    #   deformation, detached parts, health bar, power-up auras,
+│   │   │                    #   ability charge bar, story chassis scaling (buggy/truck/rig/boat/boss)
 │   │   ├── physics.js       # PhysicsEngine — movement, wall bounce, car-car collision,
 │   │   │                    #   spawn generation, team arc spawns, power-up physics effects
 │   │   └── ai.js            # TacticalAIBrain — FSM, target scoring, flanking, drift turns,
-│   │                        #   CTF role assignment (ATTACKER / DEFENDER)
+│   │                        #   CTF role assignment (ATTACKER / DEFENDER),
+│   │                        #   Commando Escort Brain (Story bodyguards / Viper)
 │   │
 │   ├── modes/
 │   │   ├── singlePlayer.js  # King of the Ring (FFA) & Stadium Squad Siege — spawn & win logic
@@ -444,8 +610,13 @@ MyGame_CarBattle_V2/
 │   │   ├── coopTeam.js      # Co-op Team mode — allied/enemy spawn & win condition
 │   │   ├── squadWar.js      # Squad War mode — P1 team vs P2 team spawn & scoring
 │   │   ├── timedSiege.js    # Timed Siege overlay logic — countdown timer HUD
-│   │   └── captureFlag.js   # CaptureFlagMode — flag state machine, steal/carry/capture
-│   │                        #   mechanics, flag passing, auto-return, CTF HUD, minimap
+│   │   ├── captureFlag.js   # CaptureFlagMode — flag state machine, steal/carry/capture
+│   │   │                    #   mechanics, flag passing, auto-return, CTF HUD, minimap
+│   │   └── storyMode.js     # StoryMode — episode/stage data, enemy defs, boss AI,
+│   │                        #   Key Flag mechanic, gate unlock, ability system,
+│   │                        #   bodyguard summoning, formation cycling, Viper escort,
+│   │                        #   cage unlock (Ep1 Stage 5), repair crates, radio comms,
+│   │                        #   cutscene system, Co-op Story support
 │   │
 │   ├── features/
 │   │   ├── hazards.js       # ArenaHazards — tree/bench/rock generation, collision,
@@ -460,7 +631,7 @@ MyGame_CarBattle_V2/
 │       └── uiManager.js     # UIManager — screen routing, HUD updates, match results,
 │                            #   color pickers, keybind UI, settings sync, analytics view,
 │                            #   CTF setup screen, Stadium Squad Siege config,
-│                            #   live arena map preview
+│                            #   Story Mode setup screen, live arena map preview
 │
 └── screenshots/
     ├── Screenshot 2026-10-18 222812.png   # Main Menu
@@ -507,7 +678,7 @@ npx http-server . -p 8080
 
 Then visit: `http://localhost:8080`
 
-> ⚠️ **Note:** Web3Forms feedback form requires an internet connection. Power-up supply drops, Capture the Flag, and all game features are fully playable offline.
+> ⚠️ **Note:** Web3Forms feedback form requires an internet connection. Power-up supply drops, Capture the Flag, Story Mode, and all game features are fully playable offline.
 
 ---
 
@@ -521,15 +692,18 @@ Each frame in `Game.loop()` executes in order:
 4. Resolve car–car collisions (with power-up damage multipliers applied)
 5. Update arena hazards — tree/bench/rock collisions + supply drop spawner tick + orb pickup detection
 6. Update CTF flag state machine — steal/carry/capture/drop/auto-return logic
-7. Check mode win condition
-8. **Draw arena ground** (pitch stripes, lines, desert terrain, or park walkways / ice surface)
-9. **Draw ground hazard elements** (tree bases, bench pads, rocks, CTF flag stands, power-up orbs)
-10. **Draw CTF flags** — AT_BASE, DROPPED (with return timer arc), or CARRIED (above carrier)
-11. **Draw world effects** (tire tracks, detached parts, shockwaves, particles, floating texts)
-12. **Draw all cars** (shadow, wheels, body, damage dents, headlights, exhaust flames, power-up aura, health bar, power-up duration bar, name tag)
-13. **Draw tree canopies** (on top of cars for depth layering)
-14. Draw kill announcer overlay
-15. Draw minimap (cars + trees + benches + power-up orbs + CTF flag icons)
+7. Update Story Mode — stage flag, gate unlock, repair crate pickups, ability charge ticking, Viper escort
+8. Check mode win condition
+9. **Draw arena ground** (pitch stripes, lines, desert terrain, park walkways, ice surface, or story road)
+10. **Draw ground hazard elements** (tree bases, bench pads, rocks, CTF flag stands, story gates & obstacles, power-up orbs)
+11. **Draw CTF flags** — AT_BASE, DROPPED (with return timer arc), or CARRIED (above carrier)
+12. **Draw Story elements** — Key Flag post, gate progress bars, Viper cage, repair crates
+13. **Draw world effects** (tire tracks, detached parts, shockwaves, particles, floating texts)
+14. **Draw all cars** (shadow, wheels, body, damage dents, headlights, exhaust flames, power-up aura, health bar, ability charge bar, name tag)
+15. **Draw tree canopies** (on top of cars for depth layering)
+16. **Draw Story HUD** — radio comms banner, ability hint, formation name
+17. Draw kill announcer overlay
+18. Draw minimap (cars + trees + benches + power-up orbs + CTF flag icons)
 
 ### Physics Engine (`js/entities/physics.js`)
 - **Arcade top-down driving** — velocity decomposed into forward/lateral components
@@ -550,6 +724,15 @@ Each frame in `Game.loop()` executes in order:
 | **Follow Zoom** (`moving_wide`) | Smoothly follows the player car with lerp; zoom scales with speed |
 | **Full Stadium** (`fixed_full`) | Static top-down overview of the entire arena |
 
+### Mobile Controls Engine (`js/core/mobileControls.js`)
+| Feature | Implementation |
+|---|---|
+| **360° joystick** | `atan2(dy, dx)` angle tracking with lerped angular correction |
+| **Snap-turn** | When `|angleDiff| > 1.25 rad`, instantly rotate car and redirect velocity |
+| **Drift trigger** | Auto-drift when stick deviation > 0.42 rad at speed > 3.5 |
+| **Dynamic spawn** | Joystick base spawns at touch-start position in `dynamic` mode |
+| **2P split** | Two independent touch zones; each player has a dedicated joystick state |
+
 ### Team Spawn Arc System (`js/entities/physics.js`)
 The `generateTeamSpawnPositions()` function distributes teams along opposing stadium arcs:
 - **Team 1** spawns along the **Left Arc** (180° / π radians)
@@ -565,7 +748,7 @@ All analytics are stored in **`localStorage`** — no server, fully private.
 
 Tracked data:
 - Total matches played
-- Per-mode play counts (Single Player, 1v1, Co-op, Squad War, CTF)
+- Per-mode play counts (Single Player, 1v1, Co-op, Squad War, CTF, Story)
 - Per-player career stats by driver name: matches, wins, kills, damage dealt
 - Session event log for feedback form prefill
 
@@ -606,16 +789,27 @@ View all stats in-game via **GAME STATS** from the main menu.
 | ✅ Done | **Flag steal / carry / capture / pass / auto-return mechanics** |
 | ✅ Done | **Desert Dunes arena** |
 | ✅ Done | **Frostbite Ice Rink (circular arena)** |
+| ✅ Done | **📖 Story Mode — Episode 1: Overland Campaign (5 stages)** |
+| ✅ Done | **📖 Story Mode — Episode 2: Glacier Coast (5 stages)** |
+| ✅ Done | **5 Enemy Chassis — Buggy, Zombie Truck, War-Rig, Gunboat, Boss** |
+| ✅ Done | **Player Ability System — Summon Guard / Group Heal / Arena Abilities** |
+| ✅ Done | **3 Deployable Bot Formation Patterns** |
+| ✅ Done | **Bodyguard bot escort with formation + patrol + combat AI** |
+| ✅ Done | **Viper Companion escort (Episode 2)** |
+| ✅ Done | **Story Co-op Mode (P1 + P2 + Wingman)** |
+| ✅ Done | **Ability charge bar (0–200% dual-segment)** |
+| ✅ Done | **📱 Mobile Touch Joystick — 360° dynamic, snap-turn, 2P split** |
+| ✅ Done | **Double-tap ability activation on mobile** |
 | 🔄 In Progress | Online multiplayer — rooms & matchmaking |
 | 📋 Planned | Ranked global leaderboard |
 | 📋 Planned | Additional arena maps |
-| 📋 Planned | Mobile touch controls |
+| 📋 Planned | Story Mode Episode 3 |
 
 ---
 
 ## 🚗 Vehicle — APEX GT
 
-There is currently one vehicle archetype: **APEX GT** — a balanced, well-rounded racer.
+There is currently one player vehicle archetype: **APEX GT** — a balanced, well-rounded racer.
 
 | Stat | Value |
 |---|---|
@@ -628,7 +822,7 @@ There is currently one vehicle archetype: **APEX GT** — a balanced, well-round
 | Handbrake Grip | 0.955 |
 | Rear Damage Penalty | 1.55× |
 
-> ⚡ With **Turbo Speed Boost** active: Top Speed → ~15.1 u/f, Acceleration → ~0.65
+> ⚡ With **Turbo Speed Boost** active: Top Speed → ~15.1 u/f, Acceleration → ~0.65  
 > 🔥 With **Inferno Fire RAM** active: Hit damage → 1.8×, Exhaust flames turn orange
 
 ### Car Color Palettes
@@ -654,12 +848,14 @@ There is currently one vehicle archetype: **APEX GT** — a balanced, well-round
 |---|---|
 | 🎮 Game Design & Direction | Full game concept, mode design, and UX flow |
 | ⚙️ 2D Physics & Deformation Engine | Custom arcade physics, damage model, detached parts |
-| 🧠 Tactical Combat AI System | FSM-based AI with flanking, drift, evasion, CTF roles |
+| 🧠 Tactical Combat AI System | FSM-based AI with flanking, drift, evasion, CTF roles, Escort Brain |
 | 🎨 UI/UX Architecture | 10+ screen menu system, HUD, results, analytics |
 | 🎵 Procedural Web Audio | All sounds synthesized — zero audio files |
 | ⚡ Power-Up Supply Drop System | 5-type orb system, 3D rendering, pickup physics |
 | 🚩 Capture the Flag Engine | Full CTF state machine, flag passing, AI role assignment |
 | 🏜️❄️ New Arena Design | Desert Dunes & Frostbite Ice Rink (circular boundary) |
+| 📖 Story Campaign Engine | 2-episode narrative, boss AI, ability system, bot formations |
+| 📱 Mobile Controls Engine | 360° dynamic joystick, snap-turn reflex, 2P split-screen |
 
 </div>
 
@@ -673,9 +869,9 @@ This project is licensed under the **MIT License** — see the [LICENSE](LICENSE
 
 <div align="center">
 
-**Bumper Crash v5.0.0** · Developed by **Muhammad Haseeb Ahmed**
+**Bumper Crash v6.1.0** · Developed by **Muhammad Haseeb Ahmed**
 
-*"The last car driving wins — unless someone captures your flag first."*
+*"The last car driving wins — unless someone captures your flag first. Or your Story Campaign boss does."*
 
 ⭐ Star this repo if you enjoyed the game!
 
